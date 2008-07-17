@@ -123,9 +123,22 @@ public class LogcatActivity extends Activity
 	private String makeLogFilename()
 	{
 		SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd-kkmmss");
-		String date = fmt.format(new Date());
+		String name = "logcat-" + fmt.format(new Date()) + ".log";
 		
-		return "/sdcard/logcat-" + date + ".log";
+		/* Lame hack to support this design :\ */
+		FileOutputStream out = null;
+		
+		try {
+			out = openFileOutput(name, 0);
+		}
+		catch (IOException e) {}
+		finally
+		{
+			if (out != null)
+				try { out.close(); } catch (IOException e) {}
+		}
+
+		return getFileStreamPath(name).getAbsolutePath();
 	}
 
 	private String saveCurrentLog()
