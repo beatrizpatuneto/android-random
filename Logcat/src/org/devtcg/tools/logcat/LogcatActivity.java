@@ -1,5 +1,12 @@
 package org.devtcg.tools.logcat;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 import android.app.Activity;
@@ -11,6 +18,7 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.Menu;
 import android.view.UIThreadUtilities;
 import android.view.View;
 import android.view.View.OnLongClickListener;
@@ -33,6 +41,8 @@ public class LogcatActivity extends Activity
 
 	public static final int MAX_LINES = 250;
 	
+	private static final int MENU_SAVE_LOG = Menu.FIRST;
+	
 //	private static final int MSG_ERROR = 0;
 	private static final int MSG_NEWLINE = 1;
 	
@@ -54,7 +64,7 @@ public class LogcatActivity extends Activity
 			}
 		}
 	};
-	
+
 	/* TODO: Scrolling needs a lot of work.  Might not be worth it, though. */
 	private void handleMessageNewline(Message msg)
 	{
@@ -99,7 +109,85 @@ public class LogcatActivity extends Activity
 	    
 	    super.onCreate(icicle);
 	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		super.onCreateOptionsMenu(menu);
+
+		menu.add(0, MENU_SAVE_LOG, "Save Log");
+
+		return true;
+	}
 	
+	private String makeLogFilename()
+	{
+		SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd-kkmmss");
+		String date = fmt.format(new Date());
+		
+		return "/sdcard/logcat-" + date + ".log";
+	}
+
+	private String saveCurrentLog()
+	  throws IOException
+	{
+		String filename = makeLogFilename();
+		
+		BufferedWriter writer = null;
+
+		try
+		{
+			writer = new BufferedWriter(new FileWriter(filename), 2048);
+
+			int n = mLines.getChildCount();
+
+			for (int i = 0; i < n; i++)
+			{
+				TextView lineView = (TextView)mLines.getChildAt(i);
+				String line = lineView.getText().toString();
+
+				writer.write(line, 0, line.length());
+				writer.newLine();
+			}
+		}
+		finally
+		{
+			if (writer != null)
+				try { writer.close(); } catch (IOException e) {}	
+		}
+		
+		return filename;
+	}
+	
+	private void menuSaveCurrentLog()
+	{
+		try
+		{
+			String filename = saveCurrentLog();
+			
+			Toast.makeText(this, "Wrote " + filename,
+			  Toast.LENGTH_LONG).show();
+		}
+		catch (IOException e)
+		{
+			Toast.makeText(this, "Failed writing log: " + e.toString(),
+			  Toast.LENGTH_LONG).show();
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(Menu.Item item)
+	{
+		switch (item.getId())
+		{
+		case MENU_SAVE_LOG:
+			menuSaveCurrentLog();
+			return true;
+		}
+
+		return super.onOptionsItemSelected(item);
+	}
+
 	@Override
 	public void onStart()
 	{
