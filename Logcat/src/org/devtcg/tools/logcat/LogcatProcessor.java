@@ -12,7 +12,7 @@ public abstract class LogcatProcessor extends Thread
 	private static final int BUFFER_SIZE = 1024;
 
 	private int mLines = 0;
-	protected Process mLogcatProc;
+	protected Process mLogcatProc = null;
 
 	public void run()
 	{
@@ -23,14 +23,17 @@ public abstract class LogcatProcessor extends Thread
 		catch (IOException e)
 		{
 			onError("Can't start " + LOGCAT_CMD[0], e);
+			return;
 		}
+		
+		BufferedReader reader = null;
 
 		try
 		{
-			BufferedReader reader =
+			reader =
 			  new BufferedReader(new InputStreamReader(mLogcatProc.getInputStream()),
 			    BUFFER_SIZE);
-			
+
 			String line;
 			
 			while ((line = reader.readLine()) != null)
@@ -43,11 +46,22 @@ public abstract class LogcatProcessor extends Thread
 		{
 			onError("Error reading from process " + LOGCAT_CMD[0], e);
 		}
+		finally
+		{
+			if (reader != null)
+				try { reader.close(); } catch (IOException e) {}
+				
+			stopCatter();
+		}
 	}
 
 	public void stopCatter()
 	{
+		if (mLogcatProc == null)
+			return;
+		
 		mLogcatProc.destroy();
+		mLogcatProc = null;
 	}
 	
 	public int getLineCount()
