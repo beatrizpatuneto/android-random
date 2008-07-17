@@ -74,13 +74,16 @@ public class LogcatActivity extends Activity
 		if (mLines.getChildCount() > MAX_LINES)
 			mLines.removeViewAt(0);
 
-		/* Lame trick so our code runs after mLines#onMeasure.  Ideally we should use a
-		 * custom widget here. */
+		/* Lame trick so our code runs after mLines#onMeasure.  Ideally we
+		 * should use a custom widget here. */
 		mScrollView.post(new Runnable() {
 			public void run()
 			{
 				if (autoscroll == true)
-					mScrollView.scrollTo(0, mLines.getBottom() - mScrollView.getHeight());
+				{
+					mScrollView.scrollTo(0,
+					  mLines.getBottom() - mScrollView.getHeight());
+				}
 			}
 		});    				
 	}
@@ -107,7 +110,8 @@ public class LogcatActivity extends Activity
     			UIThreadUtilities.runOnUIThread(LogcatActivity.this, new Runnable() {
     				public void run()
     				{
-    					Toast.makeText(LogcatActivity.this, msg, Toast.LENGTH_LONG).show();
+    					Toast.makeText(LogcatActivity.this, msg,
+						  Toast.LENGTH_LONG).show();
     				}
     			});
     		}
