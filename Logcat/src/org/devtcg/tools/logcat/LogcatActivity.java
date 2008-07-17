@@ -88,90 +88,90 @@ public class LogcatActivity extends Activity
 		});    				
 	}
 	
-    @Override
-    public void onCreate(Bundle icicle)
-    {
-        super.onCreate(icicle);
-        setContentView(R.layout.main);
-
-        mScrollView = (ScrollView)findViewById(R.id.scrollView);
-        mLines = (LinearLayout)findViewById(R.id.lines);
-        
-        super.onCreate(icicle);
-    }
-
-    @Override
-    public void onStart()
-    {
-    	mLogcatter = new LogcatProcessor()
-    	{
-    		public void onError(final String msg, Throwable e)
-    		{
-    			UIThreadUtilities.runOnUIThread(LogcatActivity.this, new Runnable() {
-    				public void run()
-    				{
-    					Toast.makeText(LogcatActivity.this, msg,
+	@Override
+	public void onCreate(Bundle icicle)
+	{
+	    super.onCreate(icicle);
+	    setContentView(R.layout.main);
+	
+	    mScrollView = (ScrollView)findViewById(R.id.scrollView);
+	    mLines = (LinearLayout)findViewById(R.id.lines);
+	    
+	    super.onCreate(icicle);
+	}
+	
+	@Override
+	public void onStart()
+	{
+		mLogcatter = new LogcatProcessor()
+		{
+			public void onError(final String msg, Throwable e)
+			{
+				UIThreadUtilities.runOnUIThread(LogcatActivity.this, new Runnable() {
+					public void run()
+					{
+						Toast.makeText(LogcatActivity.this, msg,
 						  Toast.LENGTH_LONG).show();
-    				}
-    			});
-    		}
-
-    		public void onNewline(String line)
-    		{
-    			Message msg = mHandler.obtainMessage(MSG_NEWLINE);
-    			msg.obj = line;
-    			mHandler.sendMessage(msg);
-    		}
-    	};
-
-    	mLogcatter.start();
-
-    	super.onStart();
-    }
-
-    @Override
-    public void onStop()
-    {
-    	mLogcatter.stopCatter();
-    	mLogcatter = null;
-
-    	super.onStop();
-    }
-    
-    /**
-     * Simple class to help keep context across multiple logcat invocations 
-     * (between onStop and onStart).  Similar to the way that the unidiff
-     * patch format works to keep context.
-     */
-    private static class LogcatContext
-    {
-    	int mPrec;
-    	int mPos;
-    	String[] mLastLines;
-    	int mLastLineCount;
-
-    	public LogcatContext(int precision)
-    	{
-    		mPrec = precision;
-    		mPos = mLastLineCount = 0;
-    		mLastLines = new String[precision * 2];
-    	}
-
-    	public void addLine(String line)
-    	{
-    		/* TODO */
-    	}
-    }
-    
+					}
+				});
+			}
+	
+			public void onNewline(String line)
+			{
+				Message msg = mHandler.obtainMessage(MSG_NEWLINE);
+				msg.obj = line;
+				mHandler.sendMessage(msg);
+			}
+		};
+	
+		mLogcatter.start();
+	
+		super.onStart();
+	}
+	
+	@Override
+	public void onStop()
+	{
+		mLogcatter.stopCatter();
+		mLogcatter = null;
+	
+		super.onStop();
+	}
+	
+	/**
+	 * Simple class to help keep context across multiple logcat invocations 
+	 * (between onStop and onStart).  Similar to the way that the unidiff
+	 * patch format works to keep context.
+	 */
+	private static class LogcatContext
+	{
+		int mPrec;
+		int mPos;
+		String[] mLastLines;
+		int mLastLineCount;
+	
+		public LogcatContext(int precision)
+		{
+			mPrec = precision;
+			mPos = mLastLineCount = 0;
+			mLastLines = new String[precision * 2];
+		}
+	
+		public void addLine(String line)
+		{
+			/* TODO */
+		}
+	}
+	
 	/* 
 	 * Format a logcat line of the form:
 	 * 
 	 *   L/tag(????): Message
 	 */
-    private static class LoglineFormattedString extends SpannableString
-    {
-    	public static final HashMap<Character, Integer> LABEL_COLOR_MAP; 
-    	
+	private static class LoglineFormattedString extends SpannableString
+	{
+		public static final HashMap<Character, Integer> LABEL_COLOR_MAP; 
+		
 		public LoglineFormattedString(String line)
 		{
 			super(line);
@@ -217,5 +217,5 @@ public class LogcatActivity extends Activity
 			LABEL_COLOR_MAP.put('E', 0xffff9999);
 			LABEL_COLOR_MAP.put('W', 0xffffff99);
 		}
-    }
+	}
 }
