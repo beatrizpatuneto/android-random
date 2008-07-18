@@ -1,0 +1,5 @@
+Simple utility to translate Android binary XML files to plain text XML.  This
+can be run over any of the ".xml" (really, binary XML) files found in
+/system/app/*.apk, including framework-res.apk which contains all the standard
+framework layouts.  See http://android-random.googlecode.com for a tarball of
+the interesting translations.
