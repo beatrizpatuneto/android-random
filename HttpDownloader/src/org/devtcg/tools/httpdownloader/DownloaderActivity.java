@@ -143,8 +143,11 @@ public class DownloaderActivity extends Activity
     @Override
     public void onDestroy()
     {
-    	mThread.stopDownload();
-    	mThread = null;
+		if (mThread != null)
+		{
+			mThread.stopDownload();
+			mThread = null;
+		}
 
     	super.onDestroy();
     }
