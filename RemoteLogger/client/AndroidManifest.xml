@@ -10,8 +10,8 @@
         </activity>
 	<service android:name=".LogProcessor" android:process=":remote">
 		<intent-filter>
-			<action android:name="com.androidnerds.tools.BugReporter.LogProcessorInterface" />
-			<action android:name="com.androidnerds.tools.BugReporter.LOG_PROCESSOR" />
+			<action android:name="com.androidnerds.tools.RemoteLogger.LogProcessorInterface" />
+			<action android:name="com.androidnerds.tools.RemoteLogger.LOG_PROCESSOR" />
 		</intent-filter>
 	</service>
     </application>
