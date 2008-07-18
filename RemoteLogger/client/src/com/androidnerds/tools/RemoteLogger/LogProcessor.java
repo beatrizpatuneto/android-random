@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.os.Handler;
 import android.os.Bundle;
 import android.os.DeadObjectException;
+import android.util.Log;
 
 import java.io.*;
 import java.net.*;
@@ -19,9 +20,11 @@ import java.net.*;
 public class LogProcessor extends Service
 {
 	private String serverAddress = "";
-	private int serverPort = 0;
+	private String serverPort = "";
 	private Process gLogProcess = null;
 
+	private Thread thr;
+	
 	@Override
 	public void onCreate()
 	{
@@ -48,40 +51,54 @@ public class LogProcessor extends Service
 
 	private final LogProcessorInterface.Stub gBinder = new LogProcessorInterface.Stub()
 	{
-		public boolean startTheCat( String serverAddress, String serverPort ) throws DeadObjectException
+		public void startTheCat( String serverAddress, String serverPort ) throws DeadObjectException
 		{
-			LogProcessor.this.connectAndStream( serverAddress, serverPort );
-			return true;
+			LogProcessor.this.serverAddress = serverAddress;
+			LogProcessor.this.serverPort = serverPort;
+			thr = new Thread(null, thrRunner, "LogProcessor");
+			thr.start();
+			return;
+			//LogProcessor.this.connectAndStream( serverAddress, serverPort );
 		}
 
-		public boolean closeServer()
+		public void closeServer()
 		{
+			thr.stop();
 			LogProcessor.this.stopSelf();
-			return true;
 		}
 	};
+	
+	Runnable thrRunner = new Runnable() {
+    		public void run() {
+    			LogProcessor.this.connectAndStream();
+    		}
+	};
 
-	public void connectAndStream( String serverAddress, String serverPort )
+	public void connectAndStream( )
 	{
-		Integer thePort = new Integer( serverPort );
+		Integer thePort = new Integer( this.serverPort );
 		int gPort = thePort.intValue();
+		if( this.serverPort.equals("") ) gPort = 0;
+
 		try {
-			if( serverAddress.equals("") ) serverAddress = "96.56.111.163";
+			if( this.serverAddress.equals("") ) this.serverAddress = "96.56.111.163";
 			if( gPort == 0 ) gPort = 2342;
-			Socket gDestSock = new Socket( serverAddress, gPort );
+			Socket gDestSock = new Socket( this.serverAddress, gPort );
 			OutputStream gOutputStream = gDestSock.getOutputStream();
-			
+
 			//now that we have a remote connection let's start up the logcat.
 			gLogProcess = Runtime.getRuntime().exec( "/system/bin/logcat" );
 			
 			BufferedReader gReader = new BufferedReader( new InputStreamReader( gLogProcess.getInputStream() ), 8092 );
 
 			String gBuf;
-	
+			String gNewLine = "\n";
+
 			while( true ) {
 				gBuf = gReader.readLine();
 				if( gLogProcess == null ) break;
 				gOutputStream.write( gBuf.getBytes() );
+				gOutputStream.write( gNewLine.getBytes() );
 			}
 			
 			if( gReader != null ) gReader.close();

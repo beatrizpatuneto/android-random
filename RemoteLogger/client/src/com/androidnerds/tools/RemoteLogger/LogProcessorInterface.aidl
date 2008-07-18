@@ -4,6 +4,6 @@ import com.androidnerds.tools.RemoteLogger.LogProcessorInterface;
 
 interface LogProcessorInterface
 {
-	boolean startTheCat( String serverAddress, String serverPort );
-	boolean closeServer();
+	void startTheCat( String serverAddress, String serverPort );
+	void closeServer();
 }
