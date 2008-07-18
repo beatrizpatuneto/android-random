@@ -20,6 +20,8 @@ public class RemoteLogger extends Activity
 	private String serverAddress;
 	private String serverPort;
 
+	private boolean isBinded = false;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate( Bundle icicle )
@@ -45,6 +47,20 @@ public class RemoteLogger extends Activity
 		} );
 	}
 
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+		if( isBinded ) unbindService( gConnection );
+	}
+
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+		workThatMagic();
+	}
+
 	public void workThatMagic()
 	{
 		EditText gAddressField = ( EditText )findViewById( R.id.serverAddr );
@@ -55,13 +71,14 @@ public class RemoteLogger extends Activity
 		Editable gPort = gPortField.getText();
 		serverPort = gPort.toString();
 
-		this.bindService( new Intent( LogProcessorInterface.class.getName() ), gConnection, Context.BIND_AUTO_CREATE );
+		
+		if( !serverAddress.equals("") ) this.bindService( new Intent( LogProcessorInterface.class.getName() ), gConnection, Context.BIND_AUTO_CREATE );
 		//oh yea that's all for this method :)
 	}
 
 	private void stopLogService()
 	{
-		unbindService( gConnection );
+		if( isBinded ) unbindService( gConnection );
 	}
 
 	private ServiceConnection gConnection = new ServiceConnection() 
@@ -70,8 +87,8 @@ public class RemoteLogger extends Activity
 		{
 			logInterface = LogProcessorInterface.Stub.asInterface( service );
 			try {
-				boolean result = logInterface.startTheCat( serverAddress, serverPort );
-				if( !result ) Log.d( "LogWriter", "Hm, writing to the log that we are supposed to be streaming..." );
+				isBinded = true;
+				logInterface.startTheCat( serverAddress, serverPort );
 			} catch( DeadObjectException e ) {
 
 			}
@@ -79,12 +96,7 @@ public class RemoteLogger extends Activity
 
 		public void onServiceDisconnected( ComponentName className )
 		{
-			try {
-				boolean result = logInterface.closeServer();
-				if( !result ) Log.d("LogWriter", "Hm, not good when the logger needs to write to the log :) " );
-			} catch( DeadObjectException e ) {
-				//don't really have anything for here yet.
-			}
+			isBinded = false;
 		}
 	};
 }
