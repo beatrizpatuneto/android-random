@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -15,10 +16,14 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Resources;
+import android.content.SharedPreferences;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -27,11 +32,14 @@ import android.widget.Toast;
 
 public class DownloaderActivity extends Activity 
 {
+	public static final String TAG = "DownloaderActivity";
+	
+	private SharedPreferences mPrefs;
+	
 	private EditText mSrcView;
 	private EditText mDstView;
 	private Button mGetBtn;
 
-	private Download mDownload;
 	private DownloadProcessor mThread;
 	private ProgressDialog mProgress;
 	
@@ -42,16 +50,33 @@ public class DownloaderActivity extends Activity
 	private static final int MSG_ERROR = 4;
 	
 	private static final int MSG_STATUS_SUCCESS = 0;
+	
+	private static final String PREF_LAST_SRC_URL = "lastSrcURL";
+	private static final String PREF_LAST_DST_PATH = "lastDstPath";
 
 	private final Handler mHandler = new Handler()
 	{
 		@Override
 		public void handleMessage(Message msg)
 		{
+			/* We introduce a race condition on cancellation... */
+			if (mThread == null || mProgress == null)
+				return;
+			
+			Download dl = mThread.getDownload();
+			
 			switch (msg.what)
 			{
 			case MSG_FINISHED:
+				Log.d(TAG, "MSG_FINISHED");
+				
+				Editor prefs = mPrefs.edit();
+				prefs.putString(PREF_LAST_SRC_URL, dl.url.toString());
+				prefs.putString(PREF_LAST_DST_PATH, dl.dst.toString());
+				prefs.commit();
+				
 				mProgress.dismiss();
+				mProgress = null;
 				break;
 			case MSG_STATUS:
 				switch (msg.arg1)
@@ -62,22 +87,30 @@ public class DownloaderActivity extends Activity
 				}
 				break;
 			case MSG_LENGTH:
-				mProgress.setIndeterminate(false);
+				Log.d(TAG, "MSG_LENGTH: " + (Long)msg.obj);
+				//mProgress.setIndeterminate(false);
 				mProgress.setProgress(0);
-				mDownload.length = (Long)msg.obj;
+				dl.length = (Long)msg.obj;
 				break;
 			case MSG_PROGRESS:
-				if (mDownload.length >= 0)
+				Log.d(TAG, "MSG_PROGRESS: " + (Long)msg.obj);
+				if (dl.length >= 0)
 				{
 					float prog =
-					  ((float)((Long)msg.obj) / (float)mDownload.length) * 10000f;
+					  ((float)((Long)msg.obj) / (float)dl.length) * 100f;
 
-					mProgress.setProgress((int)prog);
+					mProgress.setProgress((int)(prog * 100f));
+					mProgress.setMessage("Received " + (int)prog + "%");
+				}
+				else
+				{
+					mProgress.setMessage("Received " + (Long)msg.obj + " bytes");
 				}
 				break;
 			case MSG_ERROR:
-				mDownload.dst.delete();
+				dl.abortCleanup();
 				mProgress.dismiss();
+				mProgress = null;
 				Toast.makeText(DownloaderActivity.this, "Error: " + msg.obj,
 				  Toast.LENGTH_LONG).show();
 				break;
@@ -86,15 +119,22 @@ public class DownloaderActivity extends Activity
 			}
 		}
 	};
-	
+
     @Override
     public void onCreate(Bundle icicle)
     {
         super.onCreate(icicle);
         setContentView(R.layout.main);
         
+        mPrefs = getSharedPreferences("prefs", 0);
+        
         mSrcView = (EditText)findViewById(R.id.src);
         mDstView = (EditText)findViewById(R.id.dst);
+      
+        mSrcView.setText(mPrefs.getString(PREF_LAST_SRC_URL,
+          getResources().getString(R.string.default_src_url)));
+        mDstView.setText(mPrefs.getString(PREF_LAST_DST_PATH,
+          getResources().getString(R.string.default_dst_path)));
         
         mGetBtn = (Button)findViewById(R.id.get);
         mGetBtn.setOnClickListener(mGetClick);
@@ -104,6 +144,8 @@ public class DownloaderActivity extends Activity
     public void onDestroy()
     {
     	mThread.stopDownload();
+    	mThread = null;
+
     	super.onDestroy();
     }
     
@@ -111,13 +153,30 @@ public class DownloaderActivity extends Activity
     {
     	public void onClick(View v)
     	{
-    		mProgress = ProgressDialog.show(DownloaderActivity.this, "Downloading...",
-    		  "Connecting to server...", true, true, mGetCancelClick);
-    		
     		String src = mSrcView.getText().toString();
     		String dst = mDstView.getText().toString();
+    		
+    		URL srcUrl;
 
-    		mDownload = new Download(new URL(src), new File(dst));
+    		try
+    		{
+    			srcUrl = new URL(src);
+    		}
+    		catch (MalformedURLException e)
+    		{
+    			Toast.makeText(DownloaderActivity.this,
+    			  "Invalid source URL: " + e.toString(),
+    			  Toast.LENGTH_SHORT).show();
+
+    			return;
+    		}
+
+    		mProgress = ProgressDialog.show(DownloaderActivity.this, "Downloading...",
+    	    		  "Connecting to server...", true, true, mGetCancelClick);
+
+    		Download dl = new Download(srcUrl, new File(dst));
+    		mThread = new DownloadProcessor(dl, mHandler);
+    		mThread.start();
     	}
     };
     
@@ -125,21 +184,66 @@ public class DownloaderActivity extends Activity
     {
 		public void onCancel(DialogInterface di)
 		{
+			mProgress.dismiss();
+			mProgress = null;
+			
 			mThread.stopDownload();
+			mThread = null;
 		}
     };
-    
+
     static final class Download
     {
     	URL url;
+    	boolean directory;
     	File dst;
+    	String name;
     	long length;
-    	
+
     	public Download(URL url, File dst)
     	{
     		this.url = url;
     		this.dst = dst;
-    	}    	
+
+    		/* Figure out the filename to save to from the URL.  Note that
+    		 * it would be better to override once the HTTP server responds,
+    		 * since a better name will have been provided, possibly after
+    		 * redirect.  But I don't care right now. */
+    		if ((directory = dst.isDirectory()) == true)
+    		{
+    			String[] paths = url.getPath().split("/");
+
+    			int n = paths.length;
+    			
+    			if (n > 0)
+    				n--;
+
+    			if (paths[n].length() > 0)
+    				name = paths[n];
+    			else
+    				name = "index.html";
+    		}
+    	}
+    	
+    	public File getDestination()
+    	{
+    		File f;
+    		
+    		if (directory == true)
+    			f = new File(dst.getAbsolutePath() + File.separator + name);
+    		else
+    			f = dst;
+    		
+    		return f;
+    	}
+
+    	/**
+    	 * Delete the destination file, if it exists.
+    	 */
+    	public void abortCleanup()
+    	{
+    		getDestination().delete();
+    	}
     }
     
     private static final class DownloadProcessor extends Thread
@@ -150,10 +254,15 @@ public class DownloaderActivity extends Activity
     	private volatile HttpClient mClient = null;
     	private GetMethod mMethod = null;
 
-    	public void DownloadProcessor(Download d, Handler handler)
+    	public DownloadProcessor(Download d, Handler handler)
     	{
     		mDownload = d;
     		mHandler = handler;
+    	}
+    	
+    	public Download getDownload()
+    	{
+    		return mDownload;
     	}
 
     	public void run()
@@ -181,14 +290,14 @@ public class DownloaderActivity extends Activity
     			}
 
     			sendStatus(MSG_STATUS_SUCCESS);
-
+    			
     			long len;
 
     			if ((len = mMethod.getResponseContentLength()) >= 0)
     				sendLength(len);
 
     			in = mMethod.getResponseBodyAsStream();
-    			out = new FileOutputStream(mDownload.dst);
+    			out = new FileOutputStream(mDownload.getDestination());
 
     			byte[] b = new byte[1024];
     			int n;
@@ -203,7 +312,7 @@ public class DownloaderActivity extends Activity
     					return;
     				
     				bytes += n;
-    				sendProgress(n);
+    				sendProgress(bytes);
     				out.write(b, 0, n);
     			}
     			
@@ -255,6 +364,7 @@ public class DownloaderActivity extends Activity
 
     	public void sendProgress(long n)
     	{
+    		mHandler.removeMessages(MSG_PROGRESS);
     		Message msg = mHandler.obtainMessage(MSG_PROGRESS, (Long)n);
     		mHandler.sendMessage(msg);
     	}
@@ -271,7 +381,7 @@ public class DownloaderActivity extends Activity
    				return;
 
     		interrupt();
-    		mDownload.dst.delete();
+    		mDownload.abortCleanup();
     	}
     }
 }
