@@ -25,19 +25,17 @@
  */
 package com.androidnerds.tools.Glance;
 
-import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.GridView;
 import android.widget.ListAdapter;
 import android.util.Log;
 
 import java.io.*;
 
 /** This is a really simple elementary application that displays directories and files on the Android system. **/
-public class Glance extends Activity
+public class Glance extends ListActivity
 {
 	public GridView gIconView;
 
