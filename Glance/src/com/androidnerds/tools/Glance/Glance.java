@@ -1,6 +1,6 @@
 /* Copyright (c) 2008 AndroidNerds
  *
- * Written and Maintained by Mike Novak <mike@novaklabs.com>
+ * Written and Maintained by the random guys.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -30,20 +30,12 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.Toast;
-import android.util.Log;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /** This is a really simple elementary application that displays directories and files on the Android system. **/
 public class Glance extends ListActivity
 {
+	DirectoryAdapter gAdapter;
 	public ListView gListView;
-	public ArrayList<HashMap<String, String>> gDirChildren = new ArrayList<HashMap<String, String>>();
-	SimpleAdapter files;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -51,50 +43,19 @@ public class Glance extends ListActivity
 	{
 		super.onCreate( icicle );
 		setContentView( R.layout.main );
-
-		//simple little starter test.
-		fillDirectoryListing( "/system" );	
 		
-		String[] from = new String[] { "name", "type" };
-		int[] to = new int[] { R.id.gFileName, R.id.gFileType };
-		files = new SimpleAdapter( this, gDirChildren, R.layout.list_row, from, to );
-		setListAdapter( files );
+		gAdapter = new DirectoryAdapter( this );
+		setListAdapter( gAdapter );
+
+		gAdapter.fillDirectoryListing( "/system" );
+		
 	}
-	
-	public void fillDirectoryListing( String gPath )
+
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) 
 	{
-		//Let's see what the File permissions are for what we are looking at.
-		FilePermission gFilePerms = new FilePermission( gPath + "/-", "read,write,execute,delete" );
-		File gCurrentLocation = new File( gPath );
-		//let's see what is actually in this directory....
-		String[] gListing = gCurrentLocation.list();
-
-		if( !gCurrentLocation.canRead() ) {
-			Toast.makeText( this, "Cannot read the selected directory.", Toast.LENGTH_LONG ).show();
-			return;
-		}
-	
-		Log.d( "FileIO", "Current listing size: " + gListing.length );
-		int i;
-		for( i = 0; i < gListing.length; i++ ) {
-			HashMap<String, String> item = new HashMap<String, String>();
-			File gTemp = new File( gListing[ i ] );
-
-			//Simple debugging code that won't be here forever.
-			Log.d( "FileIO", "Found file: " + gListing[ i ] );
-
-			if( gTemp.isDirectory() ) {
-				item.put( "name", gListing[ i ] );
-				item.put( "type", "directory" );
-			} else if( gTemp.isFile() ) {
-				item.put( "name", gListing[ i ] );
-				item.put( "type", "file" );
-			} else {
-				item.put( "name", gListing[ i ] );
-				item.put( "type", "unknown" );
-			}
-		
-			gDirChildren.add( item );
-		}
+		super.onListItemClick(l, v, position, id);
+		gAdapter.loadSubDirectory( position );
 	}
+
 }
