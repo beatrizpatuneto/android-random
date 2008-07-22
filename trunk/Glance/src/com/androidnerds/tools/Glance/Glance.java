@@ -29,6 +29,7 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 /** This is a really simple elementary application that displays directories and files on the Android system. **/
@@ -43,18 +44,27 @@ public class Glance extends ListActivity
 	{
 		super.onCreate( icicle );
 		setContentView( R.layout.main );
+	
+		final ImageButton gParentButton = ( ImageButton )findViewById( R.id.gParentButton );
+		gParentButton.setOnClickListener( new ImageButton.OnClickListener()  
+		{
+			public void onClick( View v )
+			{
+				gAdapter.loadParentDirectory();
+			}
+		} );
 		
 		gAdapter = new DirectoryAdapter( this );
 		setListAdapter( gAdapter );
 
-		gAdapter.fillDirectoryListing( "/system" );
+		gAdapter.fillDirectoryListing( "/" );
 		
 	}
 
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) 
+	protected void onListItemClick( ListView l, View v, int position, long id ) 
 	{
-		super.onListItemClick(l, v, position, id);
+		super.onListItemClick( l, v, position, id );
 		gAdapter.loadSubDirectory( position );
 	}
 

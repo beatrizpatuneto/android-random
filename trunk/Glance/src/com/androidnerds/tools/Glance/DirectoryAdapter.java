@@ -39,14 +39,16 @@ import java.io.File;
 import java.io.FilePermission;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class DirectoryAdapter extends BaseAdapter
 {
 	private Context gContext;
 	private String gDirectory;
 	private ArrayList<String> gChildNames = new ArrayList<String>();
-	private ArrayList<String>gChildTypes = new ArrayList<String>();
-	private ArrayList<String>gFullPath = new ArrayList<String>();
+	private ArrayList<String> gChildTypes = new ArrayList<String>();
+	private ArrayList<String> gFullPath = new ArrayList<String>();
+	private LinkedList<String> gHistory = new LinkedList<String>();
 
 	public DirectoryAdapter( Context c )
 	{
@@ -81,18 +83,28 @@ public class DirectoryAdapter extends BaseAdapter
 		gNameView.setText( gChildNames.get( position ) );
 
 		ImageView gIconView = ( ImageView )gView.findViewById( R.id.gIconHolder );
-		if( gChildTypes.get( position ).equals( "file" ) ) gIconView.setImageResource( R.drawable.file );
-		else gIconView.setImageResource( R.drawable.folder );
+		if( gChildTypes.get( position ).equals( "directory" ) ) gIconView.setImageResource( R.drawable.folder );
+		else gIconView.setImageResource( R.drawable.file );
 
 		return gView;
+	}
+
+	public void loadParentDirectory( )
+	{
+		Log.d( "FileIO", "Checking the history... " + gHistory.toString() );
+		String gLast = ( String )gHistory.getLast();
+		gHistory.removeLast();
+		fillDirectoryListing( gLast );
 	}
 
 	public void loadSubDirectory( int position )
 	{
 		Log.d( "Glance", "loadSubDirectory has been called. Loading: " + gDirectory + "/" + gChildNames.get( position ) );
-
+	
+		if( gDirectory == null ) gDirectory = "";
 		File gTemp = new File( gDirectory + "/" + gChildNames.get( position ) );
 		if( !gTemp.isFile() )
+			gHistory.add( gDirectory + "/" + gChildNames.get( position ) );
 			fillDirectoryListing( gDirectory + "/" + gChildNames.get( position ) );
 	}
 
