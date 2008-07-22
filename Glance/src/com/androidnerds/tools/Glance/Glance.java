@@ -44,15 +44,6 @@ public class Glance extends ListActivity
 	{
 		super.onCreate( icicle );
 		setContentView( R.layout.main );
-	
-		final ImageButton gParentButton = ( ImageButton )findViewById( R.id.gParentButton );
-		gParentButton.setOnClickListener( new ImageButton.OnClickListener()  
-		{
-			public void onClick( View v )
-			{
-				gAdapter.loadParentDirectory();
-			}
-		} );
 		
 		gAdapter = new DirectoryAdapter( this );
 		setListAdapter( gAdapter );
@@ -65,7 +56,8 @@ public class Glance extends ListActivity
 	protected void onListItemClick( ListView l, View v, int position, long id ) 
 	{
 		super.onListItemClick( l, v, position, id );
-		gAdapter.loadSubDirectory( position );
+		if( position == 0 ) gAdapter.loadParentDirectory();
+		else gAdapter.loadSubDirectory( position );
 	}
 
 }

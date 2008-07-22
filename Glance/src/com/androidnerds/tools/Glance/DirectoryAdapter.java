@@ -80,11 +80,16 @@ public class DirectoryAdapter extends BaseAdapter
 		View gView = inflate.inflate( R.layout.list_row, parent, false, null );
 
 		TextView gNameView = ( TextView )gView.findViewById( R.id.gFileName );
-		gNameView.setText( gChildNames.get( position ) );
+		if( position == 0 ) gNameView.setText( " .. " );
+		else gNameView.setText( gChildNames.get( position ) );
 
 		ImageView gIconView = ( ImageView )gView.findViewById( R.id.gIconHolder );
-		if( gChildTypes.get( position ).equals( "directory" ) ) gIconView.setImageResource( R.drawable.folder );
-		else gIconView.setImageResource( R.drawable.file );
+		if( position == 0 ) {
+			gIconView.setImageResource( R.drawable.parent );
+		} else { 
+			if( gChildTypes.get( position ).equals( "directory" ) ) gIconView.setImageResource( R.drawable.folder );
+			else gIconView.setImageResource( R.drawable.file );
+		}
 
 		return gView;
 	}
@@ -92,24 +97,27 @@ public class DirectoryAdapter extends BaseAdapter
 	public void loadParentDirectory( )
 	{
 		Log.d( "FileIO", "Checking the history... " + gHistory.toString() );
-		String gLast = ( String )gHistory.getLast();
 		gHistory.removeLast();
-		fillDirectoryListing( gLast );
+		Log.d( "FileIO", "New history written..." + gHistory.toString() );
+		fillDirectoryListing( ( String )gHistory.getLast() );
 	}
 
 	public void loadSubDirectory( int position )
 	{
+		if( gDirectory.equals( "/") ) gDirectory = "";
 		Log.d( "Glance", "loadSubDirectory has been called. Loading: " + gDirectory + "/" + gChildNames.get( position ) );
-	
-		if( gDirectory == null ) gDirectory = "";
 		File gTemp = new File( gDirectory + "/" + gChildNames.get( position ) );
 		if( !gTemp.isFile() )
-			gHistory.add( gDirectory + "/" + gChildNames.get( position ) );
 			fillDirectoryListing( gDirectory + "/" + gChildNames.get( position ) );
 	}
 
 	public void fillDirectoryListing( String directory )
 	{
+		if( gHistory.size() > 0 ) {
+			if( !directory.equals( gHistory.getLast() ) )  gHistory.add( directory );
+		} else {
+			gHistory.add( directory );
+		}
 		gChildNames.clear();
 		gChildTypes.clear();
 		gDirectory = directory;
@@ -132,11 +140,6 @@ public class DirectoryAdapter extends BaseAdapter
 
 			//Simple debugging code that won't be here forever.
 			Log.d( "FileIO", "Found file: " + gListing[ i ] );
-			try {
-				Log.d( "FileIO", "Parent Abs: " + gTemp.getCanonicalPath() );
-			} catch( IOException e ) {
-				Log.d( "FilIO", "Issue with the canonical path of the file." );
-			}
 
 			if( gTemp.isDirectory() ) {
 				gChildNames.add( gListing[ i ] );
