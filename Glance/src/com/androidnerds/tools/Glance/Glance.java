@@ -28,9 +28,15 @@ package com.androidnerds.tools.Glance;
 import android.app.ListActivity;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.Menu.Item;
 import android.view.View;
+import android.view.View.OnPopulateContextMenuListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.ContextMenuInfo;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.util.Log;
 
 /** This is a really simple elementary application that displays directories and files on the Android system. **/
 public class Glance extends ListActivity
@@ -50,6 +56,7 @@ public class Glance extends ListActivity
 
 		gAdapter.fillDirectoryListing( "/" );
 		setTitle( "Glance - / " );
+		determineContextMenu();
 	}
 
 	@Override
@@ -60,7 +67,32 @@ public class Glance extends ListActivity
 		else gAdapter.loadSubDirectory( position );
 		
 		//change the title of the activity to display the current directory
-		setTitle( "Glance - " + gAdapter.getDirectoryName( position ) );
+		setTitle( "Glance - " + gAdapter.getDirectoryName( ) );
 	}
 
+	@Override
+    	public boolean onContextItemSelected(Item item) 
+	{ 
+		AdapterView.ContextMenuInfo gMenuInfo = ( AdapterView.ContextMenuInfo )item.getMenuInfo();
+		Log.d( "ContextMenu", "Testing Context menu..." + gMenuInfo.position );
+		Log.d( "ContextMenu", "Menu Item selected is: " + gAdapter.getDirectoryName( ) + "/" + gAdapter.getObject( gMenuInfo.position ) ); 
+		return false;
+	}
+
+	//The following method is setup to determine the type of context menu to display to the user.
+	public void determineContextMenu()
+	{
+		View gListView = getListView();
+		gListView.setOnPopulateContextMenuListener(
+            			new View.OnPopulateContextMenuListener() {
+					@Override
+          				public void onPopulateContextMenu(ContextMenu menu, View view, Object menuInfo) 
+					{
+            					AdapterView.ContextMenuInfo mi = (AdapterView.ContextMenuInfo) menuInfo;
+						String gItem = gAdapter.getDirectoryName() + "/" + gAdapter.getObject( mi.position );
+						if( gItem.endsWith( ".apk" ) ) menu.add( 0, 0, "Install" );
+						else menu.add( 0, 0, "Copy" );
+          				}
+		});
+	}
 }

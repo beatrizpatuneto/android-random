@@ -94,9 +94,14 @@ public class DirectoryAdapter extends BaseAdapter
 		return gView;
 	}
 
-	public String getDirectoryName( int position )
+	public String getDirectoryName( )
 	{
 		return gDirectory;
+	}
+
+	public String getObject( int position )
+	{
+		return gChildNames.get( position );
 	}
 
 	public void loadParentDirectory( )
@@ -147,11 +152,11 @@ public class DirectoryAdapter extends BaseAdapter
 		Log.d( "FileIO", "Current listing size: " + gListing.length );
 		int i;
 		for( i = 0; i < gListing.length; i++ ) {
-			File gTemp = new File( gListing[ i ] );
+			File gTemp = new File( directory + "/" + gListing[ i ] );
 
 			//Simple debugging code that won't be here forever.
 			Log.d( "FileIO", "Found file: " + gListing[ i ] );
-
+			Log.d( "FileIO", "Object found... Directory: " + gTemp.isDirectory() );
 			if( gTemp.isDirectory() ) {
 				gChildNames.add( gListing[ i ] );
 				gChildTypes.add( "directory" );
