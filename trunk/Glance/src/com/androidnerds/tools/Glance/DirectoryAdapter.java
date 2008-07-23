@@ -94,11 +94,22 @@ public class DirectoryAdapter extends BaseAdapter
 		return gView;
 	}
 
+	public String getDirectoryName( int position )
+	{
+		return gDirectory;
+	}
+
 	public void loadParentDirectory( )
 	{
 		Log.d( "FileIO", "Checking the history... " + gHistory.toString() );
-		gHistory.removeLast();
+
 		Log.d( "FileIO", "New history written..." + gHistory.toString() );
+		if( gDirectory.equals( "/" ) ) {
+			Log.d( "FileIO", "Trying to go past the root directory" );
+			return;
+		}
+		gHistory.removeLast();
+		
 		fillDirectoryListing( ( String )gHistory.getLast() );
 	}
 

@@ -49,7 +49,7 @@ public class Glance extends ListActivity
 		setListAdapter( gAdapter );
 
 		gAdapter.fillDirectoryListing( "/" );
-		
+		setTitle( "Glance - / " );
 	}
 
 	@Override
@@ -58,6 +58,9 @@ public class Glance extends ListActivity
 		super.onListItemClick( l, v, position, id );
 		if( position == 0 ) gAdapter.loadParentDirectory();
 		else gAdapter.loadSubDirectory( position );
+		
+		//change the title of the activity to display the current directory
+		setTitle( "Glance - " + gAdapter.getDirectoryName( position ) );
 	}
 
 }
