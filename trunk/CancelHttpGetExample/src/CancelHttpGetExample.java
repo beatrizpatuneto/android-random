@@ -184,7 +184,8 @@ public class CancelHttpGetExample
 		{
 			/* As we've written this method, calling it from multiple threads
 			 * would be problematic. */
-			assert mStopped == false;
+			if (mStopped == true)
+				return;
 
 			/* Too late! */
 			if (isAlive() == false)
