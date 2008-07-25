@@ -123,21 +123,22 @@ public class CancelHttpGetExample
 
 			/* One last check if we've been prematurely stopped before we get
 			 * moving. */
-			if (cleanupOutputIfStopped() == true)
-			{
-				try { out.close(); } catch (IOException e) {}
+			if (cleanupOutputIfStopped(out) == true)
 				return;
-			}
 
 			mMethod = method;
 
 			try {
-				/* This method is the one place that may block!  stopDownload()
-				 * works by closing the connected socket, so this operation
-				 * can't happen when the socket is blocked on connect(). */
+				/* This method is the one place that may block!  See this
+				 * mailing list thread for analysis of this problem:
+				 *
+				 * http://mail-archives.apache.org/mod_mbox/hc-httpclient-users/200506.mbox/%3c20050615164118.GA4936@uml24.umlhosting.ch%3e
+				 *
+				 * We will try to work around by just checking mStopped after
+				 * and lazily canceling in this event.  */
 				int rc = cli.executeMethod(mMethod);
 
-				if (mStopped == true)
+				if (cleanupOutputIfStopped(out) == true)
 					return;
 
 				if (rc != 200)
@@ -155,18 +156,23 @@ public class CancelHttpGetExample
 				mMethod.releaseConnection();
 				mMethod = null;
 
-				cleanupOutputIfStopped();
+				cleanupOutputIfStopped(null);
 
 				System.out.println("Exiting!");
 			}
 		}
 
-		private boolean cleanupOutputIfStopped()
+		private boolean cleanupOutputIfStopped(OutputStream out)
 		{
 			boolean stopped = mStopped;
 
 			if (stopped == true)
 			{
+				try {
+					if (out != null)
+						out.close();
+				} catch (IOException e) {}
+
 				if (mDst != null)
 					mDst.delete();
 			}
