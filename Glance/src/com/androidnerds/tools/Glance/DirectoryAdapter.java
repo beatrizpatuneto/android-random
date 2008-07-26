@@ -49,6 +49,7 @@ public class DirectoryAdapter extends BaseAdapter
 	private ArrayList<String> gChildTypes = new ArrayList<String>();
 	private ArrayList<String> gFullPath = new ArrayList<String>();
 	private LinkedList<String> gHistory = new LinkedList<String>();
+	private View gView;
 
 	public DirectoryAdapter( Context c )
 	{
@@ -77,13 +78,13 @@ public class DirectoryAdapter extends BaseAdapter
 	public View getView( int position, View convertView, ViewGroup parent )
 	{
 		ViewInflate inflate = ViewInflate.from( gContext );
-		View gView = inflate.inflate( R.layout.list_row, parent, false, null );
-
+		View view = inflate.inflate( R.layout.list_row, parent, false, null );
+		gView = view;
 		TextView gNameView = ( TextView )gView.findViewById( R.id.gFileName );
 		if( position == 0 ) gNameView.setText( " .. " );
 		else gNameView.setText( gChildNames.get( position ) );
 
-		ImageView gIconView = ( ImageView )gView.findViewById( R.id.gIconHolder );
+		ImageView gIconView = ( ImageView )view.findViewById( R.id.gIconHolder );
 		if( position == 0 ) {
 			gIconView.setImageResource( R.drawable.parent );
 		} else { 
@@ -170,6 +171,12 @@ public class DirectoryAdapter extends BaseAdapter
 		}
 
 		notifyDataSetChanged();
+	}
+
+	public void alertDataChanged()
+	{
+		notifyDataSetChanged();
+		gView.requestLayout();
 	}
 
 }
