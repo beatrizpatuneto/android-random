@@ -1,11 +1,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.androidnerds.tools">
+    package="com.androidnerds.tools.Messages">
     <application>
+	<uses-permission android:name="android.permission.READ_CONTACTS" />
+    	<uses-permission android:name="android.permission.WRITE_CONTACTS" />
+	<uses-permission android:name="android.permission.RECEIVE_SMS" />
+	
+	<receiver class="MessagesReceiver">
+		<intent-filter>  
+			<action android:value="android.provider.Telephony.SMS_RECEIVED" />
+		</intent-filter>  
+	</receiver>
+	
         <activity android:name=".Messages" android:label="Messages">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+		<intent-filter>
+                	<action android:name="android.intent.action.MAIN" />
+                	<category android:name="android.intent.category.LAUNCHER" />
+		</intent-filter>
         </activity>
     </application>
 </manifest> 
