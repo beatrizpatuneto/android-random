@@ -25,16 +25,47 @@
  */
 package com.androidnerds.tools.Messages;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentReceiver;
+import android.os.Bundle;
+import android.provider.Telephony;
+import android.telephony.gsm.SmsMessage;
+import android.widget.Toast;
 
 public class MessagesReceiver extends IntentReceiver
 {
 	public static final String ACTION = "android.provider.Telephony.SMS_RECEIVED";
 
+	private MessagesDbAdapter gDbHelper;
+
 	public void onReceiveIntent( Context ctx, Intent intent )
 	{
+		gDbHelper = new MessagesDbAdapter( ctx );
+		gDbHelper.open();
+
 		//do message related stuff here.
+		if( intent.getAction().equals( ACTION ) ) {
+			Bundle bundle = intent.getExtras();
+			
+			if( bundle != null ) {
+				SmsMessage[] messages = Telephony.Sms.Intents.getMessagesFromIntent( intent );
+				//take the messages and add them to the database.
+				for( int i = 0; i < messages.length; i++ ) {
+					SmsMessage message = messages[ i ];
+					String sender = message.getDisplayOriginatingAddress();
+					String body = message.getDisplayMessageBody();
+					Toast.makeText( ctx, "Message: " + body + " From: " + sender + ".", Toast.LENGTH_LONG ).show();
+				}
+			}
+		}
+
+		gDbHelper.close();
+	}
+
+	public void setupNotification()
+	{
+
 	}
 }
