@@ -5,9 +5,9 @@
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <application>
-	<receiver android:name="MessagesReceiver" class="MessagesReceiver">
+	<receiver android:name="MessagesReceiver">
 		<intent-filter>  
-			<action android:name="android.provider.Telephony.SMS_RECEIVED" android:value="android.provider.Telephony.SMS_RECEIVED" />
+			<action android:name="android.provider.Telephony.SMS_RECEIVED" />
 		</intent-filter>  
 	</receiver>
 	
