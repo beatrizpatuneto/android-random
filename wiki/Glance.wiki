@@ -1,0 +1,11 @@
+#summary Glance is a file browser application for android devices.
+
+= Introduction =
+
+Glance is still in development and is very close to being 0.0.1 and available as a download.
+
+
+= Details =
+
+Below are screenshots of the UI:
+
