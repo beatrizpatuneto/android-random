@@ -24,3 +24,17 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 package com.androidnerds.tools.Messages;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentReceiver;
+
+public class MessagesReceiver extends IntentReceiver
+{
+	public static final String ACTION = "android.provider.Telephony.SMS_RECEIVED";
+
+	public void onReceiveIntent( Context ctx, Intent intent )
+	{
+		//do message related stuff here.
+	}
+}
