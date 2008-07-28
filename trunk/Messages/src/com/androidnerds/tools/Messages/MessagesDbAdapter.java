@@ -29,7 +29,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.database.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.io.FileNotFoundException;
@@ -38,6 +38,8 @@ public class MessagesDbAdapter
 {
 	public static final String KEY_SENDER = "sender";
 	public static final String KEY_MESSAGE = "message";
+	public static final String KEY_STATE = "state";
+	public static final String KEY_DIRECTION = "direction";
 	public static final String KEY_ROWID = "_id";
 
 	private static final String DATABASE_NAME = "an_sms";
@@ -46,7 +48,7 @@ public class MessagesDbAdapter
 
 	private static final String DATABASE_CREATE =
 		"create table an_messages( _id integer primary key autoincrement, " +
-		"sender text not null, message text not null, message_date datetime not null );";
+		"sender text not null, message text not null, message_date datetime not null, state integer not null, direction integer not null );";
 
 	private SQLiteDatabase gDb;
 	private final Context gCtx;
@@ -84,12 +86,14 @@ public class MessagesDbAdapter
 		gDb.close();
 	}
 
-	public long createMessage( String sender, String message )
+	public long createMessage( String sender, String message, int state, int direction )
 	{
 		ContentValues initialValues = new ContentValues();
 		initialValues.put( KEY_SENDER, sender );
 		initialValues.put( KEY_MESSAGE, message );
-		
+		initialValues.put( KEY_STATE, state );
+		initialValues.put( KEY_DIRECTION, direction );
+
 		return gDb.insert( DATABASE_TABLE, null, initialValues );
 	}
 
@@ -100,7 +104,18 @@ public class MessagesDbAdapter
 
 	public Cursor fetchAllMessages()
 	{
-		return gDb.query( true, DATABASE_TABLE, new String[] { KEY_ROWID, KEY_SENDER, KEY_MESSAGE }, null, null, null, null, null );
+		return gDb.query( true, DATABASE_TABLE, new String[] { KEY_ROWID, KEY_SENDER, KEY_MESSAGE, KEY_STATE, KEY_DIRECTION }, null, null, null, null, null );
+	}
+
+	public Cursor fetchMessage( long rowId )
+	{
+		Cursor result = gDb.query( true, DATABASE_TABLE, new String[] { KEY_ROWID, KEY_SENDER, KEY_MESSAGE, KEY_STATE, KEY_DIRECTION }, KEY_ROWID + "=" + rowId, null, null, null, null );
+
+		if( ( result.count() == 0 ) || !result.first() ) {
+			throw new SQLException( "Message cannot be found!" );
+		}
+
+		return result;
 	}
 
 }
