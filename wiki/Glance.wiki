@@ -10,3 +10,9 @@ Glance is still in development and is very close to being 0.0.1 and available as
 Below are screenshots of the UI:
 
 [http://novaklabs.com/root-view.png]
+
+[http://novaklabs.com/apk-list.png]
+
+[http://novaklabs.com/apk-with-menu.png]
+
+[http://novaklabs.com/context-menu.png]
