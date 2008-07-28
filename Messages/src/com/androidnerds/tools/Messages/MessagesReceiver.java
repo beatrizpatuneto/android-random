@@ -25,6 +25,7 @@
  */
 package com.androidnerds.tools.Messages;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
@@ -39,9 +40,12 @@ public class MessagesReceiver extends IntentReceiver
 	public static final String ACTION = "android.provider.Telephony.SMS_RECEIVED";
 
 	private MessagesDbAdapter gDbHelper;
+	private NotificationManager gNotification;
+	private Context gCtx;
 
 	public void onReceiveIntent( Context ctx, Intent intent )
 	{
+		gCtx = ctx;
 		gDbHelper = new MessagesDbAdapter( ctx );
 		gDbHelper.open();
 
@@ -56,7 +60,10 @@ public class MessagesReceiver extends IntentReceiver
 					SmsMessage message = messages[ i ];
 					String sender = message.getDisplayOriginatingAddress();
 					String body = message.getDisplayMessageBody();
-					Toast.makeText( ctx, "Message: " + body + " From: " + sender + ".", Toast.LENGTH_LONG ).show();
+					gDbHelper.createMessage( sender, body, 0, 0, message.getTimestampMillis() );
+
+					//message has been inserted into the database. notify the user.
+					this.setupNotification( sender, body );
 				}
 			}
 		}
@@ -64,8 +71,15 @@ public class MessagesReceiver extends IntentReceiver
 		gDbHelper.close();
 	}
 
-	public void setupNotification()
+	public void setupNotification( String sender, String body )
 	{
+		gNotification = ( NotificationManager )getSystemService( NOTIFICATION_SERVICE );
+		
+		Intent contentIntent = new Intent( gCtx, Messages.class );
+		Intent appIntent = new Intent( gCtx, Messages.class );
+		String app_name = "Messages";
 
+		Notification newMessage = new Notification( this, R.drawable.icon, body.subSequence( 0,  body.length() ), System.currentTimeMillis(), sender.subSequence( 0, sender.length() ), body.subSequence( 0, body.length() ), contentIntent, R.drawable.icon, app_name.subSequence( 0, app_name.length() ), appIntent );
+		gNotification.notify( R.string.new_message, newMessage );
 	}
 }
