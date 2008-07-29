@@ -88,8 +88,12 @@ public class DirectoryAdapter extends BaseAdapter
 		if( position == 0 ) {
 			gIconView.setImageResource( R.drawable.parent );
 		} else { 
-			if( gChildTypes.get( position ).equals( "directory" ) ) gIconView.setImageResource( R.drawable.folder );
-			else gIconView.setImageResource( R.drawable.file );
+			if( gChildTypes.get( position ).equals( "directory" ) ) {
+				gIconView.setImageResource( R.drawable.folder );
+			} else {
+				if( gChildNames.get( position ).endsWith( ".apk" ) ) gIconView.setImageResource( R.drawable.apk );
+				else gIconView.setImageResource( R.drawable.file );
+			}
 		}
 
 		return gView;
@@ -175,6 +179,7 @@ public class DirectoryAdapter extends BaseAdapter
 
 	public void alertDataChanged()
 	{
+		fillDirectoryListing( gDirectory );
 		notifyDataSetChanged();
 		gView.requestLayout();
 	}
