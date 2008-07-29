@@ -27,17 +27,23 @@ package com.androidnerds.tools.Glance;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.Menu.Item;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.OnPopulateContextMenuListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.ContextMenuInfo;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import java.io.*;
 
 /** This is a really simple elementary application that displays directories and files on the Android system. **/
 /** The application menu allows for creating new files and folders. **/
@@ -49,6 +55,7 @@ public class Glance extends ListActivity
 
 	private static final int NEW_FOLDER_ID = Menu.FIRST;
 	private static final int NEW_FILE_ID = Menu.FIRST + 1;
+	private static final int ABOUT_ID = Menu.FIRST + 2;
 	private static final int COPY_ACTION = 0;
 	private static final int CUT_ACTION = 1;
 	private static final int PASTE_ACTION = 2;
@@ -60,7 +67,8 @@ public class Glance extends ListActivity
 	{
 		super.onCreate( icicle );
 		setContentView( R.layout.main );
-		
+		Surface gSurface = new Surface();
+	
 		gAdapter = new DirectoryAdapter( this );
 		setListAdapter( gAdapter );
 
@@ -96,7 +104,6 @@ public class Glance extends ListActivity
 		if( gAdapter.getDirectoryName( ).equals( "/" ) ) directoryName = "";
 		else directoryName = gAdapter.getDirectoryName();
 
-		//use a switch statement to see what option was selected.
 		if( item.getTitle().equals( "Copy" ) )
 			gFileManager.addToClipboard( directoryName + "/" + gAdapter.getObject( gMenuInfo.position ), "copy" );
 		else if( item.getTitle().equals( "Cut" )  )
@@ -119,6 +126,7 @@ public class Glance extends ListActivity
 		//TODO: make the icons have the asterisk that means 'new'
 		menu.add( 0, NEW_FOLDER_ID, "New Folder", R.drawable.folder );
 		menu.add( 0, NEW_FILE_ID, "New File", R.drawable.file );
+		menu.add( 0, ABOUT_ID, "About", R.drawable.info );
 		return true;
 	}
 
@@ -127,12 +135,16 @@ public class Glance extends ListActivity
 	{
 		switch( item.getId() ) {
 			case NEW_FOLDER_ID:
-				gFileManager.createNewDirectory( gAdapter.getDirectoryName() );
+				gFileManager.createNewDirectory( gAdapter.getDirectoryName(), gAdapter );
 				break;
 			case NEW_FILE_ID:
-				gFileManager.createNewFile( gAdapter.getDirectoryName() );
+				gFileManager.createNewFile( gAdapter.getDirectoryName(), gAdapter );
+				break;
+			case ABOUT_ID:
+				Toast.makeText( this, "Version 0.0.1\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
 				break;
 		}
+
 		return super.onOptionsItemSelected( item );
 	}
 

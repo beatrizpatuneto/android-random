@@ -52,7 +52,7 @@ public class FileManager
 		gCtx = ctx;
 	}
 
-	public boolean createNewDirectory( String path )
+	public boolean createNewDirectory( String path, final DirectoryAdapter adapter )
 	{
 		gPath  = path;
 		Log.d( "FileManager", "Creating new directory in.... " + path );
@@ -65,13 +65,14 @@ public class FileManager
 			public void onClick( View v )
 			{
 				makeDirectory( gPath );
+				adapter.alertDataChanged();
 			}
 		} );
 		gDialog.show();
 		return true;
 	}
 	
-	public boolean createNewFile( String path )
+	public boolean createNewFile( String path, final DirectoryAdapter adapter )
 	{
 		gPath  = path;
 		Log.d( "FileManager", "Creating new file in.... " + path );
@@ -84,6 +85,7 @@ public class FileManager
 			public void onClick( View v )
 			{
 				createFile( gPath );
+				adapter.alertDataChanged();
 			}
 		} );
 		gDialog.show();
@@ -119,7 +121,7 @@ public class FileManager
 	public boolean makeDirectory( String path )
 	{
 		try {
-			//gDialog.close();
+			this.closeDialog();
 			EditText newName = ( EditText )gDialog.findViewById( R.id.gNewItemName );
 			Editable textItem = newName.getText();
 			File newFile = new File( path + "/" + textItem.toString() );
@@ -129,13 +131,14 @@ public class FileManager
 		} catch( Exception e ) {
 			Log.d( "FileIO", "issue creating new directory" );
 		}
+
 		return true;
 	}
 
 	public boolean createFile( String path )
 	{
 		try {
-			//gDialog.close();
+			this.closeDialog();
 			EditText newName = ( EditText )gDialog.findViewById( R.id.gNewItemName );
 			Editable textItem = newName.getText();
 			File newFile = new File( path + "/" + textItem.toString() );
@@ -145,6 +148,7 @@ public class FileManager
 		} catch( IOException e ) {
 			Log.d( "FileIO", "issue creating new file" );
 		}
+
 		return true;
 	}
 
@@ -174,7 +178,9 @@ public class FileManager
 			FileInputStream src = new FileInputStream( item );
 			BufferedReader reader = new BufferedReader( new InputStreamReader( src ), 8092 );
 			File destFile = new File( dest + "/" + item.substring( item.lastIndexOf( "/" ) ) );
+			if( destFile.exists() ) destFile.renameTo( new File( dest + "/" + item.substring( item.lastIndexOf( "/" ) ) + ".copy" ) );
 			destFile.createNewFile();
+
 			FileOutputStream destStream = new FileOutputStream( destFile );
 
 			int piece;
@@ -220,5 +226,10 @@ public class FileManager
 	public void checkClipboard()
 	{
 		Log.d( "FileIO", "Clipboard contents: " + gClipboard.toString() );
+	}
+
+	public void closeDialog()
+	{
+		gDialog.dismiss();
 	}
 }
