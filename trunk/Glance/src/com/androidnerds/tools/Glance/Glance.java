@@ -27,6 +27,7 @@ package com.androidnerds.tools.Glance;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.os.Bundle;
@@ -112,6 +113,8 @@ public class Glance extends ListActivity
 			gFileManager.pasteFromClipboard( directoryName + "/" + gAdapter.getObject( gMenuInfo.position ) );
 		else if( item.getTitle().equals( "Delete" ) )
 			gFileManager.removeFile( directoryName + "/" + gAdapter.getObject( gMenuInfo.position ) );
+		else if( item.getTitle().equals( "Open With Scribble" ) )
+			runScribbleWithFile( directoryName + "/" + gAdapter.getObject( gMenuInfo.position ) );
 		else
 			Log.d( "ContextMenu", "Hm, you should have chosen an option here." );
 
@@ -160,11 +163,20 @@ public class Glance extends ListActivity
             					AdapterView.ContextMenuInfo mi = (AdapterView.ContextMenuInfo) menuInfo;
 						String gItem = gAdapter.getDirectoryName() + "/" + gAdapter.getObject( mi.position );
 						if( gItem.endsWith( ".apk" ) ) menu.add( 0, 0, "Install" );
+						menu.add( 0, 0, "Open With Scribble" );
 						menu.add( 0, 0, "Copy" );
 						menu.add( 0, 0, "Cut" );
 						menu.add( 0, 0, "Paste" );
 						menu.add( 0, 0, "Delete" );
           				}
 		});
+	}
+
+	public void runScribbleWithFile( String filename )
+	{
+		Intent subAct = new Intent();
+		subAct.setClassName( "com.androidnerds.tools.Scribble", "com.androidnerds.tools.Scribble.Scribble" );
+		subAct.putExtra( "filename", filename );
+		startActivity( subAct );
 	}
 }
