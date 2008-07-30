@@ -120,4 +120,16 @@ public class MessagesDbAdapter
 		return result;
 	}
 
+	public Cursor fetchUniqueUsers()
+	{
+		Cursor result = gDb.rawQuery( "SELECT _id, sender, message, message_time, state, direction FROM an_messages GROUP BY sender ORDER BY _id DESC", null );
+		return result;
+	}
+
+	public Cursor fetchMessagesFromSender( String sender )
+	{
+		Cursor result = gDb.rawQuery( "SELECT _id, sender, message, message_time, state, direction FROM an_messages WHERE sender = '" + sender + "' ORDER BY _id DESC", null );
+		return result;
+	}
+
 }

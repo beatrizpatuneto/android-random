@@ -25,16 +25,82 @@
  */
 package com.androidnerds.tools.Messages;
 
-import android.app.Activity;
+import android.app.ListActivity;
+import android.app.NotificationManager;
+import android.content.Intent;
 import android.os.Bundle;
+import android.telephony.gsm.SmsManager;
+import android.view.Menu;
+import android.view.Menu.Item;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-public class Messages extends Activity
+import java.io.*;
+
+public class Messages extends ListActivity
 {
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle icicle)
-    {
-        super.onCreate(icicle);
-        setContentView(R.layout.main);
-    }
+	private MessageViewAdapter gViewAdapter;
+	private NotificationManager gNotification;
+	private static int ACTIVITY_CREATE = 0;
+	private static final int NEW_MESSAGE_ID = Menu.FIRST;
+	private static final int ABOUT_ID = Menu.FIRST + 1;
+	
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle icicle)
+	{
+		gNotification = ( NotificationManager )getSystemService( NOTIFICATION_SERVICE );
+		gNotification.cancel( R.string.new_message );
+
+        	super.onCreate(icicle);
+        	setContentView(R.layout.main);
+
+		gViewAdapter = new MessageViewAdapter( this );
+		setListAdapter( gViewAdapter );
+
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu( Menu menu )
+	{
+		super.onCreateOptionsMenu( menu );
+		//TODO: make the icons have the asterisk that means 'new'
+		menu.add( 0, NEW_MESSAGE_ID, "New Message", R.drawable.icon );
+		menu.add( 0, ABOUT_ID, "About", R.drawable.info );
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected( Menu.Item item )
+	{
+		switch( item.getId() ) {
+			case NEW_MESSAGE_ID:
+				sendNewMessage();
+				break;
+			case ABOUT_ID:
+				Toast.makeText( this, "Version 0.0.1\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
+				break;
+		}
+
+		return super.onOptionsItemSelected( item );
+	}
+
+	@Override
+	protected void onListItemClick( ListView l, View v, int position, long id ) 
+	{
+		super.onListItemClick( l, v, position, id );
+		
+		TextView gSender = ( TextView )v.findViewById( R.id.gSender );
+		Intent subAct = new Intent( this, Conversations.class );
+		subAct.putExtra( "sender", gSender.getText().toString() );
+		startSubActivity( subAct, ACTIVITY_CREATE );
+	}
+
+	public void sendNewMessage()
+	{
+		SmsManager manager = SmsManager.getDefault();
+		manager.sendTextMessage( "9177033050", null, "I love you!", null, null, null );
+	}
 }
