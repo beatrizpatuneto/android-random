@@ -26,7 +26,10 @@
 package com.androidnerds.tools.Scribble;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
@@ -95,7 +98,7 @@ public class Scribble extends Activity
 				promptSaveDialog();
 				break;
 			case ABOUT_ID:
-				Toast.makeText( this, "Version 0.0.05\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
+				Toast.makeText( this, "Version 0.0.07\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
 				break;
 		}
 
@@ -170,13 +173,38 @@ public class Scribble extends Activity
 		EditText filenameField = ( EditText )gDialog.findViewById( R.id.gNewFileName );
 		String filename = filenameField.getText().toString();
 		File newfile = new File( filename );
-		if( !newfile.canWrite() ) Toast.makeText( this, "No write access to " + filename + ".", Toast.LENGTH_LONG ).show();
-		if( newfile.exists() ) {
-			//oh shit!
+		if( !newfile.canWrite() ) {
+			Toast.makeText( this, "No write access to " + filename + ".", Toast.LENGTH_LONG ).show();
+			gDialog.dismiss();
+			return;
 		}
-
+		
 		gFile = newfile;
+
+		if( newfile.exists() ) {
+			//alert the masses, make sure this file is cool to overwrite!
+			new AlertDialog.Builder( this )
+                        .setTitle(R.string.alertTitle)
+                        .setPositiveButton( R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick( DialogInterface dialog, int whichButton ) {
+
+				gDialog.dismiss();
+                                writeFileToDisk();
+                            }
+                        })
+                        .setNegativeButton( R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick( DialogInterface dialog, int whichButton ) {
+
+                                cancelOperation();
+                            }
+                        })
+                        .show();
+            	}
+	}
+
+	public void cancelOperation()
+	{
 		gDialog.dismiss();
-		writeFileToDisk();
+		return;
 	}
 }

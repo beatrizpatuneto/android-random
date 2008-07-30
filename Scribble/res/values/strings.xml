@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Scribble</string>
+    <string name="alertTitle">Are you sure you want to overwrite this file?</string>
+    <string name="ok">ok</string>
+    <string name="cancel">cancel</string>
 </resources>
