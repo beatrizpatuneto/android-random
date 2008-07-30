@@ -57,4 +57,9 @@ public class Conversations extends ListActivity
 		setListAdapter( gViewAdapter );
 
 	}
+
+	public void markMessageAsRead( String sender )
+	{
+
+	}
 }
