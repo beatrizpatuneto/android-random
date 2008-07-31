@@ -30,6 +30,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
@@ -57,6 +59,8 @@ public class Scribble extends Activity
 	private String gFilename = new String();
 	private String gFileContents;
 	private Dialog gDialog;
+	private SharedPreferences gPrefs;
+	private String gDirectory;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -71,9 +75,40 @@ public class Scribble extends Activity
 		if( extras != null ) {
 			gFilename = extras.getString( "filename" );
 		}
-
+		
+		gPrefs = getPreferences( MODE_PRIVATE );
+		gDirectory = gPrefs.getString( "directory", "/" );
 		//first thing to check is see if the file is writable. If not alert the user this is read only.
 		checkFilePermissions();
+	}
+
+	protected void onPause()
+	{
+		super.onPause();
+
+		if( gFilename.equals( "" ) ) {
+			EditText fileContents = ( EditText )findViewById( R.id.gDocumentView );
+			String contents = fileContents.getText().toString();
+
+			//save the contents of the file in the persistent state.
+			SharedPreferences.Editor ed = gPrefs.edit();
+			ed.putString( "filecontents", contents );
+			ed.commit();
+		}
+	}
+
+	protected void onResume()
+	{
+		super.onResume();
+		
+		if( gFilename.equals( "" ) ) {
+			//pull the contents of the file from persistent state.
+			gFileContents = gPrefs.getString( "filecontents", " " );
+		
+			//setup the EditText view with the persistent contents.
+			EditText contents = ( EditText )findViewById( R.id.gDocumentView );
+			contents.setText( gFileContents );
+		}
 	}
 
 	@Override
@@ -98,7 +133,7 @@ public class Scribble extends Activity
 				promptSaveDialog();
 				break;
 			case ABOUT_ID:
-				Toast.makeText( this, "Version 0.0.07\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
+				Toast.makeText( this, "Version 0.0.1\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
 				break;
 		}
 
@@ -145,6 +180,12 @@ public class Scribble extends Activity
 			
 			writer.close();
 			Toast.makeText( this, "File has been saved.", Toast.LENGTH_LONG ).show();
+
+			//for the sake of sanity let's store the previous directory as a starting point for the file.
+			String directory = gFilename.substring( 0, gFilename.lastIndexOf( "/" ) );
+			SharedPreferences.Editor ed = gPrefs.edit();
+			ed.putString( "lastDirectory",  directory );
+			ed.commit();
 		} catch( IOException e ) {
 			Log.d( "Scribble IO", "Problem writing the file to disk" );
 		}
@@ -156,6 +197,9 @@ public class Scribble extends Activity
 		gDialog.setContentView( R.layout.savedialog );
 		gDialog.setTitle( "Save As... ( Enter full path )" );
 		
+		EditText filenameField = ( EditText )gDialog.findViewById( R.id.gNewFileName );
+		filenameField.setText( gDirectory );
+
 		final Button gCreateButton = ( Button )gDialog.findViewById( R.id.gCreateButton );
 		gCreateButton.setOnClickListener( new Button.OnClickListener()  
 		{
