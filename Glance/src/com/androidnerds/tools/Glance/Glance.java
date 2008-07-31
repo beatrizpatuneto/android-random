@@ -144,7 +144,7 @@ public class Glance extends ListActivity
 				gFileManager.createNewFile( gAdapter.getDirectoryName(), gAdapter );
 				break;
 			case ABOUT_ID:
-				Toast.makeText( this, "Version 0.0.1\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
+				Toast.makeText( this, "Version 0.0.2\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
 				break;
 		}
 
