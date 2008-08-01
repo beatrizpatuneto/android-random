@@ -27,8 +27,13 @@ package com.androidnerds.tools.Messages;
 
 import android.app.ListActivity;
 import android.app.NotificationManager;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.Contacts;
+import android.provider.Contacts.People;
+import android.util.Log;
 import android.view.Menu;
 import android.view.Menu.Item;
 import android.view.View;
@@ -92,8 +97,23 @@ public class Messages extends ListActivity
 		super.onListItemClick( l, v, position, id );
 		
 		TextView gSender = ( TextView )v.findViewById( R.id.gSender );
+		String sender = gSender.getText().toString();
+
+		//See if the sender is one of the contacts.
+		Cursor c = getContentResolver().query( People.CONTENT_URI, null, null, null, null );
+		while( c.next() ) {
+			//check to find the person in the cursor and set their phone number as such.
+			Log.d( "Contacts SMS", "Searching....." + c.getString( 4 ) );
+			if( sender.equals( c.getString( 4 ) ) ) {
+				Log.d( "Contacts SMS", "Found user: " + c.getString( 3 ) );
+				sender = c.getString( 3 );
+				break;
+			}
+		}
+		c.close();
+		
 		Intent subAct = new Intent( this, Conversations.class );
-		subAct.putExtra( "sender", gSender.getText().toString() );
+		subAct.putExtra( "sender", sender );
 		startSubActivity( subAct, ACTIVITY_CREATE );
 	}
 
