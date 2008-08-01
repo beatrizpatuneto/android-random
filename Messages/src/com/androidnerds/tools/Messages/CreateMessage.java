@@ -47,7 +47,6 @@ import android.widget.Toast;
 public class CreateMessage extends Activity
 {
 
-	private String[] contactNames;
 	@Override
 	public void onCreate( Bundle icicle )
 	{
@@ -162,6 +161,7 @@ public class CreateMessage extends Activity
 				break;
 			}
 		}
+		c.close();
 
 		if( !foundUser ) phonenumber = person;
 		
@@ -171,6 +171,13 @@ public class CreateMessage extends Activity
 		SmsManager manager = SmsManager.getDefault();
 		manager.sendTextMessage( phonenumber, null, message, null, null, null );
 
+		//save the sent message for the conversation.
+		MessagesDbAdapter gDbAdapter = new MessagesDbAdapter( this );
+		gDbAdapter.open();
+
+		gDbAdapter.createMessage( phonenumber, message, 1, 1, System.currentTimeMillis() );
+		gDbAdapter.close();
+ 
 		Toast.makeText( this, "Text message has been sent.", Toast.LENGTH_LONG ).show();
 		finish();
 	}

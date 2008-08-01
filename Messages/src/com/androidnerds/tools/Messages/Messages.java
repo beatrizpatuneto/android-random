@@ -66,7 +66,7 @@ public class Messages extends ListActivity
 	{
 		super.onCreateOptionsMenu( menu );
 		//TODO: make the icons have the asterisk that means 'new'
-		menu.add( 0, NEW_MESSAGE_ID, "New Message", R.drawable.icon );
+		menu.add( 0, NEW_MESSAGE_ID, "New Message", R.drawable.newmessage );
 		menu.add( 0, ABOUT_ID, "About", R.drawable.info );
 		return true;
 	}
@@ -99,8 +99,6 @@ public class Messages extends ListActivity
 
 	public void sendNewMessage()
 	{
-		//SmsManager manager = SmsManager.getDefault();
-		//manager.sendTextMessage( "9177033050", null, "I love you!", null, null, null );
 		Intent subAct = new Intent( this, CreateMessage.class );
 		startSubActivity( subAct, ACTIVITY_CREATE );
 	}
