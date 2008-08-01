@@ -79,7 +79,7 @@ public class Messages extends ListActivity
 				sendNewMessage();
 				break;
 			case ABOUT_ID:
-				Toast.makeText( this, "Version 0.0.013\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
+				Toast.makeText( this, "Version 0.0.014\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
 				break;
 		}
 
