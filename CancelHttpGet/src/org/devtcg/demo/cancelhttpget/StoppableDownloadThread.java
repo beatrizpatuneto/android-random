@@ -155,7 +155,7 @@ public class StoppableDownloadThread extends Thread
 			}
 
 			/* Close the socket (if it's still open) and cleanup. */
-			cli.shutdown();
+			cli.getConnectionManager().shutdown();
 
 			if (mStopped == false)
 				mHandler.sendFinished();
