@@ -25,8 +25,11 @@
  */
 package com.androidnerds.tools.Messages;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.provider.Contacts;
+import android.provider.Contacts.People;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,7 +97,29 @@ public class ConversationViewAdapter extends BaseAdapter
 
 			Log.d( "Messages", "Sender is .. " + sender );
 			ImageView statusIcon = ( ImageView )view.findViewById( R.id.gStatusIcon );
-			statusIcon.setImageResource( R.drawable.openedmessage );
+			if( direction == 1 ) {
+				statusIcon.setImageResource( R.drawable.sentmessage );
+			} else {
+				if( status == 0 ) {
+					statusIcon.setImageResource( R.drawable.newmessage );
+				} else {
+					statusIcon.setImageResource( R.drawable.openedmessage );
+				}
+			}
+
+			//See if the sender is one of the contacts.
+			Cursor c = gCtx.getContentResolver().query( People.CONTENT_URI, null, null, null, null );
+			while( c.next() ) {
+				//check to find the person in the cursor and set their phone number as such.
+				if( sender.equals( c.getString( 4 ) ) ) {
+					Log.d( "Contacts SMS", "Found user: " + c.getString( 3 ) );
+					sender = c.getString( 3 );
+					break;
+				}
+			}
+			c.close();
+
+			if( direction == 1 ) sender = "Me";
 
 			TextView gSenderView = ( TextView )view.findViewById( R.id.gSender );
 			Log.d( "Messages", "Setting sender as: " + sender );
