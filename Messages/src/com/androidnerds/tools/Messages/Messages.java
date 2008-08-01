@@ -29,7 +29,6 @@ import android.app.ListActivity;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.telephony.gsm.SmsManager;
 import android.view.Menu;
 import android.view.Menu.Item;
 import android.view.View;

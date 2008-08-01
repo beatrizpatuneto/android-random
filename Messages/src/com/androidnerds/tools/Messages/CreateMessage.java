@@ -31,14 +31,18 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.Contacts;
+import android.provider.Contacts.People;
+import android.telephony.gsm.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
+import android.widget.EditText;
 import android.widget.Filterable;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class CreateMessage extends Activity
 {
@@ -65,7 +69,7 @@ public class CreateMessage extends Activity
 		{
 			public void onClick( View v )
 			{
-				//do something.
+				sendMessage();
 			}
 		} );
 
@@ -138,11 +142,36 @@ public class CreateMessage extends Activity
 
 	private void sendMessage()
 	{
-		//SmsManager manager = SmsManager.getDefault();
-		//manager.sendTextMessage( "9177033050", null, "I love you!", null, null, null );
+		//TODO: save the sent message into the sqlite database so its part of the conversation with that person.
 
 		//its important to set the new message in the database so we can track it in the conversation.
 		//we put the sender as the person who receives it and set the direction column to denote its outgoing.
+		Cursor c = getContentResolver().query( People.CONTENT_URI, null, null, null, null );
+
+		AutoCompleteTextView gPerson = ( AutoCompleteTextView )findViewById( R.id.contactPerson );
+		String person = gPerson.getText().toString();
+		String phonenumber = person;
+		boolean foundUser = false;
+
+		while( c.next() ) {
+			//check to find the person in the cursor and set their phone number as such.
+			if( person.equals( c.getString( 4 ) ) ) {
+				Log.d( "Contacts SMS", "Found user: " + person + " " + c.getString( 3 ) );
+				phonenumber = c.getString( 3 );
+				foundUser = true;
+				break;
+			}
+		}
+
+		if( !foundUser ) phonenumber = person;
 		
+		EditText gMessage = ( EditText )findViewById( R.id.textMessage );
+		String message = gMessage.getText().toString();
+
+		SmsManager manager = SmsManager.getDefault();
+		manager.sendTextMessage( phonenumber, null, message, null, null, null );
+
+		Toast.makeText( this, "Text message has been sent.", Toast.LENGTH_LONG ).show();
+		finish();
 	}
 }
