@@ -2,5 +2,6 @@
 <resources>
     <string name="app_name">Messages</string>
     <string name="new_message">New Text Message</string>
-    <string name="conversations">Conversations</string>
+    <string name="conversations">Conversation</string>
+    <string name="createmessage">Create New Message</string>
 </resources>

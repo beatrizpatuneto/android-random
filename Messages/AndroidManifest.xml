@@ -12,6 +12,7 @@
 	</receiver>
 	
 	<activity android:name=".Conversations" android:label="@string/conversations"></activity>
+	<activity android:name=".CreateMessage" android:label="@string/createmessage"></activity>
 	<activity android:name=".Messages" android:label="Messages" android:icon="@drawable/icon">
 		<intent-filter>
                 	<action android:name="android.intent.action.MAIN" />
