@@ -80,7 +80,7 @@ public class Messages extends ListActivity
 				sendNewMessage();
 				break;
 			case ABOUT_ID:
-				Toast.makeText( this, "Version 0.0.1\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
+				Toast.makeText( this, "Version 0.0.012\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
 				break;
 		}
 
@@ -100,7 +100,9 @@ public class Messages extends ListActivity
 
 	public void sendNewMessage()
 	{
-		SmsManager manager = SmsManager.getDefault();
-		manager.sendTextMessage( "9177033050", null, "I love you!", null, null, null );
+		//SmsManager manager = SmsManager.getDefault();
+		//manager.sendTextMessage( "9177033050", null, "I love you!", null, null, null );
+		Intent subAct = new Intent( this, CreateMessage.class );
+		startSubActivity( subAct, ACTIVITY_CREATE );
 	}
 }

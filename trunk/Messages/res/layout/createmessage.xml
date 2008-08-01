@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	        android:orientation="vertical"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:padding="5px">
+
+	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+		  android:layout_width="fill_parent"
+		  android:layout_height="wrap_content"
+		  android:padding="5px"
+		  android:text="To:"
+	/>
+	
+	<AutoCompleteTextView xmlns:android="http://schemas.android.com/apk/res/android"
+			      android:id="@+id/contactPerson"
+			      android:layout_width="fill_parent"
+			      android:layout_height="wrap_content"
+			      android:minHeight="10px"
+			      android:padding="5px"
+			      android:hint="Person"
+	/>
+	
+	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:padding="5px"
+		android:text="Message:"
+	/>
+	
+	<EditText xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:padding="5px"
+		android:hint="Type message here..."
+		android:lines="3"
+		android:gravity="top"
+	/>
+	
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		 android:layout_width="wrap_content"
+		 android:layout_height="wrap_content"
+		 android:orientation="horizontal"
+		 android:padding="5px"
+		 android:layout_gravity="right"
+	>
+		
+		<Button xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/createSendBtn"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Send"
+		/>
+	
+		<Button xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/createCancelBtn"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Cancel"
+		/>
+	
+	</LinearLayout>
+</LinearLayout>

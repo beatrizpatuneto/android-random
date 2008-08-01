@@ -94,7 +94,7 @@ public class ConversationViewAdapter extends BaseAdapter
 
 			Log.d( "Messages", "Sender is .. " + sender );
 			ImageView statusIcon = ( ImageView )view.findViewById( R.id.gStatusIcon );
-			statusIcon.setImageResource( R.drawable.icon );
+			statusIcon.setImageResource( R.drawable.openedmessage );
 
 			TextView gSenderView = ( TextView )view.findViewById( R.id.gSender );
 			Log.d( "Messages", "Setting sender as: " + sender );
