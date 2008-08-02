@@ -95,18 +95,6 @@ public class ConversationViewAdapter extends BaseAdapter
 			int status = item.getInt( 3 );
 			int direction = item.getInt( 4 );
 
-			Log.d( "Messages", "Sender is .. " + sender );
-			ImageView statusIcon = ( ImageView )view.findViewById( R.id.gStatusIcon );
-			if( direction == 1 ) {
-				statusIcon.setImageResource( R.drawable.sentmessage );
-			} else {
-				if( status == 0 ) {
-					statusIcon.setImageResource( R.drawable.newmessage );
-				} else {
-					statusIcon.setImageResource( R.drawable.openedmessage );
-				}
-			}
-
 			//See if the sender is one of the contacts.
 			Cursor c = gCtx.getContentResolver().query( People.CONTENT_URI, null, null, null, null );
 			while( c.next() ) {

@@ -4,17 +4,10 @@
 		android:layout_height="wrap_content"
 		android:padding="10px">
 	
-	<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-		   android:id="@+id/gStatusIcon"
-		   android:layout_width="32px"
-		   android:layout_height="32px"
-		   />
-	
 	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
 		  android:id="@+id/gSender"
 		  android:layout_width="wrap_content"
 		  android:layout_height="wrap_content"
-		  android:layout_toRight="@id/gStatusIcon"
 		  android:padding="5px"
 		  />
 	
@@ -22,7 +15,6 @@
 		  android:id="@+id/gMessage"
 		  android:layout_width="wrap_content"
 		  android:layout_height="wrap_content"
-		  android:layout_toRight="@id/gStatusIcon"
 		  android:layout_below="@id/gSender"
 		  android:padding="5px"
 		  />
@@ -31,8 +23,8 @@
 		  android:id="@+id/gTimestamp"
 		  android:layout_width="wrap_content"
 		  android:layout_height="wrap_content"
-		  android:layout_toRight="@id/gSender"
 		  android:padding="5px"
+		  android:layout_gravity="right"
 		  />
 	
 </RelativeLayout>
