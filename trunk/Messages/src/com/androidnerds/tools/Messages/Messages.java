@@ -34,9 +34,13 @@ import android.os.Bundle;
 import android.provider.Contacts;
 import android.provider.Contacts.People;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.Menu.Item;
 import android.view.View;
+import android.view.View.OnPopulateContextMenuListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.ContextMenuInfo;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,21 +53,26 @@ public class Messages extends ListActivity
 	private NotificationManager gNotification;
 	private static int ACTIVITY_CREATE = 0;
 	private static final int NEW_MESSAGE_ID = Menu.FIRST;
-	private static final int ABOUT_ID = Menu.FIRST + 1;
+	private static final int DELETE_MESSAGES_ID = Menu.FIRST + 1;
+	private static final int ABOUT_ID = Menu.FIRST + 2;
 	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle)
 	{
+        	super.onCreate(icicle);
+        	setContentView(R.layout.main);
+		determineContextMenu();
+	}
+
+	protected void onResume()
+	{
+		super.onResume();
 		gNotification = ( NotificationManager )getSystemService( NOTIFICATION_SERVICE );
 		gNotification.cancel( R.string.new_message );
 
-        	super.onCreate(icicle);
-        	setContentView(R.layout.main);
-
 		gViewAdapter = new MessageViewAdapter( this );
 		setListAdapter( gViewAdapter );
-
 	}
 
 	@Override
@@ -71,7 +80,8 @@ public class Messages extends ListActivity
 	{
 		super.onCreateOptionsMenu( menu );
 		//TODO: make the icons have the asterisk that means 'new'
-		menu.add( 0, NEW_MESSAGE_ID, "New Message", R.drawable.newmessage );
+		menu.add( 0, NEW_MESSAGE_ID, "New Message", R.drawable.newconvo );
+		menu.add( 0, DELETE_MESSAGES_ID, "Delete Thread", R.drawable.deleteconvo );
 		menu.add( 0, ABOUT_ID, "About", R.drawable.info );
 		return true;
 	}
@@ -84,7 +94,7 @@ public class Messages extends ListActivity
 				sendNewMessage();
 				break;
 			case ABOUT_ID:
-				Toast.makeText( this, "Version 0.0.014\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
+				Toast.makeText( this, "Version 0.0.016\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
 				break;
 		}
 
@@ -112,14 +122,62 @@ public class Messages extends ListActivity
 		}
 		c.close();
 		
-		Intent subAct = new Intent( this, Conversations.class );
-		subAct.putExtra( "sender", sender );
-		startSubActivity( subAct, ACTIVITY_CREATE );
+		loadDialog( sender );
+	}
+
+	public void determineContextMenu()
+	{
+		View gListView = getListView();
+		gListView.setOnPopulateContextMenuListener(
+            			new View.OnPopulateContextMenuListener() {
+					@Override
+          				public void onPopulateContextMenu(ContextMenu menu, View view, Object menuInfo) 
+					{
+            					AdapterView.ContextMenuInfo mi = (AdapterView.ContextMenuInfo) menuInfo;
+						menu.add( 0, 0, "Open" );
+						menu.add( 0, 0, "Mark as Read" );
+						menu.add( 0, 0, "Delete Thread" );
+          				}
+		});
+	}
+
+	@Override
+    	public boolean onContextItemSelected(Item item) 
+	{ 
+		AdapterView.ContextMenuInfo gMenuInfo = ( AdapterView.ContextMenuInfo )item.getMenuInfo();
+		
+		Log.d( "Messages", "Trying to access: " + gViewAdapter.getSender( gMenuInfo.position ) );
+		if( item.getTitle().equals( "Open" ) )
+			loadDialog( gViewAdapter.getSender( gMenuInfo.position ) );
+		else if( item.getTitle().equals( "Delete Thread" )  )
+			deleteThread( gViewAdapter.getSender( gMenuInfo.position ) );
+		else
+			Log.d( "ContextMenu", "Hm, you should have chosen an option here." );
+
+		return false;
 	}
 
 	public void sendNewMessage()
 	{
 		Intent subAct = new Intent( this, CreateMessage.class );
 		startSubActivity( subAct, ACTIVITY_CREATE );
+	}
+
+	public void loadDialog( String sender )
+	{
+		Intent subAct = new Intent( this, Conversations.class );
+		subAct.putExtra( "sender", sender );
+		startSubActivity( subAct, ACTIVITY_CREATE );
+	}
+
+	public void deleteThread( String sender )
+	{
+		MessagesDbAdapter gDb = new MessagesDbAdapter( this );
+		gDb.open();
+		gDb.deleteDialog( sender );
+		gDb.close();
+		
+		Log.d( "MessagesDB", "Hm, the record should be deleted by now..." );
+		gViewAdapter.alertDataChanged();
 	}
 }

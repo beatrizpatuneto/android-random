@@ -108,23 +108,17 @@ public class ConversationViewAdapter extends BaseAdapter
 			}
 			c.close();
 
-			if( direction == 1 ) sender = "Me";
-
 			TextView gSenderView = ( TextView )view.findViewById( R.id.gSender );
+			if( direction == 1 ) {
+				sender = "Me";
+			}
+
 			Log.d( "Messages", "Setting sender as: " + sender );
 			gSenderView.setText( sender );
 
 			TextView gBodyView = ( TextView )view.findViewById( R.id.gMessage );
 			Log.d( "Messages", "Setting body as: " + body );
 			gBodyView.setText( body );
-
-			//do some date parsing.
-			java.util.Date gDate = new java.util.Date( timeMillis );
-			SimpleDateFormat gFormatter = new SimpleDateFormat( "MM/dd/yy h:m a" );
-
-			TextView gDateView = ( TextView )view.findViewById( R.id.gTimestamp );
-			Log.d( "Messages", "Setting date as: " + gFormatter.format( gDate ) );
-			gDateView.setText( gFormatter.format( gDate ) );
 		}
 
 		item.close();

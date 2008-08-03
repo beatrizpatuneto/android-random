@@ -29,6 +29,8 @@ import android.app.ListActivity;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.Menu.Item;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -39,22 +41,57 @@ public class Conversations extends ListActivity
 {
 	private ConversationViewAdapter gViewAdapter;
 	private NotificationManager gNotification;
+	private static int ACTIVITY_CREATE = 0;
+	private static final int REPLY_ID = Menu.FIRST;
+	String sender = "";
 
 	/** Called when the activity is first created. */
 	@Override
-	public void onCreate(Bundle icicle)
+	public void onCreate( Bundle icicle )
 	{
-        	super.onCreate(icicle);
-        	setContentView(R.layout.main);
+        	super.onCreate( icicle );
+        	setContentView( R.layout.main );
 
 		Bundle extras = getIntent().getExtras();
-		String sender = "";
+		
 		if( extras != null ) {
 			sender = extras.getString( "sender" );
 		}
+	}
 
+	protected void onResume()
+	{
+		super.onResume();
 		gViewAdapter = new ConversationViewAdapter( this, sender );
 		setListAdapter( gViewAdapter );
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu( Menu menu )
+	{
+		super.onCreateOptionsMenu( menu );
+		//TODO: make the icons have the asterisk that means 'new'
+		menu.add( 0, REPLY_ID, "Reply", R.drawable.replymessage );
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected( Menu.Item item )
+	{
+		switch( item.getId() ) {
+			case REPLY_ID:
+				replyToMessage();
+				break;
+		}
+
+		return super.onOptionsItemSelected( item );
+	}
+
+	public void replyToMessage()
+	{
+		Intent i = new Intent(this, CreateMessage.class);
+		i.putExtra( "contact", sender );
+    		startSubActivity(i, ACTIVITY_CREATE);
 
 	}
 

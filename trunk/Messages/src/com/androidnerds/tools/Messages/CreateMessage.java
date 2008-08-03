@@ -77,6 +77,13 @@ public class CreateMessage extends Activity
         	ContactListAdapter adapter = new ContactListAdapter( cursor, this );
 
         	AutoCompleteTextView textView = ( AutoCompleteTextView )findViewById( R.id.contactPerson );
+		
+		Bundle extras = getIntent().getExtras();
+	
+		if( extras != null ) {
+			textView.setText( extras.getString( "contact" ) );
+		}
+
 		textView.setThreshold( 1 );
         	textView.setAdapter( adapter );
 	}
