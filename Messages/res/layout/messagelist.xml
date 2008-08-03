@@ -1,38 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	      android:layout_width="fill_parent"
-	      android:layout_height="wrap_content"
+	      android:layout_height="fill_parent"
 	      android:padding="10px">
-	
-	<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-		   android:id="@+id/gStatusIcon"
-		   android:layout_width="32px"
-		   android:layout_height="32px"
-	/>
-	
-	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-		  android:id="@+id/gSender"
-		  android:layout_width="wrap_content"
-		  android:layout_height="wrap_content"
-		  android:layout_toRight="@id/gStatusIcon"
-		  android:padding="5px"
-	/>
-	
+	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		     android:id="@+id/table1"
+		     android:layout_width="wrap_content"
+		     android:layout_height="wrap_content"
+		     android:stretchColumns="1"
+		     android:padding="5px">
+		
+	<TableRow>
+		<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+			   android:id="@+id/gStatusIcon"
+			   android:layout_width="16px"
+			   android:layout_height="16px"
+			   android:layout_gravity="left"
+		/>
+		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+		 	 android:id="@+id/gSender"
+		  	android:layout_width="wrap_content"
+		  	android:layout_height="wrap_content"
+			android:paddingLeft="3px"
+			android:layout_toRight="@id/gStatusIcon"
+		/>
+		<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+			  android:id="@+id/gTimestamp"
+			  android:layout_gravity="right"
+			  android:layout_width="wrap_content"
+			  android:layout_height="wrap_content"
+			  android:layout_alignTop="@id/gSender"
+		/>
+	</TableRow>
+	</TableLayout>
+	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		     android:layout_width="wrap_content"
+		     android:layout_height="wrap_content"
+		     android:stretchColumns="1"
+		     android:padding="5px"
+		     android:layout_below="@id/table1">
+	<TableRow>
 	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
 		  android:id="@+id/gMessage"
-		  android:layout_width="wrap_content"
+		  android:layout_width="fill_parent"
 		  android:layout_height="wrap_content"
-		  android:layout_toRight="@id/gStatusIcon"
-		  android:layout_below="@id/gSender"
-		  android:padding="5px"
-	/>
-	
-	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-		  android:id="@+id/gTimestamp"
-		  android:layout_width="wrap_content"
-		  android:layout_height="wrap_content"
-		  android:layout_toRight="@id/gSender"
-		  android:padding="5px"
-	/>
-	
+		  android:paddingLeft="5px"
+		  android:singleLine="true"
+		/>
+</TableRow>
+</TableLayout>
 </RelativeLayout>

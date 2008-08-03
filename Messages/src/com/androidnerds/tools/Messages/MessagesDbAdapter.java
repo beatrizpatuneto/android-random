@@ -132,4 +132,9 @@ public class MessagesDbAdapter
 		return result;
 	}
 
+	public boolean deleteDialog( String sender )
+	{
+		return gDb.delete( DATABASE_TABLE, KEY_SENDER + "=" + sender, null ) > 0;
+	}
+
 }
