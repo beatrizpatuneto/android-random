@@ -49,7 +49,7 @@ public class Conversations extends ListActivity
 	private static int ACTIVITY_CREATE = 0;
 	private static final int REPLY_ID = Menu.FIRST;
 	String sender = "";
-
+	String senderName = "";
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate( Bundle icicle )
@@ -68,12 +68,13 @@ public class Conversations extends ListActivity
 				Log.d( "Contacts SMS", "Searching....." + c.getString( 3 ) );
 				if( sender.equals( c.getString( 3 ) ) ) {
 					Log.d( "Contacts SMS", "Found user: " + c.getString( 4 ) );
-					sender = c.getString( 4 );
+					senderName = c.getString( 4 );
 					break;
 				}
 			}
 			c.close();
-			setTitle( "Conversation with " + sender );
+			if( !senderName.equals( "" ) ) setTitle( "Conversation with " + senderName );
+			else setTitle( "Conversation with " + sender );
 		}
 	}
 
