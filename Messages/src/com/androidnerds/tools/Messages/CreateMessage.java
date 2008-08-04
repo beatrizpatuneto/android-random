@@ -29,6 +29,7 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Contacts;
 import android.provider.Contacts.People;
@@ -154,11 +155,21 @@ public class CreateMessage extends Activity
 		//we put the sender as the person who receives it and set the direction column to denote its outgoing.
 		Cursor c = getContentResolver().query( People.CONTENT_URI, null, null, null, null );
 
+		Uri lookup = android.provider.Contacts.People.CONTENT_URI;
+		
 		AutoCompleteTextView gPerson = ( AutoCompleteTextView )findViewById( R.id.contactPerson );
 		String person = gPerson.getText().toString();
 		String phonenumber = person;
 		boolean foundUser = false;
 
+		Cursor cur = managedQuery(lookup, null, android.provider.Contacts.PeopleColumns.NAME + "='" + person + "'", null);
+
+		while( cur.next() ) {
+			String phone = cur.getString( cur.getColumnIndex(android.provider.Contacts.PhonesColumns.NUMBER) );
+			Log.d( "CreateMessage", "The phone number for this contact is: " + phone );
+		}
+
+		cur.close();
 		while( c.next() ) {
 			//check to find the person in the cursor and set their phone number as such.
 			if( person.equals( c.getString( 4 ) ) ) {
