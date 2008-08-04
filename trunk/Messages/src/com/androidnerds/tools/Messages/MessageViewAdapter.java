@@ -100,7 +100,8 @@ public class MessageViewAdapter extends BaseAdapter
 	{
 		ViewInflate inflate = ViewInflate.from( gCtx );
 		View view = inflate.inflate( R.layout.messagelist, parent, false, null );
-		
+		gView = view;
+
 		MessagesDbAdapter gDb = new MessagesDbAdapter( gCtx );
 		gDb.open();
 

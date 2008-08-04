@@ -27,8 +27,13 @@ package com.androidnerds.tools.Messages;
 
 import android.app.ListActivity;
 import android.app.NotificationManager;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.Contacts;
+import android.provider.Contacts.People;
+import android.util.Log;
 import android.view.Menu;
 import android.view.Menu.Item;
 import android.view.View;
@@ -56,6 +61,19 @@ public class Conversations extends ListActivity
 		
 		if( extras != null ) {
 			sender = extras.getString( "sender" );
+
+			Cursor c = getContentResolver().query( People.CONTENT_URI, null, null, null, null );
+			while( c.next() ) {
+				//check to find the person in the cursor and set their phone number as such.
+				Log.d( "Contacts SMS", "Searching....." + c.getString( 3 ) );
+				if( sender.equals( c.getString( 4 ) ) ) {
+					Log.d( "Contacts SMS", "Found user: " + c.getString( 4 ) );
+					sender = c.getString( 4 );
+					break;
+				}
+			}
+			c.close();
+			setTitle( "Conversation with " + sender );
 		}
 	}
 
