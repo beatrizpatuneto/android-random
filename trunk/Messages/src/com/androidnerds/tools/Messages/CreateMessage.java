@@ -188,4 +188,5 @@ public class CreateMessage extends Activity
 		Toast.makeText( this, "Text message has been sent.", Toast.LENGTH_LONG ).show();
 		finish();
 	}
+
 }
