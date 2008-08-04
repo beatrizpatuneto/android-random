@@ -13,9 +13,11 @@
 	
 	<activity android:name=".Conversations" android:label="@string/conversations"></activity>
 	<activity android:name=".CreateMessage" android:label="@string/createmessage">
-		<intent-filter>
-			<action android:name="android.intent.action.SENDTO" android:scheme="sms" />
-			<data android:name=" vnd.android.cursor.item/sms" android:mimeType="vnd.android.cursor.item/sms-chat" />
+		<intent-filter android:priority="100">
+			<action android:name="android.intent.action.VIEW" />
+			<action android:name="android.intent.action.SENDTO" />
+			<category android:name="android.intent.category.DEFAULT" />
+			<data android:scheme="sms" />
 		</intent-filter>
 	</activity>
 	<activity android:name=".Messages" android:label="Messages" android:icon="@drawable/icon">
