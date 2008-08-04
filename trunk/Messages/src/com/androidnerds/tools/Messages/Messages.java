@@ -58,10 +58,10 @@ public class Messages extends ListActivity
 	
 	/** Called when the activity is first created. */
 	@Override
-	public void onCreate(Bundle icicle)
+	public void onCreate( Bundle icicle )
 	{
-        	super.onCreate(icicle);
-        	setContentView(R.layout.main);
+        	super.onCreate( icicle );
+        	setContentView( R.layout.main );
 		determineContextMenu();
 	}
 
@@ -94,7 +94,7 @@ public class Messages extends ListActivity
 				sendNewMessage();
 				break;
 			case ABOUT_ID:
-				Toast.makeText( this, "Version 0.0.020\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
+				Toast.makeText( this, "Version 0.0.021\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
 				break;
 		}
 
@@ -131,9 +131,9 @@ public class Messages extends ListActivity
 		gListView.setOnPopulateContextMenuListener(
             			new View.OnPopulateContextMenuListener() {
 					@Override
-          				public void onPopulateContextMenu(ContextMenu menu, View view, Object menuInfo) 
+          				public void onPopulateContextMenu( ContextMenu menu, View view, Object menuInfo ) 
 					{
-            					AdapterView.ContextMenuInfo mi = (AdapterView.ContextMenuInfo) menuInfo;
+            					AdapterView.ContextMenuInfo mi = ( AdapterView.ContextMenuInfo ) menuInfo;
 						menu.add( 0, 0, "Open" );
 						menu.add( 0, 0, "Mark as Read" );
 						menu.add( 0, 0, "Delete Thread" );
