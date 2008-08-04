@@ -66,7 +66,7 @@ public class Conversations extends ListActivity
 			while( c.next() ) {
 				//check to find the person in the cursor and set their phone number as such.
 				Log.d( "Contacts SMS", "Searching....." + c.getString( 3 ) );
-				if( sender.equals( c.getString( 4 ) ) ) {
+				if( sender.equals( c.getString( 3 ) ) ) {
 					Log.d( "Contacts SMS", "Found user: " + c.getString( 4 ) );
 					sender = c.getString( 4 );
 					break;
