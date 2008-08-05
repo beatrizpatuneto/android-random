@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.net.Uri;
 import android.provider.Contacts;
 import android.provider.Contacts.People;
 import android.util.AttributeSet;
