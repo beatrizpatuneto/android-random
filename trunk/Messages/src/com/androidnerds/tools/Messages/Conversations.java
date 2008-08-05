@@ -119,6 +119,13 @@ public class Conversations extends ListActivity
 
 	}
 
+	public void placeCallToSender( String sender )
+	{
+		Intent i = new Intent( Intent.CALL_ACTION );
+		i.setData( Uri.parse( "tel:" + sender ) );
+		startActivity( i );
+	}
+
 	public void markMessageAsRead( String sender )
 	{
 

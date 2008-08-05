@@ -30,9 +30,12 @@ import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.provider.Contacts;
 import android.provider.Contacts.People;
+import android.telephony.IPhone;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -131,6 +134,7 @@ public class Messages extends ListActivity
 					{
             					AdapterView.ContextMenuInfo mi = ( AdapterView.ContextMenuInfo ) menuInfo;
 						menu.add( 0, 0, "Open" );
+						menu.add( 0, 0, "Call" );
 						menu.add( 0, 0, "Delete Thread" );
           				}
 		});
@@ -144,6 +148,8 @@ public class Messages extends ListActivity
 		Log.d( "Messages", "Trying to access: " + gViewAdapter.getSender( gMenuInfo.position ) );
 		if( item.getTitle().equals( "Open" ) )
 			loadDialog( gViewAdapter.getSender( gMenuInfo.position ) );
+		else if( item.getTitle().equals( "Call" ) )
+			placeCallToSender( gViewAdapter.getSender( gMenuInfo.position ) );
 		else if( item.getTitle().equals( "Delete Thread" )  )
 			deleteThread( gViewAdapter.getSender( gMenuInfo.position ) );
 		else
@@ -156,6 +162,13 @@ public class Messages extends ListActivity
 	{
 		Intent subAct = new Intent( this, CreateMessage.class );
 		startSubActivity( subAct, ACTIVITY_CREATE );
+	}
+
+	public void placeCallToSender( String sender )
+	{
+		Intent i = new Intent( Intent.CALL_ACTION );
+		i.setData( Uri.parse( "tel:" + sender ) );
+		startActivity( i );
 	}
 
 	public void loadDialog( String sender )
@@ -175,4 +188,5 @@ public class Messages extends ListActivity
 		Log.d( "MessagesDB", "Hm, the record should be deleted by now..." );
 		gViewAdapter.alertDataChanged();
 	}
+
 }
