@@ -137,4 +137,11 @@ public class MessagesDbAdapter
 		return gDb.delete( DATABASE_TABLE, KEY_SENDER + "=" + sender, null ) > 0;
 	}
 
+	public boolean markAsRead( String sender )
+	{
+		ContentValues args = new ContentValues();
+		args.put( KEY_STATE, 1 );
+		return gDb.update( DATABASE_TABLE, args, KEY_SENDER + "=" + sender, null ) > 0;
+	}
+
 }

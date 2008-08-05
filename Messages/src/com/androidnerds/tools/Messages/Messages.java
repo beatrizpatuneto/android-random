@@ -53,8 +53,7 @@ public class Messages extends ListActivity
 	private NotificationManager gNotification;
 	private static int ACTIVITY_CREATE = 0;
 	private static final int NEW_MESSAGE_ID = Menu.FIRST;
-	private static final int DELETE_MESSAGES_ID = Menu.FIRST + 1;
-	private static final int ABOUT_ID = Menu.FIRST + 2;
+	private static final int ABOUT_ID = Menu.FIRST + 1;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -81,7 +80,6 @@ public class Messages extends ListActivity
 		super.onCreateOptionsMenu( menu );
 		//TODO: make the icons have the asterisk that means 'new'
 		menu.add( 0, NEW_MESSAGE_ID, "New Message", R.drawable.newconvo );
-		menu.add( 0, DELETE_MESSAGES_ID, "Delete Thread", R.drawable.deleteconvo );
 		menu.add( 0, ABOUT_ID, "About", R.drawable.info );
 		return true;
 	}
@@ -94,7 +92,7 @@ public class Messages extends ListActivity
 				sendNewMessage();
 				break;
 			case ABOUT_ID:
-				Toast.makeText( this, "Version 0.0.021\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
+				Toast.makeText( this, "Version 0.0.090\nWritten By Mike Novak\nReport bugs: mike@novaklabs.com", Toast.LENGTH_LONG ).show();
 				break;
 		}
 
@@ -135,7 +133,6 @@ public class Messages extends ListActivity
 					{
             					AdapterView.ContextMenuInfo mi = ( AdapterView.ContextMenuInfo ) menuInfo;
 						menu.add( 0, 0, "Open" );
-						menu.add( 0, 0, "Mark as Read" );
 						menu.add( 0, 0, "Delete Thread" );
           				}
 		});
