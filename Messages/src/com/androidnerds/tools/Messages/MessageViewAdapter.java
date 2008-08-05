@@ -82,14 +82,11 @@ public class MessageViewAdapter extends BaseAdapter
 		MessagesDbAdapter gDb = new MessagesDbAdapter( gCtx );
 		gDb.open();
 		long id = messageIds.get( position ).longValue();
-		Log.d( "MessagesView", "Trying for position..." + messageIds.get( position ).longValue() );
 		Cursor item = gDb.fetchMessage( id );
-		Log.d( "MessagesView", "Cursor output is.... "  + item.toString() );
 		item.moveTo( -1 );
 
 		String returnItem = new String( " " );
 		if( item.next() ) {
-			Log.d( "MessagesView", "Cursor sender: " + item.getString( 1 ) );
 			returnItem = item.getString( 1 );
 		}
 
@@ -163,10 +160,8 @@ public class MessageViewAdapter extends BaseAdapter
 	public void parseCursor( Cursor result )
 	{
 		messageIds.clear();
-		Log.d( "CursorParser", "Cursor output = " + result.toString() );
 
 		while( result.next() ) {
-			Log.d( "CursorParser", "Adding message id: " + result.getLong( 0 ) );
 			messageIds.add( new Long( result.getLong( 0 ) ) );
 		}
 	}
@@ -180,7 +175,6 @@ public class MessageViewAdapter extends BaseAdapter
 
 		gDb.close();
 
-		Log.d( "MessagesView", "Message Ids state: " + messageIds.toString() );
 		notifyDataSetChanged();
 		gView.requestLayout();
 	}

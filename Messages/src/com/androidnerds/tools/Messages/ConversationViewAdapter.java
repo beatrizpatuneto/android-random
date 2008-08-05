@@ -56,7 +56,6 @@ public class ConversationViewAdapter extends BaseAdapter
 		gCtx = c;
 		MessagesDbAdapter gDb = new MessagesDbAdapter( gCtx );
 		gDb.open();
-		Log.d( "ConversationsView", "In the conversation view constructor" );
 		parseCursor( gDb.fetchMessagesFromSender( sender ) );
 
 		gDb.close();
@@ -147,7 +146,6 @@ public class ConversationViewAdapter extends BaseAdapter
 		messageIds = new long[ gCount ];
 		
 		while( result.next() ) {
-			Log.d( "Conversations", "Adding message: " + result.getLong( 0 ) );
 			messageIds[ i ] = result.getLong( 0 );
 			i++;
 		}

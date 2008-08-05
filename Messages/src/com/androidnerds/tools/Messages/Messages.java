@@ -111,9 +111,7 @@ public class Messages extends ListActivity
 		Cursor c = getContentResolver().query( People.CONTENT_URI, null, null, null, null );
 		while( c.next() ) {
 			//check to find the person in the cursor and set their phone number as such.
-			Log.d( "Contacts SMS", "Searching....." + c.getString( 4 ) );
 			if( sender.equals( c.getString( 4 ) ) ) {
-				Log.d( "Contacts SMS", "Found user: " + c.getString( 3 ) );
 				sender = c.getString( 3 );
 				break;
 			}

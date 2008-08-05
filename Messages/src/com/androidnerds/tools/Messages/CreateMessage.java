@@ -90,14 +90,12 @@ public class CreateMessage extends Activity
 
 			while( cur.next() ) {
 				sender = cur.getString( cur.getColumnIndex( android.provider.Contacts.PeopleColumns.NAME ) );
-				Log.d( "CreateMessage", "The phone number for this contact is: " + sender );
 			}
 			cur.close();
 			textView.setText( sender );
 			gMessage.requestFocus( R.id.textMessage );
 		}
 
-		Log.d( "CreateMesages", "The data from the intent is: " + getIntent().getData() );
 		if( getIntent().getData() != null ) {
 			StringTokenizer dataPieces = new StringTokenizer( getIntent().getData().toString(), ":" );
 			String[] tokens = new String[ 2 ];
@@ -113,7 +111,6 @@ public class CreateMessage extends Activity
 
 			while( cur.next() ) {
 				sender = cur.getString( cur.getColumnIndex( android.provider.Contacts.PeopleColumns.NAME ) );
-				Log.d( "CreateMessage", "The phone number for this contact is: " + sender );
 			}
 
 			cur.close();
@@ -192,7 +189,6 @@ public class CreateMessage extends Activity
 
 		while( cur.next() ) {
 			String phone = cur.getString( cur.getColumnIndex( android.provider.Contacts.PhonesColumns.NUMBER ) );
-			Log.d( "CreateMessage", "The phone number for this contact is: " + phone );
 			person = phone;
 		}
 
