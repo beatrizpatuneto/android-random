@@ -5,19 +5,9 @@
 		android:padding="10px">
 
 	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-		  android:id="@+id/gSender"
+		  android:id="@+id/gContent"
 		  android:layout_width="wrap_content"
 		  android:layout_height="wrap_content"
 		  android:padding="5px"
-		  android:textColor="#ffff00"
-		  android:singleLine="true"
-		  />
-	
-	<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-		  android:id="@+id/gMessage"
-		  android:layout_width="wrap_content"
-		  android:layout_height="wrap_content"
-		  android:padding="5px"
-		  android:singleLine="false"
 		  />
 </LinearLayout>

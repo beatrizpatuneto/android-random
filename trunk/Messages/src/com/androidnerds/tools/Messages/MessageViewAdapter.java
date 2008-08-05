@@ -111,8 +111,6 @@ public class MessageViewAdapter extends BaseAdapter
 		
 		//query using the id.
 		Cursor item = gDb.fetchMessage( id );
-		Log.d( "CursorOutput", item.toString() );
-		Log.d( "Cursor", "The current item id is " + id );
 
 		item.moveTo( -1 );
 		if( item.next() ) {
@@ -122,7 +120,6 @@ public class MessageViewAdapter extends BaseAdapter
 			int status = item.getInt( 3 );
 			int direction = item.getInt( 4 );
 
-			Log.d( "Messages", "Sender is .. " + sender );
 			ImageView statusIcon = ( ImageView )view.findViewById( R.id.gStatusIcon );
 			statusIcon.setImageResource( R.drawable.conversation );
 			
@@ -137,27 +134,22 @@ public class MessageViewAdapter extends BaseAdapter
 			c.close();
 
 			TextView gSenderView = ( TextView )view.findViewById( R.id.gSender );
-			Log.d( "Messages", "Setting sender as: " + sender );
 			if( status == 0 ) gSenderView.setTypeface( Typeface.DEFAULT_BOLD );
 			gSenderView.setText( sender );
 
 			TextView gBodyView = ( TextView )view.findViewById( R.id.gMessage );
-			Log.d( "Messages", "Setting body as: " + body );
 			if( status == 0 ) gBodyView.setTypeface( Typeface.DEFAULT_BOLD );
 			gBodyView.setText( body );
 
 			//do some date parsing.
 			boolean useMinutes = false;
 			java.util.Date gDate = new java.util.Date( timeMillis );
-			Log.d( "Messages", "Let's do some date arthmetic." );
 			java.util.Date now = new java.util.Date( System.currentTimeMillis() );
 			SimpleDateFormat date = new SimpleDateFormat( "MM/dd/yy" );
 			if( date.format( gDate ).equals( date.format( now )  ) ) useMinutes = true;
-			Log.d( "Messages", "gDate: " + date.format( gDate ) + " and date: " + date.format( now ) );
 			SimpleDateFormat timeFormat = new SimpleDateFormat( "hh:mm a" );
 
 			TextView gDateView = ( TextView )view.findViewById( R.id.gTimestamp );
-			Log.d( "Messages", "Setting date as: " + date.format( gDate ) );
 			if( status == 0 ) gDateView.setTypeface( Typeface.DEFAULT_BOLD );
 			if( useMinutes ) gDateView.setText( timeFormat.format( gDate ) );
 			else gDateView.setText( date.format( gDate ) );

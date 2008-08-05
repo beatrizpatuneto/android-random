@@ -29,14 +29,18 @@ import android.app.ListActivity;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.Contacts;
 import android.provider.Contacts.People;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.util.XmlPullAttributes;
 import android.view.Menu;
 import android.view.Menu.Item;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -84,6 +88,7 @@ public class Conversations extends ListActivity
 		super.onResume();
 		gViewAdapter = new ConversationViewAdapter( this, sender );
 		setListAdapter( gViewAdapter );
+		getListView().setSelection( gViewAdapter.getCount() - 1 );
 	}
 
 	@Override
@@ -109,9 +114,9 @@ public class Conversations extends ListActivity
 
 	public void replyToMessage()
 	{
-		Intent i = new Intent(this, CreateMessage.class);
+		Intent i = new Intent( this, CreateMessage.class );
 		i.putExtra( "contact", sender );
-    		startSubActivity(i, ACTIVITY_CREATE);
+    		startSubActivity( i, ACTIVITY_CREATE );
 
 	}
 
