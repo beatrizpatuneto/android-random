@@ -29,8 +29,11 @@ import android.app.ListActivity;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.Resources;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.net.Uri;
 import android.provider.Contacts;
@@ -53,6 +56,8 @@ public class Conversations extends ListActivity
 	private NotificationManager gNotification;
 	private static int ACTIVITY_CREATE = 0;
 	private static final int REPLY_ID = Menu.FIRST;
+	private static final int CALL_ID = Menu.FIRST + 1;
+
 	String sender = "";
 	String senderName = "";
 	/** Called when the activity is first created. */
@@ -96,7 +101,16 @@ public class Conversations extends ListActivity
 	public boolean onCreateOptionsMenu( Menu menu )
 	{
 		super.onCreateOptionsMenu( menu );
-		menu.add( 0, REPLY_ID, "Reply", R.drawable.replymessage );
+
+		try {
+			PackageManager pMan = getPackageManager();
+			Drawable phoneIcon = pMan.getApplicationIcon( "com.google.android.phone" );
+			menu.add( 0, REPLY_ID, "Reply", R.drawable.replymessage );
+			Menu.Item callItem = menu.add( 0, CALL_ID, "Call" );
+			callItem.setIcon( phoneIcon );
+		} catch( NameNotFoundException e ) {
+			//do something.
+		}
 		return true;
 	}
 
@@ -106,6 +120,9 @@ public class Conversations extends ListActivity
 		switch( item.getId() ) {
 			case REPLY_ID:
 				replyToMessage();
+				break;
+			case CALL_ID:
+				placeCallToSender();
 				break;
 		}
 
@@ -120,7 +137,7 @@ public class Conversations extends ListActivity
 
 	}
 
-	public void placeCallToSender( String sender )
+	public void placeCallToSender( )
 	{
 		Intent i = new Intent( Intent.CALL_ACTION );
 		i.setData( Uri.parse( "tel:" + sender ) );
