@@ -128,7 +128,7 @@ public class MessagesDbAdapter
 
 	public Cursor fetchMessagesFromSender( String sender )
 	{
-		Cursor result = gDb.rawQuery( "SELECT _id, sender, message, message_time, state, direction FROM an_messages WHERE sender = '" + sender + "' ORDER BY _id DESC", null );
+		Cursor result = gDb.rawQuery( "SELECT _id, sender, message, message_time, state, direction FROM an_messages WHERE sender = '" + sender + "' ORDER BY _id ASC", null );
 		return result;
 	}
 

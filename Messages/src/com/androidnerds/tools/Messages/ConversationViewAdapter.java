@@ -30,6 +30,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.Contacts;
 import android.provider.Contacts.People;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -105,18 +108,30 @@ public class ConversationViewAdapter extends BaseAdapter
 			}
 			c.close();
 
-			TextView gSenderView = ( TextView )view.findViewById( R.id.gSender );
+			TextView gContent = ( TextView )view.findViewById( R.id.gContent );
 			if( direction == 1 ) {
-				gSenderView.setTextColor( 0xff9999ff );
 				sender = "Me";
 			}
 
-			Log.d( "Messages", "Setting sender as: " + sender );
-			gSenderView.setText( sender );
+			//Format the time properly to show up in the conversation dialog.
+			boolean useMinutes = false;
+			java.util.Date gDate = new java.util.Date( timeMillis );
+			java.util.Date now = new java.util.Date( System.currentTimeMillis() );
+			SimpleDateFormat date = new SimpleDateFormat( "MM/dd/yy" );
+			if( date.format( gDate ).equals( date.format( now )  ) ) useMinutes = true;
+			SimpleDateFormat timeFormat = new SimpleDateFormat( "hh:mm a" );
 
-			TextView gBodyView = ( TextView )view.findViewById( R.id.gMessage );
-			Log.d( "Messages", "Setting body as: " + body );
-			gBodyView.setText( ": " + body );
+			String theDate;
+			if( useMinutes ) theDate = timeFormat.format( gDate );
+			else theDate = date.format( gDate );
+
+			//TODO: make the different pieces part of the same string so it wraps better, but also allow for the coloring.
+			String contentString = new String( "(" +theDate + ") " + sender + " : " + body );
+			SpannableString content = new SpannableString( contentString );
+			if( direction == 1 ) content.setSpan( new ForegroundColorSpan( 0xff9999ff ), 0, contentString.indexOf( " :" ) + 2, 0 );
+ 			else content.setSpan( new ForegroundColorSpan( 0xffffff00 ), 0, contentString.indexOf( " :" ) + 2, 0 );
+
+			gContent.setText( content );
 		}
 
 		item.close();
