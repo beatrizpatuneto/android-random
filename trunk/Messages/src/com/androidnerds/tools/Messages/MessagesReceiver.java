@@ -76,7 +76,6 @@ public class MessagesReceiver extends IntentReceiver
 
 					while( cur.next() ) {
 						sender = cur.getString( cur.getColumnIndex( android.provider.Contacts.PeopleColumns.NAME ) );
-						//Log.d( "CreateMessage", "The phone number for this contact is: " + phone );
 					}
 					cur.close();
 
@@ -96,7 +95,7 @@ public class MessagesReceiver extends IntentReceiver
 		Intent appIntent = new Intent( gCtx, Messages.class );
 		String app_name = "Messages";
 
-		Notification newMessage = new Notification( gCtx, R.drawable.messagesmall, body.subSequence( 0,  body.length() ), System.currentTimeMillis(), sender.subSequence( 0, sender.length() ), body.subSequence( 0, body.length() ), contentIntent, R.drawable.icon, app_name.subSequence( 0, app_name.length() ), appIntent );
+		Notification newMessage = new Notification( gCtx, R.drawable.conversation, body.subSequence( 0,  body.length() ), System.currentTimeMillis(), sender.subSequence( 0, sender.length() ), body.subSequence( 0, body.length() ), contentIntent, R.drawable.icon, app_name.subSequence( 0, app_name.length() ), appIntent );
 		gNotification.notify( R.string.new_message, newMessage );
 	}
 }

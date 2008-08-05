@@ -95,7 +95,6 @@ public class Conversations extends ListActivity
 	public boolean onCreateOptionsMenu( Menu menu )
 	{
 		super.onCreateOptionsMenu( menu );
-		//TODO: make the icons have the asterisk that means 'new'
 		menu.add( 0, REPLY_ID, "Reply", R.drawable.replymessage );
 		return true;
 	}
