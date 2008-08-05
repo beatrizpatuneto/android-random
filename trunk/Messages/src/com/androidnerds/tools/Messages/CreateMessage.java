@@ -45,6 +45,8 @@ import android.widget.Filterable;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.StringTokenizer;
+
 public class CreateMessage extends Activity
 {
 
@@ -78,11 +80,45 @@ public class CreateMessage extends Activity
         	ContactListAdapter adapter = new ContactListAdapter( cursor, this );
 
         	AutoCompleteTextView textView = ( AutoCompleteTextView )findViewById( R.id.contactPerson );
-		
+		EditText gMessage = ( EditText )findViewById( R.id.textMessage );
+
 		Bundle extras = getIntent().getExtras();
 	
 		if( extras != null ) {
-			textView.setText( extras.getString( "contact" ) );
+			Cursor cur = managedQuery( android.provider.Contacts.People.CONTENT_URI, null, android.provider.Contacts.PhonesColumns.NUMBER + "='" + extras.getString( "contact" ) + "'", null );
+			String sender = extras.getString( "contact" );
+
+			while( cur.next() ) {
+				sender = cur.getString( cur.getColumnIndex( android.provider.Contacts.PeopleColumns.NAME ) );
+				Log.d( "CreateMessage", "The phone number for this contact is: " + sender );
+			}
+			cur.close();
+			textView.setText( sender );
+			gMessage.requestFocus( R.id.textMessage );
+		}
+
+		Log.d( "CreateMesages", "The data from the intent is: " + getIntent().getData() );
+		if( getIntent().getData() != null ) {
+			StringTokenizer dataPieces = new StringTokenizer( getIntent().getData().toString(), ":" );
+			String[] tokens = new String[ 2 ];
+
+			int i = 0;
+			while( dataPieces.hasMoreTokens() ) {
+				tokens[ i ] = dataPieces.nextToken();
+				i++;
+			}
+
+			String sender = tokens[ 1 ];
+			Cursor cur = managedQuery( android.provider.Contacts.People.CONTENT_URI, null, android.provider.Contacts.PhonesColumns.NUMBER + "='" + sender + "'", null );
+
+			while( cur.next() ) {
+				sender = cur.getString( cur.getColumnIndex( android.provider.Contacts.PeopleColumns.NAME ) );
+				Log.d( "CreateMessage", "The phone number for this contact is: " + sender );
+			}
+
+			cur.close();
+			textView.setText( sender );
+			gMessage.requestFocus( R.id.textMessage );
 		}
 
 		textView.setThreshold( 1 );
@@ -148,52 +184,31 @@ public class CreateMessage extends Activity
 	}
 
 	private void sendMessage()
-	{
-		//TODO: save the sent message into the sqlite database so its part of the conversation with that person.
-
-		//its important to set the new message in the database so we can track it in the conversation.
-		//we put the sender as the person who receives it and set the direction column to denote its outgoing.
-		Cursor c = getContentResolver().query( People.CONTENT_URI, null, null, null, null );
-
-		Uri lookup = android.provider.Contacts.People.CONTENT_URI;
-		
+	{		
 		AutoCompleteTextView gPerson = ( AutoCompleteTextView )findViewById( R.id.contactPerson );
 		String person = gPerson.getText().toString();
-		String phonenumber = person;
-		boolean foundUser = false;
 
-		Cursor cur = managedQuery(lookup, null, android.provider.Contacts.PeopleColumns.NAME + "='" + person + "'", null);
+		Cursor cur = managedQuery( android.provider.Contacts.People.CONTENT_URI, null, android.provider.Contacts.PeopleColumns.NAME + "='" + person + "'", null );
 
 		while( cur.next() ) {
-			String phone = cur.getString( cur.getColumnIndex(android.provider.Contacts.PhonesColumns.NUMBER) );
+			String phone = cur.getString( cur.getColumnIndex( android.provider.Contacts.PhonesColumns.NUMBER ) );
 			Log.d( "CreateMessage", "The phone number for this contact is: " + phone );
+			person = phone;
 		}
 
 		cur.close();
-		while( c.next() ) {
-			//check to find the person in the cursor and set their phone number as such.
-			if( person.equals( c.getString( 4 ) ) ) {
-				Log.d( "Contacts SMS", "Found user: " + person + " " + c.getString( 3 ) );
-				phonenumber = c.getString( 3 );
-				foundUser = true;
-				break;
-			}
-		}
-		c.close();
-
-		if( !foundUser ) phonenumber = person;
 		
 		EditText gMessage = ( EditText )findViewById( R.id.textMessage );
 		String message = gMessage.getText().toString();
 
 		SmsManager manager = SmsManager.getDefault();
-		manager.sendTextMessage( phonenumber, null, message, null, null, null );
+		manager.sendTextMessage( person, null, message, null, null, null );
 
 		//save the sent message for the conversation.
 		MessagesDbAdapter gDbAdapter = new MessagesDbAdapter( this );
 		gDbAdapter.open();
 
-		gDbAdapter.createMessage( phonenumber, message, 1, 1, System.currentTimeMillis() );
+		gDbAdapter.createMessage( person, message, 1, 1, System.currentTimeMillis() );
 		gDbAdapter.close();
  
 		Toast.makeText( this, "Text message has been sent.", Toast.LENGTH_LONG ).show();

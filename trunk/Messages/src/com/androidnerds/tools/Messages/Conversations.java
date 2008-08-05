@@ -62,19 +62,20 @@ public class Conversations extends ListActivity
 		if( extras != null ) {
 			sender = extras.getString( "sender" );
 
-			Cursor c = getContentResolver().query( People.CONTENT_URI, null, null, null, null );
+			Cursor c = managedQuery( android.provider.Contacts.People.CONTENT_URI, null, android.provider.Contacts.PhonesColumns.NUMBER + "='" + sender + "'", null, Contacts.People.DEFAULT_SORT_ORDER );
+
 			while( c.next() ) {
 				//check to find the person in the cursor and set their phone number as such.
-				Log.d( "Contacts SMS", "Searching....." + c.getString( 3 ) );
-				if( sender.equals( c.getString( 3 ) ) ) {
-					Log.d( "Contacts SMS", "Found user: " + c.getString( 4 ) );
-					senderName = c.getString( 4 );
-					break;
-				}
+				senderName = c.getString( c.getColumnIndex( android.provider.Contacts.PeopleColumns.NAME ) );
 			}
 			c.close();
 			if( !senderName.equals( "" ) ) setTitle( "Conversation with " + senderName );
 			else setTitle( "Conversation with " + sender );
+
+			MessagesDbAdapter dbAdapter = new MessagesDbAdapter( this );
+			dbAdapter.open();
+			dbAdapter.markAsRead( sender );
+			dbAdapter.close();
 		}
 	}
 

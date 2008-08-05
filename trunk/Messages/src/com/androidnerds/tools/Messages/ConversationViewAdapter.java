@@ -96,20 +96,18 @@ public class ConversationViewAdapter extends BaseAdapter
 			int direction = item.getInt( 4 );
 
 			//See if the sender is one of the contacts.
-			Cursor c = gCtx.getContentResolver().query( People.CONTENT_URI, null, null, null, null );
+			ContentResolver resolver = gCtx.getContentResolver();
+			Cursor c = resolver.query( android.provider.Contacts.People.CONTENT_URI, null, android.provider.Contacts.PhonesColumns.NUMBER + "='" + sender + "'", null, Contacts.People.DEFAULT_SORT_ORDER );
+
 			while( c.next() ) {
 				//check to find the person in the cursor and set their phone number as such.
-				Log.d( "Contacts SMS", "Searching....." + c.getString( 3 ) );
-				if( sender.equals( c.getString( 3 ) ) ) {
-					Log.d( "Contacts SMS", "Found user: " + c.getString( 4 ) );
-					sender = c.getString( 4 );
-					break;
-				}
+				sender = c.getString( c.getColumnIndex( android.provider.Contacts.PeopleColumns.NAME ) );
 			}
 			c.close();
 
 			TextView gSenderView = ( TextView )view.findViewById( R.id.gSender );
 			if( direction == 1 ) {
+				gSenderView.setTextColor( 0xff9999ff );
 				sender = "Me";
 			}
 
@@ -118,7 +116,7 @@ public class ConversationViewAdapter extends BaseAdapter
 
 			TextView gBodyView = ( TextView )view.findViewById( R.id.gMessage );
 			Log.d( "Messages", "Setting body as: " + body );
-			gBodyView.setText( body );
+			gBodyView.setText( ": " + body );
 		}
 
 		item.close();

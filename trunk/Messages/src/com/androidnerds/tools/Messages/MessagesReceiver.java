@@ -27,10 +27,15 @@ package com.androidnerds.tools.Messages;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentReceiver;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Contacts;
+import android.provider.Contacts.People;
 import android.provider.Telephony;
 import android.telephony.gsm.SmsMessage;
 import android.widget.Toast;
@@ -60,9 +65,21 @@ public class MessagesReceiver extends IntentReceiver
 					SmsMessage message = messages[ i ];
 					String sender = message.getDisplayOriginatingAddress();
 					String body = message.getDisplayMessageBody();
+					
+					
+
 					gDbHelper.createMessage( sender, body, 0, 0, message.getTimestampMillis() );
 
 					//message has been inserted into the database. notify the user.
+					ContentResolver resolver = gCtx.getContentResolver();
+					Cursor cur = resolver.query( android.provider.Contacts.People.CONTENT_URI, null, android.provider.Contacts.PhonesColumns.NUMBER + "='" + sender + "'", null, Contacts.People.DEFAULT_SORT_ORDER );
+
+					while( cur.next() ) {
+						sender = cur.getString( cur.getColumnIndex( android.provider.Contacts.PeopleColumns.NAME ) );
+						//Log.d( "CreateMessage", "The phone number for this contact is: " + phone );
+					}
+					cur.close();
+
 					this.setupNotification( sender, body );
 				}
 			}
