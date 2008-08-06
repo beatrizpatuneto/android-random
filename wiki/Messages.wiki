@@ -11,8 +11,6 @@ This is a conversation threaded messaging application for android. This applicat
 
 [http://novaklabs.com/messages2.png]
 
-[http://novaklabs.com/messages3.png]
-
 [http://novaklabs.com/messages4.png]
 
 [http://novaklabs.com/messages6.png]
