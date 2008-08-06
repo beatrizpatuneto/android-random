@@ -28,13 +28,19 @@ package com.androidnerds.tools.Messages;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Contacts;
 import android.provider.Contacts.People;
 import android.telephony.gsm.SmsManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.Menu.Item;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
@@ -49,6 +55,8 @@ import java.util.StringTokenizer;
 
 public class CreateMessage extends Activity
 {
+
+	private static final int CONTACTS_ID = Menu.FIRST;
 
 	@Override
 	public void onCreate( Bundle icicle )
@@ -122,6 +130,23 @@ public class CreateMessage extends Activity
         	textView.setAdapter( adapter );
 	}
 
+	// Listen for results.
+	protected void onActivityResult( int requestCode, int resultCode, String data, Bundle extras )
+	{
+    		// See which child activity is calling us back.
+    		if( data != null ) {
+			AutoCompleteTextView textView = ( AutoCompleteTextView )findViewById( R.id.contactPerson );
+			Cursor cur = managedQuery( Uri.parse( data ), null, null, null );
+			if( cur.next() ) {
+				String name = cur.getString( cur.getColumnIndex( android.provider.Contacts.PeopleColumns.NAME ) );
+				textView.setText( name );
+				EditText gMessage = ( EditText )findViewById( R.id.textMessage );
+				gMessage.requestFocus( R.id.textMessage );
+			}
+		}
+	}
+
+
 	public static class ContactListAdapter extends CursorAdapter implements Filterable 
 	{
         	public ContactListAdapter( Cursor c, Context context ) {
@@ -178,6 +203,41 @@ public class CreateMessage extends Activity
 	public void onDestroy( )
 	{
 		super.onDestroy();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu( Menu menu )
+	{
+		super.onCreateOptionsMenu( menu );
+
+		try {
+			PackageManager pMan = getPackageManager();
+			Drawable phoneIcon = pMan.getApplicationIcon( "com.google.android.contacts" );
+			Menu.Item contactsItem = menu.add( 0, CONTACTS_ID, "Search Contacts" );
+			contactsItem.setIcon( phoneIcon );
+		} catch( NameNotFoundException e ) {
+			//do something.
+		}
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected( Menu.Item item )
+	{
+		switch( item.getId() ) {
+			case CONTACTS_ID:
+				pullUpContacts();
+				break;
+		}
+
+		return super.onOptionsItemSelected( item );
+	}
+
+	private void pullUpContacts()
+	{
+		Intent i = new Intent( Intent.PICK_ACTION );
+		i.setData( android.provider.Contacts.People.CONTENT_URI );
+		startSubActivity( i, 0 );
 	}
 
 	private void sendMessage()
