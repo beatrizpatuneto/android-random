@@ -19,9 +19,12 @@ public class Klondike extends Activity
 	public static final String TAG = "Klondike";
 	
 	protected Deck mDeck;
+	protected CardStack mDealt;
 	protected CardStack[] mTableau;
 	protected CardStack[] mFoundation;
 
+	protected CardStackView mDeckView;
+	protected CardStackView mDealtView; 
 	protected CardStackView[] mFoundationView;
 	protected CardStackView[] mTableauView;
 
@@ -33,9 +36,9 @@ public class Klondike extends Activity
     {
         super.onCreate(icicle);
         setContentView(R.layout.klondike);
-        
+
         initViews();
-        
+
         if (icicle == null)
         	newGame();
         else
@@ -44,7 +47,12 @@ public class Klondike extends Activity
     
     private void initViews()
     {
-        /* Initialize views. */
+    	mDeckView = (CardStackView)findViewById(R.id.deck);
+    	mDealtView = (CardStackView)findViewById(R.id.dealt);
+    	
+    	mDeckView.setCardOrientation(CardStackView.Orientation.SINGLE);
+    	mDeckView.setCardVisibility(CardStackView.Visibility.NONE);
+
         mTableauView = new CardStackView[7];
         mTableauView[0] = (CardStackView)findViewById(R.id.stack1);
         mTableauView[1] = (CardStackView)findViewById(R.id.stack2);
@@ -78,6 +86,12 @@ public class Klondike extends Activity
     	/* Initialize models. */
         mDeck = new Deck();
         mDeck.shuffle();
+        
+        mDeck.registerObserver(new KlondikeObserver(mDeckView));
+        mDeckView.setCardStack(mDeck);
+        
+        mDealt = new CardStack();
+        mDealt.registerObserver(new KlondikeObserver(mDealtView));
 
         mTableau = new CardStack[7];
 
@@ -95,13 +109,13 @@ public class Klondike extends Activity
         	mFoundation[i] = new CardStack(13);
     		mFoundation[i].registerObserver(new KlondikeObserver(mFoundationView[i]));
         }
-        
+
         Log.d(TAG, "Deck:");
-        
+
         for (int i = 0; i < mDeck.size(); i++)
         	Log.d(TAG, "  Card " + i + ": " + mDeck.get(i));
     }
-    
+
     private void loadGame(Bundle icicle)
     {
     	/* TODO: Unserialize and load game state. */
@@ -158,7 +172,7 @@ public class Klondike extends Activity
     	{
     		mView = view;
     	}
-
+    	
 		@Override
 		protected void onAdd(Card card)
 		{

@@ -52,7 +52,7 @@ public class CardView extends View
 		mBorder.setColor(0xff000000);
 		
 		mBack = new Paint();
-		mBack.setStyle(Paint.Style.FILL_AND_STROKE);
+		mBack.setStyle(Paint.Style.FILL);
 		mBack.setColor(0xff0f81dd);
 		
 		mSuitPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -155,8 +155,8 @@ public class CardView extends View
 			canvas.drawLine(r.left, r.top + 1, r.left, r.bottom - 1, mBorder);
 			canvas.drawLine(r.right - 1, r.top + 1, r.right - 1, r.bottom - 1, mBorder);
 
-			for (int i = 1; i < 4; i++)
-				canvas.drawLine(r.left + 1, r.top + i, r.right - 1, r.top + i, mBack);
+			r.left++; r.top++; r.right--; r.bottom--;
+			canvas.drawRect(r, mBack);
 		}
 	}
 }
