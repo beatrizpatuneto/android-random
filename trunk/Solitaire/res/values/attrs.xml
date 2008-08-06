@@ -16,13 +16,13 @@
 
 <resources>
 	<declare-styleable name="CardStackView">
-		<attr name="card_orientation" format="integer">
+		<attr name="card_orientation">
 			<enum name="horizontal" value="0" />
 			<enum name="vertical" value="1" /> <!-- Default -->
 			<enum name="single" value="2" />
 		</attr>
 
-		<attr name="card_visibility" format="integer">
+		<attr name="card_visibility">
 			<enum name="top" value="0" /> <!-- Default -->
 			<enum name="all" value="1" />
 			<enum name="none" value="2" />

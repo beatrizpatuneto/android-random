@@ -3,6 +3,8 @@ package org.devtcg.games.solitaire.view;
 import java.util.Map;
 
 import org.devtcg.games.solitaire.R;
+import org.devtcg.games.solitaire.model.Card;
+import org.devtcg.games.solitaire.model.CardStack;
 
 import android.content.Context;
 import android.content.Resources;
@@ -10,11 +12,15 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class CardStackView extends ViewGroup
 {
+	public static final String TAG = "CardStackView";
+	
 	private Rect mRect;
 	private Paint mBorder;
 	private Paint mBack;
@@ -35,6 +41,8 @@ public class CardStackView extends ViewGroup
 	protected Orientation mOrientation;
 	protected Visibility mVisibility;
 	
+	private static final int STACK_OFFSET = 14;
+	
 	public CardStackView(Context context)
 	{
 		super(context);
@@ -43,7 +51,7 @@ public class CardStackView extends ViewGroup
 		setCardOrientation(Orientation.VERTICAL);
 		setCardVisibility(Visibility.TOP_CARD_ONLY);
 	}
-	
+
 	public CardStackView(Context context, AttributeSet attrs, Map inflateParams)
 	{
 		super(context, attrs, inflateParams);
@@ -52,8 +60,14 @@ public class CardStackView extends ViewGroup
 		Resources.StyledAttributes a = context.obtainStyledAttributes(attrs,
 		  R.styleable.CardStackView);
 
+		TypedValue tv = new TypedValue();
+		boolean b = a.getValue(R.styleable.CardStackView_card_orientation, tv);
+		Log.d(TAG, "b=" + b + ", tv=" + tv);
+
 		int orientation = a.getInt(R.styleable.CardStackView_card_orientation,
 		  Orientation.VERTICAL.ordinal());
+
+		Log.d(TAG, "orientation=" + orientation);
 
 		setCardOrientation(Orientation.get(orientation));
 
@@ -61,6 +75,8 @@ public class CardStackView extends ViewGroup
 		  Visibility.TOP_CARD_ONLY.ordinal());
 
 		setCardVisibility(Visibility.get(visibility));
+
+		Log.d(TAG, "visibility=" + visibility);
 	}
 	
 	private void init()
@@ -126,6 +142,18 @@ public class CardStackView extends ViewGroup
 
 		invalidate();
 	}
+	
+	public void setCardStack(CardStack stack)
+	{
+		removeAllViews();
+
+		for (Card card: stack)
+		{
+			CardView view = new CardView(mContext);
+			view.setCard(card);
+			addCard(view);
+		}
+	}
 
 	public void addCard(CardView view)
 	{
@@ -179,10 +207,10 @@ public class CardStackView extends ViewGroup
 		switch (mOrientation)
 		{
 		case HORIZONTAL:
-			xadj = 4;
+			xadj = STACK_OFFSET;
 			break;
 		case VERTICAL:
-			yadj = 4;
+			yadj = STACK_OFFSET;
 			break;
 		}
 
@@ -239,7 +267,7 @@ public class CardStackView extends ViewGroup
 					if (i == (n - 1))
 						vardim += 40;
 					else
-						vardim += 4;
+						vardim += STACK_OFFSET;
 
 					child.measure(widthSpec,
 					  View.MeasureSpec.makeMeasureSpec(40, View.MeasureSpec.EXACTLY));
@@ -269,6 +297,9 @@ public class CardStackView extends ViewGroup
 			canvas.drawRect(r.left + 1, r.top + 1, r.right - 1, r.bottom - 1, mBack);
 		}
 
+		/* TODO: In our stack, we are likely not drawing the entire card, just 
+		 * the top or left slip of it, so we need to make sure to optimize this
+		 * drawing path at some point. */
 		super.dispatchDraw(canvas);
 
 		if (isSelected() == true)
