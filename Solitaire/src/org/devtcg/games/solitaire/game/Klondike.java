@@ -25,12 +25,15 @@ public class Klondike extends Activity
 	protected CardStackView[] mFoundationView;
 	protected CardStackView[] mTableauView;
 
+	/** Indicates the stack that we are currently holding. */
+	protected CardStackView mHolding;
+
     @Override
     public void onCreate(Bundle icicle)
     {
         super.onCreate(icicle);
         setContentView(R.layout.klondike);
-
+        
         initViews();
         
         if (icicle == null)
@@ -54,10 +57,7 @@ public class Klondike extends Activity
         for (int i = 0; i < mTableauView.length; i++)
         {
         	CardStackView view = mTableauView[i];
-
         	view.setOnClickListener(mTableauClick);
-        	view.setCardOrientation(CardStackView.Orientation.VERTICAL);
-        	view.setCardVisibility(CardStackView.Visibility.TOP_CARD_ONLY);
         }
 
         mFoundationView = new CardStackView[4];
@@ -68,11 +68,8 @@ public class Klondike extends Activity
 
         for (int i = 0; i < mFoundationView.length; i++)
         {
-        	CardStackView view = mFoundationView[i];
-        	
+        	CardStackView view = mFoundationView[i];        	
         	view.setOnClickListener(mFoundationClick);
-        	view.setCardOrientation(CardStackView.Orientation.SINGLE);
-        	view.setCardVisibility(CardStackView.Visibility.TOP_CARD_ONLY);
         }
     }
 
@@ -122,13 +119,36 @@ public class Klondike extends Activity
 		{
 		}
     };
-    
+
     private final OnClickListener mTableauClick = new OnClickListener()
     {
     	public void onClick(View v)
     	{
+			CardStackView vv = (CardStackView)v;
+
+			setHolding(vv);
+
+			int n = vv.getChildCount();
+			Card card = null;
+
+			if (n > 0)
+				card = ((CardView)vv.getChildAt(n - 1)).getCard();
+
+			Log.d(TAG, "Tableau click: " + card);
     	}
     };
+
+	private void setHolding(CardStackView stack)
+	{
+		if (mHolding == stack)
+			return;
+
+		if (mHolding != null)
+			mHolding.setSelected(false);
+
+		stack.setSelected(true);
+		mHolding = stack;
+	}
     
     public class KlondikeObserver extends CardStackObserver
     {
