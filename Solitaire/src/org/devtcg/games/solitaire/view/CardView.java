@@ -31,7 +31,6 @@ public class CardView extends View
 	protected Card mCard;
 	protected Drawable mCardDrawable;
 	protected Drawable mSuitDrawable;
-	protected boolean mFaceUp = true;
 	
 	public CardView(Context context)
 	{
@@ -65,14 +64,6 @@ public class CardView extends View
 		setPreferredHeight(40);
 	}
 
-	/**
-	 * Set the card to draw.  Specifies suit and rank, not actually the bitmap data.
-	 */
-	public void setCard(Suit suit, Rank rank)
-	{
-		setCard(new Card(suit, rank));
-	}
-
 	public void setCard(Card card)
 	{
 		mCard = card;
@@ -88,9 +79,9 @@ public class CardView extends View
 			mSuitPaint.setColor(0xff0f0f0f);
 			break;
 		}
-		
+
 		mCardDrawable = getResources().getDrawable(R.drawable.card);
-		
+
 		switch (mCard.getSuit())
 		{
 		case SPADES:
@@ -99,6 +90,7 @@ public class CardView extends View
 		case CLUBS:
 			mSuitDrawable = getResources().getDrawable(R.drawable.suit_clubs);
 			break;
+		/* TODO: HEARTS and DIAMONDS. */
 		default:
 			mSuitDrawable = null;
 			break;
@@ -112,11 +104,6 @@ public class CardView extends View
 		return mCard;
 	}
 
-	public void setFaceUp(boolean faceUp)
-	{
-		mFaceUp = faceUp;
-	}
-
 	@Override
 	protected void onDraw(Canvas canvas)
 	{
@@ -125,17 +112,17 @@ public class CardView extends View
 		Rect r = mRect;
 		getDrawingRect(r);
 
-		if (mFaceUp && mCard != null)
+		if (mCard != null && mCard.isFaceUp() == true)
 		{
 			mCardDrawable.setBounds(r);
 			mCardDrawable.draw(canvas);
-			
+
 			int baseline = mSuitPaint.getFontMetricsInt(null);
-			
+
 			String rankLetter = mCard.getRankAbbr();
 			canvas.drawText(rankLetter, 4, baseline - 1, mSuitPaint);
 			canvas.drawText(rankLetter, r.right - r.left - 11, r.bottom - r.top - 4, mSuitPaint);
-		
+
 			if (mSuitDrawable != null)
 			{
 				int w = mSuitDrawable.getIntrinsicWidth();
@@ -143,7 +130,7 @@ public class CardView extends View
 
 				mSuitDrawable.setBounds(r.right - r.left - w - 2, 3, r.right - r.left - 2, 3 + h);
 				mSuitDrawable.draw(canvas);
-				
+
 				mSuitDrawable.setBounds(3, r.bottom - r.top - h - 3, 3 + w, r.bottom - r.top - 3);
 				mSuitDrawable.draw(canvas);
 			}

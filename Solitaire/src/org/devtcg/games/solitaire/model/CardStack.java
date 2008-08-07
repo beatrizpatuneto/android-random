@@ -7,7 +7,7 @@ import java.util.Observer;
 public class CardStack extends ArrayList<Card>
 {
 	protected CardStackObservable mObservable;
-	
+
 	public CardStack()
 	{
 		super();
@@ -29,6 +29,29 @@ public class CardStack extends ArrayList<Card>
 	{
 		mObservable.addObserver(o);
 	}
+	
+	/**
+	 * Examine a card from the "top" of the deck, without removing it.
+	 */
+	public Card peekTop()
+	{
+		return peek(size() - 1);
+	}
+	
+	/**
+	 * Examine a card from the specified position of the deck.  The bottom of the deck is at
+	 * position 0.
+	 * 
+	 * Valid range:
+	 * 
+	 * <code>0 &lt;= pos &lt; n</code>
+	 * 
+	 * Where <code>n</code> is the number of cards in the deck.
+	 */
+	public Card peek(int pos)
+	{
+		return get(pos);
+	}
 
 	public Card removeTop()
 	{
@@ -45,18 +68,26 @@ public class CardStack extends ArrayList<Card>
 	}
 
 	@Override
+	public Card remove(int location)
+	{
+		Card card = super.remove(location);
+		mObservable.removeCard(location);
+		return card;
+	}
+
+	@Override
 	public boolean add(Card card)
 	{
 		boolean ret = super.add(card);
 		mObservable.addCard(card);
 		return ret;
 	}
-	
+
 	@Override
 	public boolean addAll(Collection<? extends Card> collection)
 	{
 		boolean ret = super.addAll(collection);
-		
+
 		for (Object o: collection)
 		{
 			if (o instanceof Card)

@@ -7,16 +7,23 @@ public class Card
 {
 	protected Suit mSuit;
 	protected Rank mRank;
+	protected boolean mFaceUp;
 	
 	public Card(Card card)
 	{
-		this(card.getSuit(), card.getRank());
+		this(card.getSuit(), card.getRank(), card.isFaceUp());
 	}
 
 	public Card(Suit suit, Rank rank)
 	{
+		this(suit, rank, true);
+	}
+	
+	public Card(Suit suit, Rank rank, boolean faceUp)
+	{
 		mSuit = suit;
 		mRank = rank;
+		mFaceUp = faceUp;
 	}
 
     public Card(int suit, int rank)
@@ -47,6 +54,8 @@ public class Card
         	case 3: mSuit = Suit.SPADES; break;
         	default: throw new IllegalArgumentException("suit must be between 0 and 3");
         }
+        
+        mFaceUp = true;
     }
     
     public Suit getSuit()
@@ -93,6 +102,16 @@ public class Card
     	}
     }
     
+    public void setFaceUp(boolean faceUp)
+    {
+    	mFaceUp = faceUp;
+    }
+    
+    public boolean isFaceUp()
+    {
+    	return mFaceUp;
+    }
+    
     @Override
     public String toString()
     {
@@ -111,6 +130,19 @@ public class Card
     		return false;
 
     	return true;
+    }
+    
+    public static boolean isSuitBlack(Suit suit)
+    {
+    	if (suit == Suit.CLUBS || suit == Suit.SPADES)
+    		return true;
+    	
+    	return false;
+    }
+    
+    public static boolean isSuitRed(Suit suit)
+    {
+    	return isSuitBlack(suit) == false;
     }
     
 	public enum Suit {

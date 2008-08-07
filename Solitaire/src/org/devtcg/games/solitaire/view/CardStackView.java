@@ -5,6 +5,7 @@ import java.util.Map;
 import org.devtcg.games.solitaire.R;
 import org.devtcg.games.solitaire.model.Card;
 import org.devtcg.games.solitaire.model.CardStack;
+import org.devtcg.games.solitaire.model.CardStackObserver;
 
 import android.content.Context;
 import android.content.Resources;
@@ -25,21 +26,17 @@ public class CardStackView extends ViewGroup
 	private Paint mBorder;
 	private Paint mBack;
 	private Paint mSelected;
-	
+
+	/** Connected card stack, if any. */
+	protected CardStack mStack;
+
 	public enum Orientation
 	{
 		HORIZONTAL, VERTICAL, SINGLE;
 		public static Orientation get(int ordinal) { return values()[ordinal]; }
 	}
 
-	public enum Visibility
-	{
-		TOP_CARD_ONLY, ALL_CARDS, NONE;
-		public static Visibility get(int ordinal) { return values()[ordinal]; }
-	}
-
 	protected Orientation mOrientation;
-	protected Visibility mVisibility;
 	
 	private static final int STACK_OFFSET = 14;
 	
@@ -49,7 +46,6 @@ public class CardStackView extends ViewGroup
 		init();
 
 		setCardOrientation(Orientation.VERTICAL);
-		setCardVisibility(Visibility.TOP_CARD_ONLY);
 	}
 
 	public CardStackView(Context context, AttributeSet attrs, Map inflateParams)
@@ -70,13 +66,6 @@ public class CardStackView extends ViewGroup
 		Log.d(TAG, "orientation=" + orientation);
 
 		setCardOrientation(Orientation.get(orientation));
-
-		int visibility = a.getInt(R.styleable.CardStackView_card_visibility,
-		  Visibility.TOP_CARD_ONLY.ordinal());
-
-		setCardVisibility(Visibility.get(visibility));
-
-		Log.d(TAG, "visibility=" + visibility);
 	}
 	
 	private void init()
@@ -106,45 +95,12 @@ public class CardStackView extends ViewGroup
 	{
 		mOrientation = orientation;
 	}
-
-	/**
-	 * Sets the parameters for the card stack visbility.  Default is TOP_CARD_ONLY.
-	 * 
-	 * @param visibility
-	 *   Sets which cards in the stack are drawn face up.
-	 */
-	public void setCardVisibility(Visibility visibility)
-	{
-		int n;
-
-		mVisibility = visibility;
-
-		if ((n = getChildCount()) == 0)
-			return;
-
-		/* Kind of a micro optimization here, but whatever. */
-		switch (mVisibility)
-		{
-		case ALL_CARDS:
-			for (int i = 0; i < n; i++)
-				((CardView)getChildAt(i)).setFaceUp(true);
-			break;
-		case TOP_CARD_ONLY:
-			for (int i = 0; i < n - 1; i++)
-				((CardView)getChildAt(i)).setFaceUp(false);
-			((CardView)getChildAt(n - 1)).setFaceUp(true);
-			break;
-		case NONE:
-			for (int i = 0; i < n - 1; i++)
-				((CardView)getChildAt(i)).setFaceUp(false);
-			break;
-		}
-
-		invalidate();
-	}
 	
-	public void setCardStack(CardStack stack)
+	public void connectToCardStack(CardStack stack, CardStackObserver o)
 	{
+		stack.registerObserver(o);
+		mStack = stack;
+
 		removeAllViews();
 
 		for (Card card: stack)
@@ -154,25 +110,14 @@ public class CardStackView extends ViewGroup
 			addCard(view);
 		}
 	}
+	
+	public CardStack getCardStack()
+	{
+		return mStack;
+	}
 
 	public void addCard(CardView view)
 	{
-		switch (mVisibility)
-		{
-		case ALL_CARDS:
-			view.setFaceUp(true);
-			break;
-		case NONE:
-			view.setFaceUp(false);
-			break;
-		case TOP_CARD_ONLY:
-			int n = getChildCount();
-			if (n > 0)
-				((CardView)getChildAt(n - 1)).setFaceUp(false);
-			view.setFaceUp(true);
-			break;
-		}
-		
 		view.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		addView(view);
 		
@@ -182,15 +127,6 @@ public class CardStackView extends ViewGroup
 	public void removeCard(int position)
 	{
 		removeViewAt(position);
-		
-		if (mVisibility == Visibility.TOP_CARD_ONLY)
-		{
-			int n = getChildCount();
-
-			if (n > 0)
-				((CardView)getChildAt(n - 1)).setFaceUp(true);
-		}
-		
 		invalidate();
 	}
 
@@ -297,9 +233,9 @@ public class CardStackView extends ViewGroup
 			canvas.drawRect(r.left + 1, r.top + 1, r.right - 1, r.bottom - 1, mBack);
 		}
 
-		/* TODO: In our stack, we are likely not drawing the entire card, just 
-		 * the top or left slip of it, so we need to make sure to optimize this
-		 * drawing path at some point. */
+		/* TODO: In a stack, we shouldn't need to draw each card in full.  In
+		 * every case, we can save drawing area, but we don't have an elegant
+		 * way to propogate the clipping yet. */
 		super.dispatchDraw(canvas);
 
 		if (isSelected() == true)

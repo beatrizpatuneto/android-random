@@ -22,11 +22,5 @@
 			<enum name="vertical" value="1" /> <!-- Default -->
 			<enum name="single" value="2" />
 		</attr>
-
-		<attr name="card_visibility">
-			<enum name="top" value="0" /> <!-- Default -->
-			<enum name="all" value="1" />
-			<enum name="none" value="2" />
-		</attr>
 	</declare-styleable>
 </resources>
