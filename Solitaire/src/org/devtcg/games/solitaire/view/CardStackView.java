@@ -76,7 +76,7 @@ public class CardStackView extends ViewGroup
 
 		mBack = new Paint();
 		mBack.setStyle(Paint.Style.FILL);
-		mBack.setColor(0xff30ad00);
+		mBack.setColor(0xff578132);
 
 		mSelected = new Paint();
 		mSelected.setStyle(Paint.Style.STROKE);

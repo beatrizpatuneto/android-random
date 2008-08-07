@@ -52,7 +52,7 @@ public class CardView extends View
 		
 		mBack = new Paint();
 		mBack.setStyle(Paint.Style.FILL);
-		mBack.setColor(0xff0f81dd);
+		mBack.setColor(0xff557fa4);
 		
 		mSuitPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mSuitPaint.setTypeface(Typeface.DEFAULT_BOLD);

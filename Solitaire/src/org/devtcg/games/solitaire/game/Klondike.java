@@ -80,6 +80,7 @@ public class Klondike extends Activity
         {
         	CardStackView view = mFoundationView[i];        	
         	view.setOnClickListener(mFoundationClick);
+        	view.setCardOrientation(CardStackView.Orientation.SINGLE);
         }
     }
 
