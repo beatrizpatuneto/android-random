@@ -17,7 +17,7 @@ import android.view.View.OnClickListener;
 public class Klondike extends Activity
 {
 	public static final String TAG = "Klondike";
-	
+
 	protected Deck mDeck;
 	protected CardStack mDealt;
 	protected CardStack[] mTableau;
@@ -44,13 +44,16 @@ public class Klondike extends Activity
         else
         	loadGame(icicle);
     }
-    
+
     private void initViews()
     {
     	mDeckView = (CardStackView)findViewById(R.id.deck);
-    	mDealtView = (CardStackView)findViewById(R.id.dealt);
-    	
     	mDeckView.setCardOrientation(CardStackView.Orientation.SINGLE);
+    	mDeckView.setOnClickListener(mDeckClick);
+    	
+    	mDealtView = (CardStackView)findViewById(R.id.dealt);
+    	mDealtView.setCardOrientation(CardStackView.Orientation.SINGLE);
+    	mDealtView.setOnClickListener(mDealtClick);
 
         mTableauView = new CardStackView[7];
         mTableauView[0] = (CardStackView)findViewById(R.id.stack1);
@@ -89,14 +92,14 @@ public class Klondike extends Activity
 
         mDealt = new CardStack();
         mDealtView.connectToCardStack(mDealt, new KlondikeObserver(mDealtView));
-
+        
         mTableau = new CardStack[7];
 
         for (int i = 0; i < mTableau.length; i++)
         {
         	mTableau[i] = new CardStack(i + 4);
         	mTableau[i].addAll(mDeck.deal(i + 1, false));
-        	mTableau[i].peekTop().setFaceUp(true);
+        	mTableau[i].flipTopCard(true);
         	mTableauView[i].connectToCardStack(mTableau[i],
         	  new KlondikeObserver(mTableauView[i]));
         }
@@ -109,11 +112,16 @@ public class Klondike extends Activity
     		mFoundationView[i].connectToCardStack(mFoundation[i],
     		  new KlondikeObserver(mFoundationView[i]));
         }
+        
+        mDealt.add(mDeck.draw());
 
         Log.d(TAG, "Deck:");
 
         for (int i = 0; i < mDeck.size(); i++)
-        	Log.d(TAG, "  Card " + i + ": " + mDeck.get(i));
+        {
+        	Card card = mDeck.get(i);
+        	Log.d(TAG, "  Card " + i + ": " + card + " (" + card.isFaceUp() + ")");
+        }
     }
 
     private void loadGame(Bundle icicle)
@@ -127,10 +135,64 @@ public class Klondike extends Activity
     	/* TODO: Serialize and save game state. */
     }
     
+    private final OnClickListener mDeckClick = new OnClickListener()
+    {
+    	public void onClick(View v)
+    	{
+    		if (mDeck.size() == 0)
+    		{
+    			int n = mDealt.size();
+
+    			while (n-- > 0)
+    			{
+    				Card card = mDealt.remove(0);
+    				mDeck.add(card);
+    			}
+
+    			mDeck.flipTopCard(false);
+    		}
+    		else
+    		{
+    			mDealt.flipTopCard(false);
+    			mDealt.add(mDeck.draw());
+    			releaseHolding();
+    		}
+    	}
+    };
+    
+    private final OnClickListener mDealtClick = new OnClickListener()
+    {
+    	public void onClick(View v)
+    	{
+			if (mDealt.size() >= 0)
+				setHolding(mDealtView);
+    	}
+    };
+    
     private final OnClickListener mFoundationClick = new OnClickListener()
     {
 		public void onClick(View v)
 		{
+			CardStackView vv = (CardStackView)v;
+			CardStack acestack = vv.getCardStack();
+			
+			if (mHolding == null)
+				return;
+			
+			CardStack stack = mHolding.getCardStack();
+			Card card = stack.peekTop();
+			
+			releaseHolding();
+			
+			if (card == null)
+				return;
+
+			if (card.getRank() == Card.Rank.ACE)
+			{
+				stack.removeTop();
+				stack.flipTopCard(true);
+				acestack.add(card);
+			}
 		}
     };
 
@@ -159,19 +221,19 @@ public class Klondike extends Activity
 
 					/* Check that we haven't now removed the top card from this
 					 * stack, leaving an unflipped new top. */
-					Card top = src.peekTop();
-
-					if (top != null && top.isFaceUp() == false)
-						top.setFaceUp(true);
+					src.flipTopCard(true);
 				}
 
 				releaseHolding();
 			}
 			else
-				setHolding(vv);
+			{
+				if (vv.getCardStack().size() > 0)
+					setHolding(vv);
+			}
     	}
     };
-    
+
     /**
      * Checks for an returns a legal move between two tableau stacks.
      *  
@@ -190,12 +252,23 @@ public class Klondike extends Activity
 
     	if (srcn == 0)
     		return -1;
-
+    	
     	Card dsttop = dst.peekTop();
 
-    	int targetOrd = dsttop.getRankOrdinal() - 1;
-    	boolean targetIsRed = Card.isSuitBlack(dsttop.getSuit());
-
+    	int targetOrd;
+    	boolean targetIsRed;
+    	
+    	if (dsttop != null)
+    	{
+    		targetOrd = dsttop.getRankOrdinal() - 1;
+    		targetIsRed = Card.isSuitBlack(dsttop.getSuit());
+    	}
+    	else
+    	{
+    		targetOrd = Card.Rank.KING.rankOrdinal();
+    		targetIsRed = false; /* Irrelevant... */
+    	}
+    	
     	if (targetOrd < 2)
     		return -1;
 
@@ -204,12 +277,20 @@ public class Klondike extends Activity
     	{
     		Card check = src.get(i);
 
+    		if (check.isFaceUp() == false)
+    			break;
+
     		if (check.getRankOrdinal() == targetOrd)
     		{
-    			if (targetIsRed == Card.isSuitRed(check.getSuit()))
+    			if (targetOrd == Card.Rank.KING.rankOrdinal())
     				return i;
     			else
-    				return -1;
+    			{
+    				if (targetIsRed == Card.isSuitRed(check.getSuit()))
+    					return i;
+    				else
+    					break;
+    			}
     		}
     	}
 
@@ -247,10 +328,10 @@ public class Klondike extends Activity
 		@Override
 		protected void onAdd(Card card)
 		{
+			Log.d(TAG, mView + ": Adding " + card);
 			CardView view = new CardView(Klondike.this);
 			view.setCard(card);
 			mView.addCard(view);
-			Log.d(TAG, mView + ": Added " + card);
 			mView.invalidate();
 		}
 
@@ -258,8 +339,8 @@ public class Klondike extends Activity
 		protected void onRemove(int pos)
 		{
 			CardView view = (CardView)mView.getChildAt(pos);
+			Log.d(TAG, mView + ": Removing " + view.getCard());
 			mView.removeCard(pos);
-			Log.d(TAG, mView + ": Removed " + view.getCard());
 			mView.invalidate();
 		}
     }
