@@ -90,9 +90,11 @@ public class CardView extends View
 		case CLUBS:
 			mSuitDrawable = getResources().getDrawable(R.drawable.suit_clubs);
 			break;
-		/* TODO: HEARTS and DIAMONDS. */
-		default:
-			mSuitDrawable = null;
+		case HEARTS:
+			mSuitDrawable = getResources().getDrawable(R.drawable.suit_hearts);
+			break;
+		case DIAMONDS:
+			mSuitDrawable = getResources().getDrawable(R.drawable.suit_diamonds);
 			break;
 		}
 		
