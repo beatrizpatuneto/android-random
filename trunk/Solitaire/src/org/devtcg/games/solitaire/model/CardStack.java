@@ -35,7 +35,12 @@ public class CardStack extends ArrayList<Card>
 	 */
 	public Card peekTop()
 	{
-		return peek(size() - 1);
+		int n = size();
+		
+		if (n == 0)
+			return null;
+		
+		return peek(n - 1);
 	}
 	
 	/**
@@ -55,16 +60,12 @@ public class CardStack extends ArrayList<Card>
 
 	public Card removeTop()
 	{
-		Card card;
-		int n;
+		int n = size();
 		
-		if ((n = size()) == 0)
+		if (n == 0)
 			return null;
 
-		card = remove(n - 1);
-		mObservable.removeCard(n - 1);
-
-		return card;
+		return remove(n - 1);
 	}
 
 	@Override
@@ -73,6 +74,18 @@ public class CardStack extends ArrayList<Card>
 		Card card = super.remove(location);
 		mObservable.removeCard(location);
 		return card;
+	}
+
+	@Override
+	public void removeRange(int start, int end)
+	{
+		super.removeRange(start, end);
+
+		if (end == 0)
+			return;
+
+		for (int i = end - 1; i >= start; i--)
+			mObservable.removeCard(i);
 	}
 
 	@Override
@@ -95,6 +108,16 @@ public class CardStack extends ArrayList<Card>
 		}
 			
 		return ret;
+	}
+	
+	public void flipTopCard(boolean faceUp)
+	{
+		Card top = peekTop();
+		
+		if (top == null)
+			return;
+
+		top.setFaceUp(faceUp);
 	}
 	
 	@Override

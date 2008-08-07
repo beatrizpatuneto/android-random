@@ -154,7 +154,8 @@ public class Card
 
 	public enum Rank {
 		ACE, DEUCE, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK,
-		QUEEN, KING
+		QUEEN, KING;
+		public int rankOrdinal() { return ordinal() + 1; } 
 	}
 
 	protected static final String ranks[] =

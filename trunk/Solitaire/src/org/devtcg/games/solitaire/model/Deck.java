@@ -59,7 +59,17 @@ public class Deck extends CardStack
 	 */
 	public Card draw()
 	{
-		return removeTop();
+		return draw(true);
+	}
+
+	public Card draw(boolean faceUp)
+	{
+		int n = size();
+
+		if (n == 0)
+			return null;
+
+		return draw(size() - 1, faceUp);
 	}
 	
 	/**
@@ -69,7 +79,14 @@ public class Deck extends CardStack
 	 */
 	public Card draw(int pos)
 	{
-		return remove(pos);
+		return draw(pos, true);
+	}
+
+	public Card draw(int pos, boolean faceUp)
+	{
+		Card card = remove(pos);
+		card.setFaceUp(faceUp);
+		return card;
 	}
 	
 	public List<Card> deal(int cards)
