@@ -7,23 +7,26 @@ public abstract class CardStackObserver implements Observer
 {
 	public void update(Observable o, Object data)
 	{
+		CardStackObservable oo = (CardStackObservable)o;		
 		CardStackObservable.Action a = (CardStackObservable.Action)data;
+		
+		CardStack stack = oo.getCardStack();
 
 		switch (a.action)
 		{
 		case CardStackObservable.Action.ADD:
-			onAdd(a.card);
+			onAdd(stack, a.card);
 			break;
 		case CardStackObservable.Action.REMOVE:
 			/* TODO: Handle searching. */
 			if (a.card != null)
 				throw new RuntimeException("TODO");
 
-			onRemove(a.cardPos);
+			onRemove(stack, a.cardPos);
 			break;
 		}
 	}
 
-	protected abstract void onAdd(Card card);
-	protected abstract void onRemove(int pos);
+	protected abstract void onAdd(CardStack stack, Card card);
+	protected abstract void onRemove(CardStack stack, int pos);
 }

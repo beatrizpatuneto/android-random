@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Toast;
 
 public class Klondike extends Activity
 {
@@ -27,6 +28,11 @@ public class Klondike extends Activity
 	protected CardStackView mDealtView; 
 	protected CardStackView[] mFoundationView;
 	protected CardStackView[] mTableauView;
+
+	/** Flag indicating which of the foundation stacks have been filled.  The
+	 *  game is won when all 4 are full.  This is simply a 4 bit flag, where each
+	 *  bit position represents a suit corresponding to its ordinal. */ 
+	private int mWinFlag = 0;
 
 	/** Indicates the stack that we are currently holding. */
 	protected CardStackView mHolding;
@@ -113,7 +119,7 @@ public class Klondike extends Activity
     		mFoundationView[i].connectToCardStack(mFoundation[i],
     		  new KlondikeObserver(mFoundationView[i]));
         }
-        
+
         mDealt.add(mDeck.draw());
 
         Log.d(TAG, "Deck:");
@@ -193,17 +199,23 @@ public class Klondike extends Activity
 
 			Card acetop = acestack.peekTop();
 			int rank;
-			
+
 			if (acetop == null)
 				rank = Card.Rank.ACE.rankOrdinal();
 			else
 				rank = acetop.getRankOrdinal() + 1;
-			
+
 			if (card.getRankOrdinal() == rank)
 			{
 				stack.removeTop();
 				stack.flipTopCard(true);
 				acestack.add(card);
+				
+				if (checkWin(acestack) == true)
+				{
+					Toast.makeText(Klondike.this, "You WIN!", Toast.LENGTH_LONG).show();
+					newGame();
+				}
 			}
 		}
     };
@@ -327,18 +339,33 @@ public class Klondike extends Activity
 			mHolding = null;
 		}
 	}
+	
+	private boolean checkWin(CardStack foundation)
+	{
+		if (foundation.size() < 13)
+			return false;
+		
+		int bit = foundation.peekTop().getSuit().ordinal();
+		
+		assert (mWinFlag & (1 << bit)) == 0;
+		mWinFlag |= (1 << bit);
 
+		/* Returns true if the game is won; false otherwise. */
+		return (mWinFlag == 0xf);
+	}
+	
     public class KlondikeObserver extends CardStackObserver
     {
     	protected CardStackView mView;
 
     	public KlondikeObserver(CardStackView view)
     	{
+    		super();
     		mView = view;
     	}
 
 		@Override
-		protected void onAdd(Card card)
+		protected void onAdd(CardStack stack, Card card)
 		{
 			Log.d(TAG, mView + ": Adding " + card);
 			CardView view = new CardView(Klondike.this);
@@ -348,7 +375,7 @@ public class Klondike extends Activity
 		}
 
 		@Override
-		protected void onRemove(int pos)
+		protected void onRemove(CardStack stack, int pos)
 		{
 			CardView view = (CardView)mView.getChildAt(pos);
 			Log.d(TAG, mView + ": Removing " + view.getCard());

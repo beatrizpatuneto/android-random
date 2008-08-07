@@ -4,9 +4,17 @@ import java.util.Observable;
 
 public class CardStackObservable extends Observable
 {
-	public CardStackObservable()
+	protected CardStack mStack;
+	
+	public CardStackObservable(CardStack stack)
 	{
 		super();
+		mStack = stack;
+	}
+	
+	public CardStack getCardStack()
+	{
+		return mStack;
 	}
 
 	public static class Action

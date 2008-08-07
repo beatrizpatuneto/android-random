@@ -22,7 +22,7 @@ public class CardStack extends ArrayList<Card>
 
 	private void init()
 	{
-		mObservable = new CardStackObservable();
+		mObservable = new CardStackObservable(this);
 	}
 
 	public void registerObserver(CardStackObserver o)
