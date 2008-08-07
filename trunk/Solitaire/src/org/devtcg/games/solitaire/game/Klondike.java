@@ -145,18 +145,21 @@ public class Klondike extends Activity
 
     			while (n-- > 0)
     			{
-    				Card card = mDealt.remove(0);
+    				Card card = mDealt.remove(n);
     				mDeck.add(card);
     			}
 
     			mDeck.flipTopCard(false);
     		}
-    		else
-    		{
-    			mDealt.flipTopCard(false);
-    			mDealt.add(mDeck.draw());
-    			releaseHolding();
-    		}
+    		
+			mDealt.flipTopCard(false);
+			
+			int deal = Math.min(3, mDeck.size());
+			
+			mDealt.addAll(mDeck.deal(deal, false));
+			mDealt.flipTopCard(true);
+			
+			releaseHolding();
     	}
     };
     
@@ -181,13 +184,21 @@ public class Klondike extends Activity
 			
 			CardStack stack = mHolding.getCardStack();
 			Card card = stack.peekTop();
-			
+
 			releaseHolding();
-			
+
 			if (card == null)
 				return;
 
-			if (card.getRank() == Card.Rank.ACE)
+			Card acetop = acestack.peekTop();
+			int rank;
+			
+			if (acetop == null)
+				rank = Card.Rank.ACE.rankOrdinal();
+			else
+				rank = acetop.getRankOrdinal() + 1;
+			
+			if (card.getRankOrdinal() == rank)
 			{
 				stack.removeTop();
 				stack.flipTopCard(true);
