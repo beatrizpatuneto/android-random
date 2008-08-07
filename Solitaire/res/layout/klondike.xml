@@ -11,7 +11,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-    
+
 <!-- BEGIN DECK STACK -->
     <TextView
         android:layout_width="wrap_content"
@@ -26,7 +26,6 @@
         android:layout_x="10px"
         android:layout_y="20px"
         solitaire:card_orientation="single"
-        solitaire:card_visibility="none"
         />
     <org.devtcg.games.solitaire.view.CardStackView android:id="@+id/dealt"
         android:layout_width="30px"
@@ -34,7 +33,6 @@
         android:layout_x="50px"
         android:layout_y="20px"
         solitaire:card_orientation="single"
-        solitaire:card_visibility="top"
         />
 <!-- END DECK STACK -->
     
@@ -52,7 +50,6 @@
         android:layout_x="150px"
         android:layout_y="20px"
         solitaire:card_orientation="single"
-        solitaire:card_visibility="top"
         />
         
     <TextView
@@ -68,7 +65,6 @@
         android:layout_x="190px"
         android:layout_y="20px"
         solitaire:card_orientation="single"
-        solitaire:card_visibility="top"
         />
 
     <TextView
@@ -84,7 +80,6 @@
         android:layout_x="230px"
         android:layout_y="20px"
         solitaire:card_orientation="single"
-        solitaire:card_visibility="top"
         />
         
     <TextView
@@ -100,7 +95,6 @@
         android:layout_x="270px"
         android:layout_y="20px"
         solitaire:card_orientation="single"
-        solitaire:card_visibility="top"
         />
 <!-- END FOUNDATION -->
 
@@ -118,7 +112,6 @@
         android:layout_x="10px"
         android:layout_y="83px"
         solitaire:card_orientation="vertical"
-        solitaire:card_visibility="top"
         />
         
     <TextView
@@ -134,7 +127,6 @@
         android:layout_x="50px"
         android:layout_y="83px"
         solitaire:card_orientation="vertical"
-        solitaire:card_visibility="top"
         />
         
     <TextView
@@ -150,7 +142,6 @@
         android:layout_x="90px"
         android:layout_y="83px"
         solitaire:card_orientation="vertical"
-        solitaire:card_visibility="top"
         />
         
     <TextView
@@ -166,7 +157,6 @@
         android:layout_x="130px"
         android:layout_y="83px"
         solitaire:card_orientation="vertical"
-        solitaire:card_visibility="top"
         />
         
     <TextView
@@ -182,7 +172,6 @@
         android:layout_x="170px"
         android:layout_y="83px"
         solitaire:card_orientation="vertical"
-        solitaire:card_visibility="top"
         />
         
     <TextView
@@ -198,7 +187,6 @@
         android:layout_x="210px"
         android:layout_y="83px"
         solitaire:card_orientation="vertical"
-        solitaire:card_visibility="top"
         />
 
     <TextView
@@ -214,7 +202,6 @@
         android:layout_x="250px"
         android:layout_y="83px"
         solitaire:card_orientation="vertical"
-        solitaire:card_visibility="top"
         />
 <!-- END TABLEAU -->
  
