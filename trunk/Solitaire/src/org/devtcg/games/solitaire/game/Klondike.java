@@ -51,7 +51,6 @@ public class Klondike extends Activity
     	mDealtView = (CardStackView)findViewById(R.id.dealt);
     	
     	mDeckView.setCardOrientation(CardStackView.Orientation.SINGLE);
-    	mDeckView.setCardVisibility(CardStackView.Visibility.NONE);
 
         mTableauView = new CardStackView[7];
         mTableauView[0] = (CardStackView)findViewById(R.id.stack1);
@@ -86,28 +85,29 @@ public class Klondike extends Activity
     	/* Initialize models. */
         mDeck = new Deck();
         mDeck.shuffle();
-        
-        mDeck.registerObserver(new KlondikeObserver(mDeckView));
-        mDeckView.setCardStack(mDeck);
-        
+        mDeckView.connectToCardStack(mDeck, new KlondikeObserver(mDeckView));
+
         mDealt = new CardStack();
-        mDealt.registerObserver(new KlondikeObserver(mDealtView));
+        mDealtView.connectToCardStack(mDealt, new KlondikeObserver(mDealtView));
 
         mTableau = new CardStack[7];
 
         for (int i = 0; i < mTableau.length; i++)
         {
         	mTableau[i] = new CardStack(i + 4);
-    		mTableau[i].registerObserver(new KlondikeObserver(mTableauView[i]));
-        	mTableau[i].addAll(mDeck.deal(i + 1));
+        	mTableau[i].addAll(mDeck.deal(i + 1, false));
+        	mTableau[i].peekTop().setFaceUp(true);
+        	mTableauView[i].connectToCardStack(mTableau[i],
+        	  new KlondikeObserver(mTableauView[i]));
         }
 
         mFoundation = new CardStack[4];
-        
+
         for (int i = 0; i < mFoundation.length; i++)
         {
         	mFoundation[i] = new CardStack(13);
-    		mFoundation[i].registerObserver(new KlondikeObserver(mFoundationView[i]));
+    		mFoundationView[i].connectToCardStack(mFoundation[i],
+    		  new KlondikeObserver(mFoundationView[i]));
         }
 
         Log.d(TAG, "Deck:");
@@ -140,51 +140,127 @@ public class Klondike extends Activity
     	{
 			CardStackView vv = (CardStackView)v;
 
-			setHolding(vv);
+			if (mHolding != null)
+			{
+				CardStack src = mHolding.getCardStack();
+				CardStack dst = vv.getCardStack();
 
-			int n = vv.getChildCount();
-			Card card = null;
+				int pos = findLegalTableauMove(src, dst);
 
-			if (n > 0)
-				card = ((CardView)vv.getChildAt(n - 1)).getCard();
+				if (pos >= 0)
+				{
+					int n = src.size();
 
-			Log.d(TAG, "Tableau click: " + card);
+					for (int i = pos; i < n; i++)
+					{
+						Card card = src.remove(pos);
+						dst.add(card);
+					}
+
+					/* Check that we haven't now removed the top card from this
+					 * stack, leaving an unflipped new top. */
+					Card top = src.peekTop();
+
+					if (top != null && top.isFaceUp() == false)
+						top.setFaceUp(true);
+				}
+
+				releaseHolding();
+			}
+			else
+				setHolding(vv);
     	}
     };
+    
+    /**
+     * Checks for an returns a legal move between two tableau stacks.
+     *  
+     * @param src
+     *   Stack to move from.
+     *   
+     * @param dst
+     *   Stack to move to.
+     *   
+     * @return
+     *   If found, the move position in <code>src</code> is returned; otherwise, -1.
+     */
+    private int findLegalTableauMove(CardStack src, CardStack dst)
+    {
+    	int srcn = src.size();
+
+    	if (srcn == 0)
+    		return -1;
+
+    	Card dsttop = dst.peekTop();
+
+    	int targetOrd = dsttop.getRankOrdinal() - 1;
+    	boolean targetIsRed = Card.isSuitBlack(dsttop.getSuit());
+
+    	if (targetOrd < 2)
+    		return -1;
+
+    	/* TODO: Optimize. */
+    	for (int i = srcn - 1; i >= 0; i--)
+    	{
+    		Card check = src.get(i);
+
+    		if (check.getRankOrdinal() == targetOrd)
+    		{
+    			if (targetIsRed == Card.isSuitRed(check.getSuit()))
+    				return i;
+    			else
+    				return -1;
+    		}
+    	}
+
+    	return -1;
+    }
 
 	private void setHolding(CardStackView stack)
 	{
 		if (mHolding == stack)
 			return;
 
-		if (mHolding != null)
-			mHolding.setSelected(false);
-
+		releaseHolding();
 		stack.setSelected(true);
 		mHolding = stack;
 	}
-    
+
+	private void releaseHolding()
+	{
+		if (mHolding != null)
+		{
+			mHolding.setSelected(false);
+			mHolding = null;
+		}
+	}
+
     public class KlondikeObserver extends CardStackObserver
     {
     	protected CardStackView mView;
-    	
+
     	public KlondikeObserver(CardStackView view)
     	{
     		mView = view;
     	}
-    	
+
 		@Override
 		protected void onAdd(Card card)
 		{
 			CardView view = new CardView(Klondike.this);
 			view.setCard(card);
 			mView.addCard(view);
+			Log.d(TAG, mView + ": Added " + card);
+			mView.invalidate();
 		}
 
 		@Override
 		protected void onRemove(int pos)
 		{
+			CardView view = (CardView)mView.getChildAt(pos);
 			mView.removeCard(pos);
+			Log.d(TAG, mView + ": Removed " + view.getCard());
+			mView.invalidate();
 		}
     }
 }

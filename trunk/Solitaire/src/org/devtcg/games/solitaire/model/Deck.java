@@ -29,7 +29,7 @@ public class Deck extends CardStack
 		for (Card.Suit suit: Card.Suit.values())
 		{
 			for (Card.Rank rank: Card.Rank.values())
-				add(new Card(suit, rank));
+				add(new Card(suit, rank, false));
 		}
 	}
 	
@@ -53,29 +53,6 @@ public class Deck extends CardStack
 	}
 	
 	/**
-	 * Examine a card from the "top" of the deck, without removing it.
-	 */
-	public Card peek()
-	{
-		return peek(size() - 1);
-	}
-	
-	/**
-	 * Examine a card from the specified position of the deck.  The bottom of the deck is at
-	 * position 0.
-	 * 
-	 * Valid range:
-	 * 
-	 * <code>0 &lt;= pos &lt; n</code>
-	 * 
-	 * Where <code>n</code> is the number of cards in the deck.
-	 */
-	public Card peek(int pos)
-	{
-		return get(pos);
-	}
-	
-	/**
 	 * Deal a single card from the "top" of the deck.
 	 * 
 	 * @note This removes the card from the deck, reducing it's size.
@@ -94,21 +71,37 @@ public class Deck extends CardStack
 	{
 		return remove(pos);
 	}
+	
+	public List<Card> deal(int cards)
+	{
+		return deal(cards, true);
+	}
 
 	/**
 	 * Draws multiple cards from the "top" of the deck.
+	 * 
+	 * @param cards
+	 *   Number of cards to deal from the deck.
+	 *   
+	 * @param faceUp
+	 *   Should cards be dealt face up or down?  Always changes the state of
+	 *   the cards dealt.
 	 */
-	public List<Card> deal(int cards)
+	public List<Card> deal(int cards, boolean faceUp)
 	{
 		int n = size();
-		
+
 		ArrayList<Card> l = new ArrayList<Card>(cards);
 
 		if (n < cards)
 			return null;
 
 		for (int i = n - cards; i < n; i++)
-			l.add(get(i));
+		{
+			Card c = get(i);
+			c.setFaceUp(faceUp);
+			l.add(c);
+		}
 
 		removeRange(n - cards, n);
 		return l;
