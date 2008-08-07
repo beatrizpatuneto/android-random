@@ -157,7 +157,6 @@ public class Glance extends ListActivity
 		View gListView = getListView();
 		gListView.setOnPopulateContextMenuListener(
             			new View.OnPopulateContextMenuListener() {
-					@Override
           				public void onPopulateContextMenu(ContextMenu menu, View view, Object menuInfo) 
 					{
             					AdapterView.ContextMenuInfo mi = (AdapterView.ContextMenuInfo) menuInfo;
