@@ -81,7 +81,7 @@ public class CardStackView extends ViewGroup
 		mSelected = new Paint();
 		mSelected.setStyle(Paint.Style.STROKE);
 		mSelected.setColor(0xffe3b705);
-		
+
 		mRect = new Rect();
 	}
 
@@ -167,6 +167,8 @@ public class CardStackView extends ViewGroup
 	{
 		int n = getChildCount();
 		
+		Log.d(TAG, "widthSpec=" + MeasureSpec.toString(widthSpec) + ", heightSpec=" + MeasureSpec.toString(heightSpec));
+		
 		if (n == 0)
 		{
 			setMeasuredDimension(30, 40);
@@ -182,9 +184,11 @@ public class CardStackView extends ViewGroup
 			{
 				View lastChild = getChildAt(n - 1);
 				lastChild.measure(widthSpec, heightSpec);
-				
+
 				w = lastChild.getMeasuredWidth();
 				h = lastChild.getMeasuredHeight();
+
+				Log.d(TAG, "lastChild measured " + w + "x" + h);
 			}
 
 			setMeasuredDimension(w, h);
