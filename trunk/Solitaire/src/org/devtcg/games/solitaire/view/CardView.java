@@ -33,6 +33,10 @@ public class CardView extends View
 	protected Card mCard;
 	protected Drawable mCardDrawable;
 	protected Drawable mSuitDrawable;
+	
+	/* mPreferredWidth/Height isn't available to us for some reason? */
+	protected int mDesiredWidth;
+	protected int mDesiredHeight;
 
 	public CardView(Context context)
 	{
@@ -55,15 +59,16 @@ public class CardView extends View
 		mBack = new Paint();
 		mBack.setStyle(Paint.Style.FILL);
 		mBack.setColor(0xff557fa4);
-		
+
 		mSuitPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mSuitPaint.setTypeface(Typeface.DEFAULT_BOLD);
 		//mSuitPaint.setStyle(Paint.Style.STROKE);
-		
+
 		mRect = new Rect();
 		
-		setPreferredWidth(30);
-		setPreferredHeight(40);
+		/* TODO: Use the card drawable... */
+		mDesiredWidth = 30;
+		mDesiredHeight = 40;
 	}
 
 	public void setCard(Card card)
@@ -108,13 +113,23 @@ public class CardView extends View
 		return mCard;
 	}
 	
+	public int getDesiredWidth()
+	{
+		return mDesiredWidth;
+	}
+	
+	public int getDesiredHeight()
+	{
+		return mDesiredHeight;
+	}
+	
 	@Override
 	protected void onMeasure(int widthSpec, int heightSpec)
 	{
-		Log.d(TAG, "widthSpec=" + MeasureSpec.toString(widthSpec) + ", heightSpec=" + MeasureSpec.toString(heightSpec));
-		setMeasuredDimension(30, 40);
+		setMeasuredDimension(resolveSize(mDesiredWidth, widthSpec),
+		  resolveSize(mDesiredHeight, heightSpec));
 	}
-
+	
 	@Override
 	protected void onDraw(Canvas canvas)
 	{

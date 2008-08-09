@@ -12,6 +12,7 @@ import android.content.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -134,8 +135,8 @@ public class CardStackView extends ViewGroup
 	protected void onLayout(boolean changed, int l, int t, int r, int b)
 	{
 		int n = getChildCount();
-		int x = 0, xadj = 0;
-		int y = 0, yadj = 0;
+		int x = mPaddingLeft, xadj = 0;
+		int y = mPaddingTop, yadj = 0;
 
 		if (n == 0)
 			return;
@@ -153,9 +154,10 @@ public class CardStackView extends ViewGroup
 		for (int i = 0; i < n; i++)
 		{
 			View child = getChildAt(i);
-			
+
 			child.layout(x, y,
-			  x + child.getMeasuredWidth(), y + child.getMeasuredHeight());
+			  x + child.getMeasuredWidth(),
+			  y + child.getMeasuredHeight());
 
 			x += xadj;
 			y += yadj;
@@ -171,7 +173,11 @@ public class CardStackView extends ViewGroup
 		
 		if (n == 0)
 		{
-			setMeasuredDimension(30, 40);
+			Drawable card = getResources().getDrawable(R.drawable.card);
+
+			setMeasuredDimension(card.getIntrinsicWidth(),
+			  card.getIntrinsicHeight());
+
 			return;
 		}
 
@@ -185,8 +191,8 @@ public class CardStackView extends ViewGroup
 				View lastChild = getChildAt(n - 1);
 				lastChild.measure(widthSpec, heightSpec);
 
-				w = lastChild.getMeasuredWidth();
-				h = lastChild.getMeasuredHeight();
+				w = lastChild.getMeasuredWidth() + mPaddingLeft + mPaddingRight;
+				h = lastChild.getMeasuredHeight() + mPaddingTop + mPaddingBottom;
 
 				Log.d(TAG, "lastChild measured " + w + "x" + h);
 			}
@@ -200,20 +206,21 @@ public class CardStackView extends ViewGroup
 
 			for (int i = 0; i < n; i++)
 			{
-				View child = getChildAt(i);
+				CardView child = (CardView)getChildAt(i);
 
 				if (mOrientation == Orientation.VERTICAL)
 				{
+					child.measure(widthSpec, 
+					  View.MeasureSpec.makeMeasureSpec(child.getDesiredHeight(),
+					    View.MeasureSpec.EXACTLY));
+
 					if (i == (n - 1))
-						vardim += 40;
+						vardim += child.getMeasuredHeight() + mPaddingTop + mPaddingBottom;
 					else
 						vardim += STACK_OFFSET;
 
-					child.measure(widthSpec,
-					  View.MeasureSpec.makeMeasureSpec(40, View.MeasureSpec.EXACTLY));
-
 					if (fixeddim == 0)
-						fixeddim = child.getMeasuredWidth();
+						fixeddim = child.getMeasuredWidth() + mPaddingLeft + mPaddingRight;
 				}
 			}
 
