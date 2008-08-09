@@ -141,7 +141,7 @@ public class Klondike extends Activity
     {
     	/* TODO: Serialize and save game state. */
     }
-    
+
     private final OnClickListener mDeckClick = new OnClickListener()
     {
     	public void onClick(View v)
@@ -149,14 +149,15 @@ public class Klondike extends Activity
     		if (mDeck.size() == 0)
     		{
     			int n = mDealt.size();
+    			
+    			/* Make sure all cards are flipped down. */
+    			mDealt.flipTopCard(false);
 
     			while (n-- > 0)
     			{
     				Card card = mDealt.remove(n);
     				mDeck.add(card);
     			}
-
-    			mDeck.flipTopCard(false);
     		}
     		
 			mDealt.flipTopCard(false);
@@ -206,12 +207,13 @@ public class Klondike extends Activity
 			else
 				rank = acetop.getRankOrdinal() + 1;
 
-			if (card.getRankOrdinal() == rank)
+			if (card.getRankOrdinal() == rank &&
+			    (acetop == null || acetop.getSuit() == card.getSuit()))
 			{
 				stack.removeTop();
 				stack.flipTopCard(true);
 				acestack.add(card);
-				
+
 				if (checkWin(acestack) == true)
 				{
 					Toast.makeText(Klondike.this, "You WIN!", Toast.LENGTH_LONG).show();
