@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.devtcg.games.solitaire.R;
@@ -171,9 +170,9 @@ public class Klondike extends Activity
     }
 
     @Override
-    protected void onStop()
+    protected void onPause()
     {
-    	Log.d(TAG, "onStop(): Saving game state...");
+    	Log.d(TAG, "onPause(): Saving game state...");
 
     	saveGame(new Bundle());
     	
