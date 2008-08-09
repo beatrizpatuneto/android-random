@@ -2,7 +2,7 @@
 <org.devtcg.games.solitaire.view.CardTableView 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:solitaire="http://schemas.devtcg.org/apk/res/org.devtcg.games.solitaire"
-    android:padding="10dip"
+    android:padding="5dip"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
