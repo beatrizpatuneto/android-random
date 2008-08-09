@@ -43,7 +43,9 @@ public class Klondike extends Activity
         super.onCreate(icicle);
         setContentView(R.layout.klondike);
 
-        			initViews();
+		initViews();
+
+		Log.d(TAG, "icicle=" + icicle);
 
         if (icicle == null)
         	newGame();
@@ -120,13 +122,13 @@ public class Klondike extends Activity
     		  new KlondikeObserver(mFoundationView[i]));
         }
 
-        Log.d(TAG, "Deck:");
-
-        for (int i = 0; i < mDeck.size(); i++)
-        {
-        	Card card = mDeck.get(i);
-        	Log.d(TAG, "  Card " + i + ": " + card + " (" + card.isFaceUp() + ")");
-        }
+//        Log.d(TAG, "Deck:");
+//
+//        for (int i = 0; i < mDeck.size(); i++)
+//        {
+//        	Card card = mDeck.get(i);
+//        	Log.d(TAG, "  Card " + i + ": " + card + " (" + card.isFaceUp() + ")");
+//        }
     }
 
     private void loadGame(Bundle icicle)
@@ -138,6 +140,8 @@ public class Klondike extends Activity
     @Override
     protected void onFreeze(Bundle icicle)
     {
+    	Log.d(TAG, "onFreeze()");
+    	
     	/* TODO: Serialize and save game state. */
     	icicle.putString("foo", "bar");
     }
@@ -375,7 +379,6 @@ public class Klondike extends Activity
 		@Override
 		protected void onAdd(CardStack stack, Card card)
 		{
-			Log.d(TAG, mView + ": Adding " + card);
 			CardView view = new CardView(Klondike.this);
 			view.setCard(card);
 			mView.addCard(view);
@@ -386,7 +389,6 @@ public class Klondike extends Activity
 		protected void onRemove(CardStack stack, int pos)
 		{
 			CardView view = (CardView)mView.getChildAt(pos);
-			Log.d(TAG, mView + ": Removing " + view.getCard());
 			mView.removeCard(pos);
 			mView.invalidate();
 		}
