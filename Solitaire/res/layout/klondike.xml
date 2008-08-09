@@ -18,6 +18,7 @@
             <org.devtcg.games.solitaire.view.CardStackView
                 android:id="@+id/deck"
                 android:layout_gravity="center_horizontal"
+                android:padding="1px"
                 solitaire:card_orientation="single"
                 />
             <org.devtcg.games.solitaire.view.CardStackView
@@ -31,21 +32,25 @@
             <org.devtcg.games.solitaire.view.CardStackView 
                 android:id="@+id/ace1"
                 android:layout_gravity="center_horizontal"
+                android:padding="1px"
                 solitaire:card_orientation="single"
                 />
             <org.devtcg.games.solitaire.view.CardStackView 
                 android:id="@+id/ace2"
                 android:layout_gravity="center_horizontal"
+                android:padding="1px"
                 solitaire:card_orientation="single"
                 />
             <org.devtcg.games.solitaire.view.CardStackView 
                 android:id="@+id/ace3"
                 android:layout_gravity="center_horizontal"
+                android:padding="1px"
                 solitaire:card_orientation="single"
                 />
             <org.devtcg.games.solitaire.view.CardStackView 
                 android:id="@+id/ace4"
                 android:layout_gravity="center_horizontal"
+                android:padding="1px"
                 solitaire:card_orientation="single"
                 />
 

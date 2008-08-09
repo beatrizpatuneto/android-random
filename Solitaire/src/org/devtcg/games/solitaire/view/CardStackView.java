@@ -168,6 +168,8 @@ public class CardStackView extends ViewGroup
 	protected void onMeasure(int widthSpec, int heightSpec)
 	{
 		int n = getChildCount();
+		int paddingWidth = mPaddingLeft + mPaddingRight;
+		int paddingHeight = mPaddingTop + mPaddingBottom;
 		
 		Log.d(TAG, "widthSpec=" + MeasureSpec.toString(widthSpec) + ", heightSpec=" + MeasureSpec.toString(heightSpec));
 		
@@ -175,8 +177,8 @@ public class CardStackView extends ViewGroup
 		{
 			Drawable card = getResources().getDrawable(R.drawable.card);
 
-			setMeasuredDimension(card.getIntrinsicWidth(),
-			  card.getIntrinsicHeight());
+			setMeasuredDimension(card.getIntrinsicWidth() + paddingWidth,
+			  card.getIntrinsicHeight() + paddingHeight);
 
 			return;
 		}
@@ -191,8 +193,8 @@ public class CardStackView extends ViewGroup
 				View lastChild = getChildAt(n - 1);
 				lastChild.measure(widthSpec, heightSpec);
 
-				w = lastChild.getMeasuredWidth() + mPaddingLeft + mPaddingRight;
-				h = lastChild.getMeasuredHeight() + mPaddingTop + mPaddingBottom;
+				w = lastChild.getMeasuredWidth() + paddingWidth;
+				h = lastChild.getMeasuredHeight() + paddingHeight;
 
 				Log.d(TAG, "lastChild measured " + w + "x" + h);
 			}
@@ -215,12 +217,12 @@ public class CardStackView extends ViewGroup
 					    View.MeasureSpec.EXACTLY));
 
 					if (i == (n - 1))
-						vardim += child.getMeasuredHeight() + mPaddingTop + mPaddingBottom;
+						vardim += child.getMeasuredHeight() + paddingHeight;
 					else
 						vardim += STACK_OFFSET;
 
 					if (fixeddim == 0)
-						fixeddim = child.getMeasuredWidth() + mPaddingLeft + mPaddingRight;
+						fixeddim = child.getMeasuredWidth() + paddingWidth;
 				}
 			}
 
