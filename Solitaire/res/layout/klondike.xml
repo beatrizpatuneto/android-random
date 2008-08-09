@@ -2,6 +2,7 @@
 <org.devtcg.games.solitaire.view.CardTableView 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:solitaire="http://schemas.devtcg.org/apk/res/org.devtcg.games.solitaire"
+    android:padding="10dip"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
@@ -23,6 +24,7 @@
                 android:id="@+id/dealt"
                 android:layout_gravity="left"
                 android:layout_span="2"
+                android:padding="1px"
                 solitaire:card_orientation="single"
                 />
 
@@ -54,36 +56,43 @@
             <org.devtcg.games.solitaire.view.CardStackView
                 android:id="@+id/stack1"
                 android:layout_gravity="center_horizontal"
+                android:padding="1px"
                 solitaire:card_orientation="vertical"
                 />
             <org.devtcg.games.solitaire.view.CardStackView
                 android:id="@+id/stack2"
                 android:layout_gravity="center_horizontal"
+                android:padding="1px"
                 solitaire:card_orientation="vertical"
                 />
             <org.devtcg.games.solitaire.view.CardStackView
                 android:id="@+id/stack3"
                 android:layout_gravity="center_horizontal"
+                android:padding="1px"
                 solitaire:card_orientation="vertical"
                 />
             <org.devtcg.games.solitaire.view.CardStackView
                 android:id="@+id/stack4"
                 android:layout_gravity="center_horizontal"
+                android:padding="1px"
                 solitaire:card_orientation="vertical"
                 />
             <org.devtcg.games.solitaire.view.CardStackView
                 android:id="@+id/stack5"
                 android:layout_gravity="center_horizontal"
+                android:padding="1px"
                 solitaire:card_orientation="vertical"
                 />
             <org.devtcg.games.solitaire.view.CardStackView
                 android:id="@+id/stack6"
                 android:layout_gravity="center_horizontal"
+                android:padding="1px"
                 solitaire:card_orientation="vertical"
                 />
             <org.devtcg.games.solitaire.view.CardStackView
                 android:id="@+id/stack7"
                 android:layout_gravity="center_horizontal"
+                android:padding="1px"
                 solitaire:card_orientation="vertical"
                 />
 

@@ -161,7 +161,8 @@ public class Klondike extends Activity
     		
 			mDealt.flipTopCard(false);
 			
-			int deal = Math.min(3, mDeck.size());
+			//int deal = Math.min(3, mDeck.size());
+			int deal = 1;
 			
 			mDealt.addAll(mDeck.deal(deal, false));
 			mDealt.flipTopCard(true);
@@ -233,6 +234,8 @@ public class Klondike extends Activity
 
 				int pos = findLegalTableauMove(src, dst);
 
+				releaseHolding();
+				
 				if (pos >= 0)
 				{
 					int n = src.size();
@@ -247,8 +250,11 @@ public class Klondike extends Activity
 					 * stack, leaving an unflipped new top. */
 					src.flipTopCard(true);
 				}
-
-				releaseHolding();
+				else
+				{
+					if (vv.getCardStack().size() > 0)
+						setHolding(vv);						
+				}
 			}
 			else
 			{
