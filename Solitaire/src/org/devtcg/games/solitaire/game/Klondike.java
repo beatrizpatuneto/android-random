@@ -34,7 +34,7 @@ public class Klondike extends Activity
 	 *  bit position represents a suit corresponding to its ordinal. */ 
 	private int mWinFlag = 0;
 
-	/** Indicates the stack that we are currently holding. */
+	/** The stack that we are currently holding. */
 	protected CardStackView mHolding;
 
     @Override
@@ -43,7 +43,7 @@ public class Klondike extends Activity
         super.onCreate(icicle);
         setContentView(R.layout.klondike);
 
-        initViews();
+        			initViews();
 
         if (icicle == null)
         	newGame();
@@ -120,8 +120,6 @@ public class Klondike extends Activity
     		  new KlondikeObserver(mFoundationView[i]));
         }
 
-        mDealt.add(mDeck.draw());
-
         Log.d(TAG, "Deck:");
 
         for (int i = 0; i < mDeck.size(); i++)
@@ -134,12 +132,14 @@ public class Klondike extends Activity
     private void loadGame(Bundle icicle)
     {
     	/* TODO: Unserialize and load game state. */
+    	Log.d(TAG, "loadGame(icicle=" + icicle + ")");
     }
 
     @Override
     protected void onFreeze(Bundle icicle)
     {
     	/* TODO: Serialize and save game state. */
+    	icicle.putString("foo", "bar");
     }
 
     private final OnClickListener mDeckClick = new OnClickListener()

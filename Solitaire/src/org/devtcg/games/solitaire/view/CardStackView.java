@@ -54,12 +54,9 @@ public class CardStackView extends ViewGroup
 		super(context, attrs, inflateParams);
 		init();
 
+		/* XXX: This doesn't work but I don't understand why. */
 		Resources.StyledAttributes a = context.obtainStyledAttributes(attrs,
 		  R.styleable.CardStackView);
-
-		TypedValue tv = new TypedValue();
-		boolean b = a.getValue(R.styleable.CardStackView_card_orientation, tv);
-		Log.d(TAG, "b=" + b + ", tv=" + tv);
 
 		int orientation = a.getInt(R.styleable.CardStackView_card_orientation,
 		  Orientation.VERTICAL.ordinal());
@@ -171,8 +168,6 @@ public class CardStackView extends ViewGroup
 		int paddingWidth = mPaddingLeft + mPaddingRight;
 		int paddingHeight = mPaddingTop + mPaddingBottom;
 		
-		Log.d(TAG, "widthSpec=" + MeasureSpec.toString(widthSpec) + ", heightSpec=" + MeasureSpec.toString(heightSpec));
-		
 		if (n == 0)
 		{
 			Drawable card = getResources().getDrawable(R.drawable.card);
@@ -188,16 +183,11 @@ public class CardStackView extends ViewGroup
 			int w = 0;
 			int h = 0;
 
-			if (n > 0)
-			{
-				View lastChild = getChildAt(n - 1);
-				lastChild.measure(widthSpec, heightSpec);
+			View lastChild = getChildAt(n - 1);
+			lastChild.measure(widthSpec, heightSpec);
 
-				w = lastChild.getMeasuredWidth() + paddingWidth;
-				h = lastChild.getMeasuredHeight() + paddingHeight;
-
-				Log.d(TAG, "lastChild measured " + w + "x" + h);
-			}
+			w = lastChild.getMeasuredWidth() + paddingWidth;
+			h = lastChild.getMeasuredHeight() + paddingHeight;
 
 			setMeasuredDimension(w, h);
 		}
@@ -235,15 +225,20 @@ public class CardStackView extends ViewGroup
 	{
 		Rect r = mRect;
 		getDrawingRect(r);
-		
+
 		if (getChildCount() == 0)
 		{
-			canvas.drawLine(r.left + 1, r.top, r.right - 1, r.top, mBorder);
-			canvas.drawLine(r.left + 1, r.bottom - 1, r.right - 1, r.bottom - 1, mBorder);
-			canvas.drawLine(r.left, r.top + 1, r.left, r.bottom - 1, mBorder);
-			canvas.drawLine(r.right - 1, r.top + 1, r.right - 1, r.bottom - 1, mBorder);
+			int pl = mPaddingLeft;
+			int pt = mPaddingTop;
+			int pr = mPaddingRight;
+			int pb = mPaddingBottom;
+			
+			canvas.drawLine(r.left + pl + 1, r.top + pt, r.right - 1 - pr, r.top + pt, mBorder);
+			canvas.drawLine(r.left + pl + 1, r.bottom - 1 - pb, r.right - 1 - pr, r.bottom - 1 - pb, mBorder);
+			canvas.drawLine(r.left + pl, r.top + 1 + pt, r.left + pl, r.bottom - 1 - pb, mBorder);
+			canvas.drawLine(r.right - 1, r.top + 1 + pt, r.right - 1 - pr, r.bottom - 1 - pb, mBorder);
 
-			canvas.drawRect(r.left + 1, r.top + 1, r.right - 1, r.bottom - 1, mBack);
+			canvas.drawRect(r.left + pl + 1, r.top + 1 + pt, r.right - 1 - pr, r.bottom - 1 - pb, mBack);
 		}
 
 		/* TODO: In a stack, we shouldn't need to draw each card in full.  In
