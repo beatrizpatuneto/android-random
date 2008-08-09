@@ -23,15 +23,17 @@ import android.view.View;
  */
 public class CardView extends View
 {
+	public static final String TAG = "CardView";
+	
 	private Rect mRect;
 	private Paint mBorder;
 	private Paint mBack;
 	private Paint mSuitPaint;
-	
+
 	protected Card mCard;
 	protected Drawable mCardDrawable;
 	protected Drawable mSuitDrawable;
-	
+
 	public CardView(Context context)
 	{
 		super(context);		
@@ -104,6 +106,13 @@ public class CardView extends View
 	public Card getCard()
 	{
 		return mCard;
+	}
+	
+	@Override
+	protected void onMeasure(int widthSpec, int heightSpec)
+	{
+		Log.d(TAG, "widthSpec=" + MeasureSpec.toString(widthSpec) + ", heightSpec=" + MeasureSpec.toString(heightSpec));
+		setMeasuredDimension(30, 40);
 	}
 
 	@Override
