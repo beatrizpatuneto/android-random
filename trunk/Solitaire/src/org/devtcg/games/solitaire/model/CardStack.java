@@ -6,6 +6,8 @@ import java.util.Observer;
 
 public class CardStack extends ArrayList<Card>
 {
+	private static final long serialVersionUID = -8840125106915106274L;
+
 	protected CardStackObservable mObservable;
 
 	public CardStack()
@@ -23,6 +25,16 @@ public class CardStack extends ArrayList<Card>
 	private void init()
 	{
 		mObservable = new CardStackObservable(this);
+	}
+	
+	public static CardStack valueOf(ArrayList list)
+	{
+		CardStack stack = new CardStack(list.size());
+		
+		for (Object o: list)
+			stack.add((Card)o);
+		
+		return stack;
 	}
 
 	public void registerObserver(CardStackObserver o)
