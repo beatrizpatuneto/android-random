@@ -1,5 +1,12 @@
 package org.devtcg.games.solitaire.game;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+
 import org.devtcg.games.solitaire.R;
 import org.devtcg.games.solitaire.model.Card;
 import org.devtcg.games.solitaire.model.CardStack;
@@ -10,6 +17,7 @@ import org.devtcg.games.solitaire.view.CardView;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,13 +29,13 @@ public class Klondike extends Activity
 
 	protected Deck mDeck;
 	protected CardStack mDealt;
-	protected CardStack[] mTableau;
-	protected CardStack[] mFoundation;
+	protected CardStack[] mTableau = new CardStack[7];
+	protected CardStack[] mFoundation = new CardStack[4];
 
 	protected CardStackView mDeckView;
 	protected CardStackView mDealtView; 
-	protected CardStackView[] mFoundationView;
-	protected CardStackView[] mTableauView;
+	protected CardStackView[] mTableauView = new CardStackView[7];
+	protected CardStackView[] mFoundationView = new CardStackView[4];
 
 	/** Flag indicating which of the foundation stacks have been filled.  The
 	 *  game is won when all 4 are full.  This is simply a 4 bit flag, where each
@@ -44,13 +52,17 @@ public class Klondike extends Activity
         setContentView(R.layout.klondike);
 
 		initViews();
+		
+		if (icicle == null)
+		{
+			Log.d(TAG, "Lame hack to work around broken onFreeze in M5");
+			icicle = loadBundleFromDisk();
+		}
 
-		Log.d(TAG, "icicle=" + icicle);
-
-        if (icicle == null)
-        	newGame();
-        else
-        	loadGame(icicle);
+		if (icicle == null)
+			newGame();
+		else
+			loadGame(icicle);
     }
 
     private void initViews()
@@ -63,7 +75,6 @@ public class Klondike extends Activity
     	mDealtView.setCardOrientation(CardStackView.Orientation.SINGLE);
     	mDealtView.setOnClickListener(mDealtClick);
 
-        mTableauView = new CardStackView[7];
         mTableauView[0] = (CardStackView)findViewById(R.id.stack1);
         mTableauView[1] = (CardStackView)findViewById(R.id.stack2);
         mTableauView[2] = (CardStackView)findViewById(R.id.stack3);
@@ -78,7 +89,6 @@ public class Klondike extends Activity
         	view.setOnClickListener(mTableauClick);
         }
 
-        mFoundationView = new CardStackView[4];
         mFoundationView[0] = (CardStackView)findViewById(R.id.ace1);
         mFoundationView[1] = (CardStackView)findViewById(R.id.ace2);
         mFoundationView[2] = (CardStackView)findViewById(R.id.ace3);
@@ -102,8 +112,6 @@ public class Klondike extends Activity
         mDealt = new CardStack();
         mDealtView.connectToCardStack(mDealt, new KlondikeObserver(mDealtView));
         
-        mTableau = new CardStack[7];
-
         for (int i = 0; i < mTableau.length; i++)
         {
         	mTableau[i] = new CardStack(i + 4);
@@ -113,39 +121,118 @@ public class Klondike extends Activity
         	  new KlondikeObserver(mTableauView[i]));
         }
 
-        mFoundation = new CardStack[4];
-
         for (int i = 0; i < mFoundation.length; i++)
         {
         	mFoundation[i] = new CardStack(13);
     		mFoundationView[i].connectToCardStack(mFoundation[i],
     		  new KlondikeObserver(mFoundationView[i]));
         }
-
-//        Log.d(TAG, "Deck:");
-//
-//        for (int i = 0; i < mDeck.size(); i++)
-//        {
-//        	Card card = mDeck.get(i);
-//        	Log.d(TAG, "  Card " + i + ": " + card + " (" + card.isFaceUp() + ")");
-//        }
     }
 
+	/* Unserialize and load game state. */
     private void loadGame(Bundle icicle)
     {
-    	/* TODO: Unserialize and load game state. */
     	Log.d(TAG, "loadGame(icicle=" + icicle + ")");
+
+    	mDeck = Deck.valueOf((ArrayList)icicle.getSerializable("deck"));
+        mDeckView.connectToCardStack(mDeck, new KlondikeObserver(mDeckView));
+    	mDealt = CardStack.valueOf((ArrayList)icicle.getSerializable("dealt"));
+        mDealtView.connectToCardStack(mDealt, new KlondikeObserver(mDealtView));
+
+    	Object[] f = (Object[])icicle.getSerializable("foundation");
+
+    	for (int i = 0; i < mFoundation.length; i++)
+    	{
+    		mFoundation[i] = CardStack.valueOf((ArrayList)f[i]);
+        	mFoundationView[i].connectToCardStack(mFoundation[i],
+              new KlondikeObserver(mFoundationView[i]));
+    	}
+
+    	Object[] t = (Object[])icicle.getSerializable("tableau");
+
+        for (int i = 0; i < mTableau.length; i++)
+        {
+        	mTableau[i] = CardStack.valueOf((ArrayList)t[i]);
+        	mTableauView[i].connectToCardStack(mTableau[i],
+              new KlondikeObserver(mTableauView[i]));
+        }
+    }
+    
+    private void saveGame(Bundle icicle)
+    {
+    	icicle.putSerializable("deck", mDeck);
+    	icicle.putSerializable("dealt", mDealt);
+    	icicle.putSerializable("foundation", mFoundation);
+    	icicle.putSerializable("tableau", mTableau);
+
+    	/* Normally this would not be necessary but apparently due to
+    	 * infuriating M5 bugs, onFreeze doesn't work as documented. */
+    	saveBundleToDisk(icicle);
     }
 
     @Override
-    protected void onFreeze(Bundle icicle)
+    protected void onStop()
     {
-    	Log.d(TAG, "onFreeze()");
+    	Log.d(TAG, "onStop(): Saving game state...");
+
+    	saveGame(new Bundle());
     	
-    	/* TODO: Serialize and save game state. */
-    	icicle.putString("foo", "bar");
+    	super.onStop();
     }
 
+    /* XXX */
+    private void saveBundleToDisk(Bundle icicle)
+    {
+    	Parcel p = Parcel.obtain();
+		p.writeBundle(icicle);
+		byte[] serialized = p.marshall();
+		
+    	FileOutputStream out = null;
+    	
+    	try {
+    		out = openFileOutput("foo", MODE_PRIVATE);
+    		out.write(serialized);
+    	} catch (IOException e) {
+    		Log.d(TAG, "Unable to save state!");
+    	} finally {
+    		if (out != null)
+    			try { out.close(); } catch (IOException e) {}
+    	}
+    }
+
+    /* XXX */
+    private Bundle loadBundleFromDisk()
+    {
+    	Bundle result = null;
+    	FileInputStream in = null;
+    	
+    	try {
+    		in = openFileInput("foo");
+
+    		ByteArrayOutputStream out = new ByteArrayOutputStream();
+    		byte[] b = new byte[1024];
+    		int n;
+    		
+    		while ((n = in.read(b)) >= 0)
+    			out.write(b, 0, n);
+        	
+    		byte[] unserialized = out.toByteArray();
+    		
+    		Parcel p = Parcel.obtain();
+    		p.unmarshall(unserialized, 0, unserialized.length);
+    		p.setDataPosition(0);
+    		
+    		result = p.readBundle();
+    	} catch (IOException e) {
+    		Log.d(TAG, "Unable to load state!");
+    	} finally {
+    		if (in != null)
+    			try { in.close(); } catch (IOException e) {}
+    	}
+
+    	return result;
+    }
+    
     private final OnClickListener mDeckClick = new OnClickListener()
     {
     	public void onClick(View v)

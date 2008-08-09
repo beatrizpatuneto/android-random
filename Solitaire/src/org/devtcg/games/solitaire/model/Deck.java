@@ -9,6 +9,8 @@ import java.util.Random;
  */
 public class Deck extends CardStack
 {
+	private static final long serialVersionUID = 77319588072766699L;
+	
 	public static final int STANDARD_DECK_SIZE = 52;
 
 	/**
@@ -31,6 +33,17 @@ public class Deck extends CardStack
 			for (Card.Rank rank: Card.Rank.values())
 				add(new Card(suit, rank, false));
 		}
+	}
+
+	public static Deck valueOf(ArrayList list)
+	{
+		Deck stack = new Deck(0);
+		stack.ensureCapacity(list.size());
+		
+		for (Object o: list)
+			stack.add((Card)o);
+		
+		return stack;
 	}
 	
 	/**

@@ -1,10 +1,14 @@
 package org.devtcg.games.solitaire.model;
 
+import java.io.Serializable;
+
 /**
  * Simple card interface for {@link Deck}.
  */
-public class Card
+public class Card implements Serializable
 {
+	private static final long serialVersionUID = 1625465421248959766L;
+	
 	protected Suit mSuit;
 	protected Rank mRank;
 	protected boolean mFaceUp;
@@ -18,7 +22,7 @@ public class Card
 	{
 		this(suit, rank, true);
 	}
-	
+
 	public Card(Suit suit, Rank rank, boolean faceUp)
 	{
 		mSuit = suit;
