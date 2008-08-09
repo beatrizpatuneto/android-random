@@ -18,6 +18,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
@@ -25,6 +26,8 @@ import android.widget.Toast;
 public class Klondike extends Activity
 {
 	public static final String TAG = "Klondike";
+	
+	public static final String TMP_STATE_FILE = "gamestate";
 
 	protected Deck mDeck;
 	protected CardStack mDealt;
@@ -35,6 +38,8 @@ public class Klondike extends Activity
 	protected CardStackView mDealtView; 
 	protected CardStackView[] mTableauView = new CardStackView[7];
 	protected CardStackView[] mFoundationView = new CardStackView[4];
+
+	private static final int MENU_NEW_GAME = Menu.FIRST;
 
 	/** Flag indicating which of the foundation stacks have been filled.  The
 	 *  game is won when all 4 are full.  This is simply a 4 bit flag, where each
@@ -62,6 +67,16 @@ public class Klondike extends Activity
 			newGame();
 		else
 			loadGame(icicle);
+    }
+
+    @Override
+    protected void onPause()
+    {
+    	Log.d(TAG, "onPause(): Saving game state...");
+
+    	saveGame(new Bundle());
+    	
+    	super.onStop();
     }
 
     private void initViews()
@@ -169,16 +184,6 @@ public class Klondike extends Activity
     	saveBundleToDisk(icicle);
     }
 
-    @Override
-    protected void onPause()
-    {
-    	Log.d(TAG, "onPause(): Saving game state...");
-
-    	saveGame(new Bundle());
-    	
-    	super.onStop();
-    }
-
     /* XXX */
     private void saveBundleToDisk(Bundle icicle)
     {
@@ -189,7 +194,7 @@ public class Klondike extends Activity
     	FileOutputStream out = null;
     	
     	try {
-    		out = openFileOutput("foo", MODE_PRIVATE);
+    		out = openFileOutput(TMP_STATE_FILE, MODE_PRIVATE);
     		out.write(serialized);
     	} catch (IOException e) {
     		Log.d(TAG, "Unable to save state!");
@@ -206,7 +211,7 @@ public class Klondike extends Activity
     	FileInputStream in = null;
     	
     	try {
-    		in = openFileInput("foo");
+    		in = openFileInput(TMP_STATE_FILE);
 
     		ByteArrayOutputStream out = new ByteArrayOutputStream();
     		byte[] b = new byte[1024];
@@ -230,6 +235,30 @@ public class Klondike extends Activity
     	}
 
     	return result;
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+    	super.onCreateOptionsMenu(menu);
+    	
+    	menu.add(0, MENU_NEW_GAME, "New Game");
+    	
+    	return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(Menu.Item item)
+    {
+    	switch (item.getId())
+    	{
+    	case MENU_NEW_GAME:
+    		deleteFile(TMP_STATE_FILE);
+    		newGame();
+    		return true;
+    	}
+    	
+    	return super.onOptionsItemSelected(item);
     }
     
     private final OnClickListener mDeckClick = new OnClickListener()
