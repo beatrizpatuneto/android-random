@@ -41,9 +41,11 @@ public class Klondike extends Activity
 
 	private static final int MENU_NEW_GAME = Menu.FIRST;
 
-	/** Flag indicating which of the foundation stacks have been filled.  The
-	 *  game is won when all 4 are full.  This is simply a 4 bit flag, where each
-	 *  bit position represents a suit corresponding to its ordinal. */ 
+	/** 
+	 * Flag indicating which of the foundation stacks have been filled.  The
+	 * game is won when all 4 are full.  This is simply a 4 bit flag, where
+	 * each bit position represents a suit corresponding to its ordinal.
+	 */ 
 	private int mWinFlag = 0;
 
 	/** The stack that we are currently holding. */
