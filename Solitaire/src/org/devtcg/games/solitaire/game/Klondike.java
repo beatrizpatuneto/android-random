@@ -84,7 +84,7 @@ public class Klondike extends Activity
     	mDeckView = (CardStackView)findViewById(R.id.deck);
     	mDeckView.setCardOrientation(CardStackView.Orientation.SINGLE);
     	mDeckView.setOnClickListener(mDeckClick);
-    	
+
     	mDealtView = (CardStackView)findViewById(R.id.dealt);
     	mDealtView.setCardOrientation(CardStackView.Orientation.SINGLE);
     	mDealtView.setOnClickListener(mDealtClick);
@@ -236,7 +236,7 @@ public class Klondike extends Activity
 
     	return result;
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -246,7 +246,7 @@ public class Klondike extends Activity
     	
     	return true;
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(Menu.Item item)
     {
@@ -269,6 +269,10 @@ public class Klondike extends Activity
     		{
     			int n = mDealt.size();
     			
+    			/* Nothing to do, back out. */
+    			if (n == 0)
+    				return;
+
     			/* Make sure all cards are flipped down. */
     			mDealt.flipTopCard(false);
 
@@ -278,7 +282,7 @@ public class Klondike extends Activity
     				mDeck.add(card);
     			}
     		}
-    		
+
 			mDealt.flipTopCard(false);
 			
 			//int deal = Math.min(3, mDeck.size());
