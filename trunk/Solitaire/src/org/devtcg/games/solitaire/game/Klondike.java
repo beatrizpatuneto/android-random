@@ -1,10 +1,12 @@
 package org.devtcg.games.solitaire.game;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.devtcg.games.solitaire.R;
 import org.devtcg.games.solitaire.model.Card;
@@ -16,7 +18,6 @@ import org.devtcg.games.solitaire.view.CardView;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -58,17 +59,13 @@ public class Klondike extends Activity
         setContentView(R.layout.klondike);
 
 		initViews();
-		
-		if (icicle == null)
-		{
-			Log.d(TAG, "Lame hack to work around broken onFreeze in M5");
-			icicle = loadBundleFromDisk();
-		}
 
-		if (icicle == null)
+		HashMap<String, Object> state = loadStateFromDisk();
+
+		if (state == null)
 			newGame();
 		else
-			loadGame(icicle);
+			loadGame(state);
     }
 
     @Override
@@ -76,9 +73,11 @@ public class Klondike extends Activity
     {
     	Log.d(TAG, "onPause(): Saving game state...");
 
-    	saveGame(new Bundle());
+    	saveGame();
     	
-    	super.onStop();
+    	Log.d(TAG, "onPause(): Saved!");
+
+    	super.onPause();
     }
 
     private void initViews()
@@ -146,16 +145,14 @@ public class Klondike extends Activity
     }
 
 	/* Unserialize and load game state. */
-    private void loadGame(Bundle icicle)
+    private void loadGame(HashMap<String, Object> state)
     {
-    	Log.d(TAG, "loadGame(icicle=" + icicle + ")");
-
-    	mDeck = Deck.valueOf((ArrayList)icicle.getSerializable("deck"));
+    	mDeck = Deck.valueOf((ArrayList)state.get("deck"));
         mDeckView.connectToCardStack(mDeck, new KlondikeObserver(mDeckView));
-    	mDealt = CardStack.valueOf((ArrayList)icicle.getSerializable("dealt"));
+    	mDealt = CardStack.valueOf((ArrayList)state.get("dealt"));
         mDealtView.connectToCardStack(mDealt, new KlondikeObserver(mDealtView));
 
-    	Object[] f = (Object[])icicle.getSerializable("foundation");
+    	Object[] f = (Object[])state.get("foundation");
 
     	for (int i = 0; i < mFoundation.length; i++)
     	{
@@ -164,7 +161,7 @@ public class Klondike extends Activity
               new KlondikeObserver(mFoundationView[i]));
     	}
 
-    	Object[] t = (Object[])icicle.getSerializable("tableau");
+    	Object[] t = (Object[])state.get("tableau");
 
         for (int i = 0; i < mTableau.length; i++)
         {
@@ -173,67 +170,55 @@ public class Klondike extends Activity
               new KlondikeObserver(mTableauView[i]));
         }
     }
-    
-    private void saveGame(Bundle icicle)
-    {
-    	icicle.putSerializable("deck", mDeck);
-    	icicle.putSerializable("dealt", mDealt);
-    	icicle.putSerializable("foundation", mFoundation);
-    	icicle.putSerializable("tableau", mTableau);
 
-    	/* Normally this would not be necessary but apparently due to
-    	 * infuriating M5 bugs, onFreeze doesn't work as documented. */
-    	saveBundleToDisk(icicle);
+    private void saveGame()
+    {
+    	HashMap<String, Object> state = new HashMap<String, Object>();
+    	state.put("deck", mDeck);
+    	state.put("deck", mDeck);
+    	state.put("dealt", mDealt);
+    	state.put("foundation", mFoundation);
+    	state.put("tableau", mTableau);
+
+    	saveStateToDisk(state);
     }
 
-    /* XXX */
-    private void saveBundleToDisk(Bundle icicle)
+    private void saveStateToDisk(HashMap<String, Object> state)
     {
-    	Parcel p = Parcel.obtain();
-		p.writeBundle(icicle);
-		byte[] serialized = p.marshall();
-		
     	FileOutputStream out = null;
-    	
+    	ObjectOutputStream oos = null;
+
     	try {
     		out = openFileOutput(TMP_STATE_FILE, MODE_PRIVATE);
-    		out.write(serialized);
+    		oos = new ObjectOutputStream(out);
+    		oos.writeObject(state);
     	} catch (IOException e) {
-    		Log.d(TAG, "Unable to save state!");
+    		Log.d(TAG, "Unable to save state!", e);
     	} finally {
-    		if (out != null)
+    		if (oos != null)
+    			try { oos.close(); } catch (IOException e) {}
+    		else if (out != null)
     			try { out.close(); } catch (IOException e) {}
     	}
     }
 
-    /* XXX */
-    private Bundle loadBundleFromDisk()
+    private HashMap<String, Object> loadStateFromDisk()
     {
-    	Bundle result = null;
+    	HashMap<String, Object> result = null;
     	FileInputStream in = null;
-    	
+    	ObjectInputStream ois = null;
+
     	try {
     		in = openFileInput(TMP_STATE_FILE);
-
-    		ByteArrayOutputStream out = new ByteArrayOutputStream();
-    		byte[] b = new byte[1024];
-    		int n;
-    		
-    		while ((n = in.read(b)) >= 0)
-    			out.write(b, 0, n);
-        	
-    		byte[] unserialized = out.toByteArray();
-    		
-    		Parcel p = Parcel.obtain();
-    		p.unmarshall(unserialized, 0, unserialized.length);
-    		p.setDataPosition(0);
-    		
-    		result = p.readBundle();
-    	} catch (IOException e) {
-    		Log.d(TAG, "Unable to load state!");
-    	} finally {
-    		if (in != null)
-    			try { in.close(); } catch (IOException e) {}
+    		ois = new ObjectInputStream(in);
+    		result = (HashMap<String, Object>)ois.readObject();
+    	} catch (Exception e) {
+    		Log.d(TAG, "Unable to load state!", e);
+		} finally {
+			if (ois != null)
+				try { ois.close(); } catch (IOException e) {}
+			else if (in != null)
+				try { in.close(); } catch (IOException e) {}
     	}
 
     	return result;

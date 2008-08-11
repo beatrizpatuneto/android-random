@@ -8,7 +8,7 @@ public class CardStack extends ArrayList<Card>
 {
 	private static final long serialVersionUID = -8840125106915106274L;
 
-	protected CardStackObservable mObservable;
+	protected transient CardStackObservable mObservable;
 
 	public CardStack()
 	{
