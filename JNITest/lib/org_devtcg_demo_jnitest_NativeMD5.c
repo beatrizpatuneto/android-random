@@ -60,7 +60,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_devtcg_demo_jnitest_NativeMD5_digestStream
 
 catch_exception:
 	(*env)->ExceptionClear(env);
-	return JNI_FALSE;
+	return NULL;
 }
 
 /*****************************************************************************/
