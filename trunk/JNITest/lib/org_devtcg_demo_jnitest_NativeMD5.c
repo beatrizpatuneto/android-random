@@ -45,7 +45,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_devtcg_demo_jnitest_NativeMD5_digestStream
 			continue;
 
 		belem = (*env)->GetByteArrayElements(env, b, NULL);
-		MD5Update(&ctx, (unsigned char *)belem, n);
+		MD5Update(&ctx, (unsigned char *)belem, (unsigned int)n);
 		(*env)->ReleaseByteArrayElements(env, b, belem, JNI_ABORT);
 	}
 
