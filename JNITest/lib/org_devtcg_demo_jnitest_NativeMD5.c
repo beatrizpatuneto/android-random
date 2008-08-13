@@ -25,8 +25,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_devtcg_demo_jnitest_NativeMD5_digestStream
 	if ((b = (*env)->NewByteArray(env, 1024)) == NULL)
 		return NULL;
 
-//	MD5Init(&ctx);
-	memset(digest, 0, sizeof(digest));
+	MD5Init(&ctx);
 
 	while (JNI_TRUE)
 	{
@@ -46,11 +45,11 @@ JNIEXPORT jbyteArray JNICALL Java_org_devtcg_demo_jnitest_NativeMD5_digestStream
 			continue;
 
 		belem = (*env)->GetByteArrayElements(env, b, NULL);
-//		MD5Update(&ctx, (unsigned char *)belem, n);
+		MD5Update(&ctx, (unsigned char *)belem, n);
 		(*env)->ReleaseByteArrayElements(env, b, belem, JNI_ABORT);
 	}
 
-//	MD5Final(digest, &ctx);
+	MD5Final(digest, &ctx);
 
 	if ((ret = (*env)->NewByteArray(env, 16)) == NULL)
 		return NULL;
@@ -74,13 +73,12 @@ static jbyteArray digest_stream(JNIEnv *env, FILE *fp)
 	char buf[1048];
 	size_t n;
 
-//	MD5Init(&ctx);
-	memset(digest, 0, sizeof(digest));
+	MD5Init(&ctx);
 
 	while ((n = fread(buf, 1, sizeof(buf), fp)) > 0)
-		/* MD5Update(&ctx, buf, n) */;
+		MD5Update(&ctx, buf, n);
 
-//	MD5Final(digest, &ctx);
+	MD5Final(digest, &ctx);
 
 	if (ferror(fp))
 		return NULL;
