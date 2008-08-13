@@ -1,0 +1,11 @@
+1. Build the lib/ dir with the supplied Makefile.
+2. Install libNativeMD5.so onto the emulator:
+
+  adb push libNativeMD5.so /system/lib
+
+3. Build Android test project.
+4. Install onto the emulator:
+
+  adb install bin/JNITest.apk
+ 
+Run JNITest on Android.  Check `adb logcat' for output.
