@@ -30,6 +30,7 @@ JNIEXPORT jbyteArray JNICALL Java_org_devtcg_demo_jnitest_NativeMD5_digestStream
 	while (JNI_TRUE)
 	{
 		jbyte *belem;
+		jboolean isCopy;
 
 		n = (*env)->CallIntMethod(env, in, inRead, b);
 
@@ -44,9 +45,15 @@ JNIEXPORT jbyteArray JNICALL Java_org_devtcg_demo_jnitest_NativeMD5_digestStream
 		if (n == 0)
 			continue;
 
-		belem = (*env)->GetByteArrayElements(env, b, NULL);
+		belem = (*env)->GetPrimitiveArrayCritical(env, b, &isCopy);
+
+		/* Diagnostic to check that the VM is behaving efficiently and not
+		 * screwing up our benchmark. */
+		if (isCopy == JNI_TRUE)
+			abort();
+
 		MD5Update(&ctx, (unsigned char *)belem, (unsigned int)n);
-		(*env)->ReleaseByteArrayElements(env, b, belem, JNI_ABORT);
+		(*env)->ReleasePrimitiveArrayCritical(env, b, belem, JNI_ABORT);
 	}
 
 	MD5Final(digest, &ctx);
