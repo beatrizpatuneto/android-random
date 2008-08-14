@@ -21,8 +21,8 @@ public class JNITest extends Activity
 
 	private static final DecimalFormat secFmt = new DecimalFormat("#0.0000");
 
-	protected static final String FILE1 = "/sdcard/foo";
-	protected static final String FILE2 = "/sdcard/bar";
+	protected static final String FILE1 = "/data/foo";
+	protected static final String FILE2 = "/data/bar";
 
 	private Button mGo;
 	private LinearLayout mResults;
