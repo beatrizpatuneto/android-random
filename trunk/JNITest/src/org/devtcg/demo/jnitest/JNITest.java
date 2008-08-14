@@ -1,8 +1,15 @@
 package org.devtcg.demo.jnitest;
 
-import android.app.Activity;
+import android.app.*;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.*;
+import android.view.View.OnClickListener;
+import android.widget.*;
+import android.widget.LinearLayout.LayoutParams;
+import android.text.*;
+import android.text.style.*;
+import android.graphics.*;
 
 import java.text.DecimalFormat;
 
@@ -12,7 +19,15 @@ public class JNITest extends Activity
 {
 	public static final String TAG = "JNITest";
 
-	public static final DecimalFormat secFmt = new DecimalFormat("#0.0000");
+	private static final DecimalFormat secFmt = new DecimalFormat("#0.0000");
+
+	protected static final String FILE1 = "/sdcard/foo";
+	protected static final String FILE2 = "/sdcard/bar";
+
+	private Button mGo;
+	private LinearLayout mResults;
+	private Thread mRunning;
+	private ProgressDialog mProgress;
 
     @Override
     public void onCreate(Bundle icicle)
@@ -20,37 +35,103 @@ public class JNITest extends Activity
         super.onCreate(icicle);
         setContentView(R.layout.main);
 
-		byte[] digest;
-		long now;
-		
-		now = System.nanoTime();
-		digest = NativeMD5.digestFile("/sdcard/foo");
-		printResult("digestFile(/sdcard/foo)", digest, now);
+		mGo = (Button)findViewById(R.id.go);
+		mGo.setOnClickListener(mGoClick);
 
-		now = System.nanoTime();
-		digest = digestWithStream("/sdcard/bar");
-		printResult("digestStream(/sdcard/bar)", digest, now);
-
-		now = System.nanoTime();
-		digest = NativeMD5.digestFile("/sdcard/foo");
-		printResult("digestFile(/sdcard/foo)", digest, now);
-
-		now = System.nanoTime();
-		digest = digestWithStream("/sdcard/bar");
-		printResult("digestStream(/sdcard/bar)", digest, now);
+		mResults = (LinearLayout)findViewById(R.id.results);
     }
 
-	public static void printResult(String call, byte[] digest, long start)
+	private final OnClickListener mGoClick = new OnClickListener()
 	{
-		long diff = System.nanoTime() - start;
+		public void onClick(View v)
+		{
+			mResults.removeAllViews();
 
-		Log.i(TAG, call + " = " + HexFormatter.format(digest) + ": " +
-		  secFmt.format(diff / 1000000000.0) + " seconds elapsed.");
+			mGo.setEnabled(false);
+			mProgress = ProgressDialog.show(JNITest.this,
+			  "Running test", "Please be patient while the test runs...", true);
+
+			mRunning = new Thread()
+			{
+				public void run()
+				{
+					byte[] r;
+					long now;
+
+					now = System.nanoTime();
+					r = NativeMD5.digestFile(FILE1);
+					showResult("native", FILE1, r, now);
+
+					now = System.nanoTime();
+					r = digestWithStream(FILE2);
+					showResult("hybrid", FILE2, r, now);
+
+					now = System.nanoTime();
+					r = NativeMD5.digestFile(FILE1);
+					showResult("native", FILE1, r, now);
+
+					now = System.nanoTime();
+					r = digestWithStream(FILE2);
+					showResult("hybrid", FILE2, r, now);
+
+					UIThreadUtilities.runOnUIThread(JNITest.this, new Runnable() {
+						public void run()
+						{
+							mGo.setEnabled(true);
+							mProgress.dismiss();
+						}
+					});
+				}
+
+				public void showResult(String call, String file, byte[] r, 
+				  long then)
+				{
+					double elapsed = (System.nanoTime() - then) / 1000000000.0;
+					UIThreadUtilities.runOnUIThread(JNITest.this,
+					  new ResultRunnable(call, file, r, elapsed));
+				}
+			};
+
+			mRunning.start();
+		}
+	};
+
+	private class ResultRunnable implements Runnable
+	{
+		private String call;
+		private String file;
+		private byte[] digest;
+		private double elapsed;
+
+		public ResultRunnable(String call, String file, byte[] digest,
+		  double elapsed)
+		{
+			this.call = call;
+			this.file = file;
+			this.digest = digest;
+			this.elapsed = elapsed;
+		}
+
+		public void run()
+		{
+			ResultFormattedString msg =
+			  new ResultFormattedString(call, file, 
+			    HexFormatter.format(digest), secFmt.format(elapsed));
+
+			TextView res = new TextView(JNITest.this);
+			res.setText(msg);
+
+			res.setTextAppearance(JNITest.this,
+			  android.R.style.TextAppearance_Medium);
+
+			mResults.addView(res, new LayoutParams(LayoutParams.FILL_PARENT,
+			  LayoutParams.WRAP_CONTENT));
+		}
 	}
 
-	public static class HexFormatter
+	private static class HexFormatter
 	{
-		protected static final char[] map = "0123456789ABCDEF".toCharArray();
+		protected static final char[] map = "0123456789abcdef".toCharArray();
 
 		public static String format(byte[] b)
 		{
@@ -66,7 +147,44 @@ public class JNITest extends Activity
 		}
 	}
 
-	public static byte[] digestWithStream(String file)
+	private static class ResultFormattedString extends SpannableString
+	{
+		private int pos = 0;
+
+		public ResultFormattedString(String call, String file, 
+		  String digestStr, String elapsedStr)
+		{
+			super(call + "(" + file + ") = " + digestStr +
+			  ": " + elapsedStr + " seconds elapsed.");
+
+			setSpanPos(new ForegroundColorSpan(0xffffff99), call.length(), 0);
+			walk(call.length() + 1);
+
+			setSpanPos(new ForegroundColorSpan(0xff9999ff), file.length(), 0);
+			setSpanPos(new StyleSpan(Typeface.ITALIC), file.length(), 0);
+			walk(file.length() + 1);
+
+			walk(3);
+//			setSpanPos(new ForegroundColorSpan(0xffcccccc), digestStr.length(), 0);
+			walk(digestStr.length() + 2);
+
+			setSpanPos(new ForegroundColorSpan(0xffff9999), elapsedStr.length(), 0);
+			setSpanPos(new StyleSpan(Typeface.ITALIC), elapsedStr.length(), 0);
+			walk(elapsedStr.length() + 1);
+		}
+		
+		public void setSpanPos(Object span, int len, int flags)
+		{
+			setSpan(span, pos, pos + len, flags);
+		}
+
+		public void walk(int len)
+		{
+			pos += len;
+		}
+	}
+
+	private static byte[] digestWithStream(String file)
 	{
 		InputStream in = null;
 
