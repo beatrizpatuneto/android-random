@@ -29,8 +29,13 @@ public class Card implements Serializable
 		mRank = rank;
 		mFaceUp = faceUp;
 	}
+	
+	public Card(int suit, int rank)
+	{
+		this(suit, rank, true);
+	}
 
-    public Card(int suit, int rank)
+    public Card(int suit, int rank, boolean faceUp)
     {
         switch (rank)
         {
@@ -59,7 +64,7 @@ public class Card implements Serializable
         	default: throw new IllegalArgumentException("suit must be between 0 and 3");
         }
         
-        mFaceUp = true;
+        mFaceUp = faceUp;
     }
     
     public Suit getSuit()
