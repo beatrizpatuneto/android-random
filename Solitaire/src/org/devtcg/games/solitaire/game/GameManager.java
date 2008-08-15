@@ -202,7 +202,7 @@ public class GameManager extends Activity
 
     	return super.onOptionsItemSelected(item);
     }
-    
+
     public void onWin(Game game)
     {
     	assert mCurrent == game;
