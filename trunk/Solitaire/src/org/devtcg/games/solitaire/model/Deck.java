@@ -31,7 +31,12 @@ public class Deck extends CardStack
 		for (Card.Suit suit: Card.Suit.values())
 		{
 			for (Card.Rank rank: Card.Rank.values())
+			{
+				if (cards-- <= 0)
+					return;
+
 				add(new Card(suit, rank, false));
+			}
 		}
 	}
 
