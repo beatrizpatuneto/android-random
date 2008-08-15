@@ -35,8 +35,8 @@ public class GameManager extends Activity
 	
 	protected static final String STATE_FILE = "gamestate";
 	
-	private static final String DEFAULT_GAME = Klondike.class.getName();
-	
+	private static final String DEFAULT_GAME = Klondike.TAG;
+
 	protected static final int MENU_NEW_GAME = Menu.FIRST;
 	protected static final int MENU_RESTART_GAME = Menu.FIRST + 1;
 	protected static final int MENU_CHANGE_RULES = Menu.FIRST + 2;
@@ -54,7 +54,7 @@ public class GameManager extends Activity
 
 		mRoot = (FrameLayout)findViewById(R.id.root);
 		
-		registerGame(Klondike.class.getName(), Klondike.class);
+		registerGame(Klondike.TAG, Klondike.class);
 
 		Game game;
 
@@ -87,8 +87,6 @@ public class GameManager extends Activity
 		FileInputStream inf = null;
 		GameInputStream in = null;
 		
-		int ruleId = -1;
-
 		try {
 			inf = openFileInput(STATE_FILE);
 			in = new GameInputStream(inf);
@@ -170,7 +168,7 @@ public class GameManager extends Activity
 			outf = openFileOutput(STATE_FILE, MODE_PRIVATE);
 			out = new GameOutputStream(outf);
 
-			out.writeUTF(mCurrent.getClass().getName());
+			out.writeUTF(mCurrent.getName());
 			out.writeLong(mCurrent.getSeed());
 			mCurrent.saveGame(out);
 			out.close();

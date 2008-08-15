@@ -67,6 +67,8 @@ public abstract class Game
 	/** @deprecated Going away soon when we switch to Activity abstraction. */
 	public abstract View getGameView();
 
+	public abstract String getName();
+
 	/**
 	 * Deal a new game with the specified seed.  Used to restart a game with
 	 * the same seed, rather than create a new game.
