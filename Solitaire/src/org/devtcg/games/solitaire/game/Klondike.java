@@ -61,8 +61,7 @@ public class Klondike extends Game
     {
         super.init(mgr);
 
-        ViewInflate inflate = ViewInflate.from(mgr);
-        View v = inflate.inflate(R.layout.klondike, null, null);
+        View v = ViewInflate.from(mgr).inflate(R.layout.klondike, null, null);
 
 		initViews(v);
 
