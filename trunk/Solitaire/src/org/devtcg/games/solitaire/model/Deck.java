@@ -39,21 +39,27 @@ public class Deck extends CardStack
 	{
 		Deck stack = new Deck(0);
 		stack.ensureCapacity(list.size());
-		
+
 		for (Object o: list)
 			stack.add((Card)o);
-		
+
 		return stack;
 	}
-	
+
 	/**
 	 * Shuffle the deck.
 	 */
 	public void shuffle()
 	{
-		int n = size();
+		shuffle(new Random());
+	}
 
-		Random rand = new Random();
+	/**
+	 * Shuffle the deck with the seeded random number generator.
+	 */
+	public void shuffle(Random rand)
+	{
+		int n = size();
 
 		/* Knuth shuffle. */
 		while (--n > 0)
@@ -62,7 +68,7 @@ public class Deck extends CardStack
 			Card tmp = get(n);
 			set(n, get(k));
 			set(k, tmp);
-		}
+		}		
 	}
 	
 	/**
