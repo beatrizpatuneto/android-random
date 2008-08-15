@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">Solitaire</string>
     <string name="klondike">Klondike</string>
+	 <string name="freecell">Freecell</string>
 </resources>
