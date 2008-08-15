@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import org.devtcg.games.solitaire.R;
 import org.devtcg.games.solitaire.model.Card;
@@ -21,14 +22,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewInflate;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
 
-public class Klondike extends Activity
+public class Klondike extends Game
 {
 	public static final String TAG = "Klondike";
 	
 	public static final String TMP_STATE_FILE = "gamestate";
+	
+	protected View mRoot;
 
 	protected Deck mDeck;
 	protected CardStack mDealt;
@@ -40,8 +44,6 @@ public class Klondike extends Activity
 	protected CardStackView[] mTableauView = new CardStackView[7];
 	protected CardStackView[] mFoundationView = new CardStackView[4];
 
-	private static final int MENU_NEW_GAME = Menu.FIRST;
-
 	/** 
 	 * Flag indicating which of the foundation stacks have been filled.  The
 	 * game is won when all 4 are full.  This is simply a 4 bit flag, where
@@ -51,52 +53,43 @@ public class Klondike extends Activity
 
 	/** The stack that we are currently holding. */
 	protected CardStackView mHolding;
+	
+	@Override
+	public String getName()
+	{
+		return "Klondike";
+	}
 
     @Override
-    public void onCreate(Bundle icicle)
+    public void init(GameManager mgr)
     {
-        super.onCreate(icicle);
-        setContentView(R.layout.klondike);
+        super.init(mgr);
 
-		initViews();
+        ViewInflate inflate = ViewInflate.from(mgr);
+        View v = inflate.inflate(R.layout.klondike, null, null);
 
-		HashMap<String, Object> state = loadStateFromDisk();
-
-		if (state == null)
-			newGame();
-		else
-			loadGame(state);
+		initViews(v);
+		
+		mRoot = v;
     }
 
-    @Override
-    protected void onPause()
+    private void initViews(View v)
     {
-    	Log.d(TAG, "onPause(): Saving game state...");
-
-    	saveGame();
-    	
-    	Log.d(TAG, "onPause(): Saved!");
-
-    	super.onPause();
-    }
-
-    private void initViews()
-    {
-    	mDeckView = (CardStackView)findViewById(R.id.deck);
+    	mDeckView = (CardStackView)v.findViewById(R.id.deck);
     	mDeckView.setCardOrientation(CardStackView.Orientation.SINGLE);
     	mDeckView.setOnClickListener(mDeckClick);
 
-    	mDealtView = (CardStackView)findViewById(R.id.dealt);
+    	mDealtView = (CardStackView)v.findViewById(R.id.dealt);
     	mDealtView.setCardOrientation(CardStackView.Orientation.SINGLE);
     	mDealtView.setOnClickListener(mDealtClick);
 
-        mTableauView[0] = (CardStackView)findViewById(R.id.stack1);
-        mTableauView[1] = (CardStackView)findViewById(R.id.stack2);
-        mTableauView[2] = (CardStackView)findViewById(R.id.stack3);
-        mTableauView[3] = (CardStackView)findViewById(R.id.stack4);
-        mTableauView[4] = (CardStackView)findViewById(R.id.stack5);
-        mTableauView[5] = (CardStackView)findViewById(R.id.stack6);
-        mTableauView[6] = (CardStackView)findViewById(R.id.stack7);
+        mTableauView[0] = (CardStackView)v.findViewById(R.id.stack1);
+        mTableauView[1] = (CardStackView)v.findViewById(R.id.stack2);
+        mTableauView[2] = (CardStackView)v.findViewById(R.id.stack3);
+        mTableauView[3] = (CardStackView)v.findViewById(R.id.stack4);
+        mTableauView[4] = (CardStackView)v.findViewById(R.id.stack5);
+        mTableauView[5] = (CardStackView)v.findViewById(R.id.stack6);
+        mTableauView[6] = (CardStackView)v.findViewById(R.id.stack7);
 
         for (int i = 0; i < mTableauView.length; i++)
         {
@@ -104,10 +97,10 @@ public class Klondike extends Activity
         	view.setOnClickListener(mTableauClick);
         }
 
-        mFoundationView[0] = (CardStackView)findViewById(R.id.ace1);
-        mFoundationView[1] = (CardStackView)findViewById(R.id.ace2);
-        mFoundationView[2] = (CardStackView)findViewById(R.id.ace3);
-        mFoundationView[3] = (CardStackView)findViewById(R.id.ace4);
+        mFoundationView[0] = (CardStackView)v.findViewById(R.id.ace1);
+        mFoundationView[1] = (CardStackView)v.findViewById(R.id.ace2);
+        mFoundationView[2] = (CardStackView)v.findViewById(R.id.ace3);
+        mFoundationView[3] = (CardStackView)v.findViewById(R.id.ace4);
 
         for (int i = 0; i < mFoundationView.length; i++)
         {
@@ -116,12 +109,19 @@ public class Klondike extends Activity
         	view.setCardOrientation(CardStackView.Orientation.SINGLE);
         }
     }
-
-    private void newGame()
+    
+	@Override
+	public View getGameView()
+	{
+		return mRoot;
+	}
+	
+    @Override
+    public void newGame(long seed)
     {
     	/* Initialize models. */
         mDeck = new Deck();
-        mDeck.shuffle();
+        mDeck.shuffle(new Random(seed));
         mDeckView.connectToCardStack(mDeck, new KlondikeObserver(mDeckView));
 
         mDealt = new CardStack();
@@ -144,110 +144,91 @@ public class Klondike extends Activity
         }
     }
 
-	/* Unserialize and load game state. */
-    private void loadGame(HashMap<String, Object> state)
+	@Override
+    public boolean loadGame(GameInputStream in)
     {
-    	mDeck = Deck.valueOf((ArrayList)state.get("deck"));
-        mDeckView.connectToCardStack(mDeck, new KlondikeObserver(mDeckView));
-    	mDealt = CardStack.valueOf((ArrayList)state.get("dealt"));
-        mDealtView.connectToCardStack(mDealt, new KlondikeObserver(mDealtView));
+//    	mDeck = Deck.valueOf((ArrayList)state.get("deck"));
+//        mDeckView.connectToCardStack(mDeck, new KlondikeObserver(mDeckView));
+//    	mDealt = CardStack.valueOf((ArrayList)state.get("dealt"));
+//        mDealtView.connectToCardStack(mDealt, new KlondikeObserver(mDealtView));
+//
+//    	Object[] f = (Object[])state.get("foundation");
+//
+//    	for (int i = 0; i < mFoundation.length; i++)
+//    	{
+//    		mFoundation[i] = CardStack.valueOf((ArrayList)f[i]);
+//        	mFoundationView[i].connectToCardStack(mFoundation[i],
+//              new KlondikeObserver(mFoundationView[i]));
+//    	}
+//
+//    	Object[] t = (Object[])state.get("tableau");
+//
+//        for (int i = 0; i < mTableau.length; i++)
+//        {
+//        	mTableau[i] = CardStack.valueOf((ArrayList)t[i]);
+//        	mTableauView[i].connectToCardStack(mTableau[i],
+//              new KlondikeObserver(mTableauView[i]));
+//        }
 
-    	Object[] f = (Object[])state.get("foundation");
-
-    	for (int i = 0; i < mFoundation.length; i++)
-    	{
-    		mFoundation[i] = CardStack.valueOf((ArrayList)f[i]);
-        	mFoundationView[i].connectToCardStack(mFoundation[i],
-              new KlondikeObserver(mFoundationView[i]));
-    	}
-
-    	Object[] t = (Object[])state.get("tableau");
-
-        for (int i = 0; i < mTableau.length; i++)
-        {
-        	mTableau[i] = CardStack.valueOf((ArrayList)t[i]);
-        	mTableauView[i].connectToCardStack(mTableau[i],
-              new KlondikeObserver(mTableauView[i]));
-        }
+		return false;
     }
 
-    private void saveGame()
+	@Override
+    public boolean saveGame(GameOutputStream out)
     {
-    	HashMap<String, Object> state = new HashMap<String, Object>();
-    	state.put("deck", mDeck);
-    	state.put("deck", mDeck);
-    	state.put("dealt", mDealt);
-    	state.put("foundation", mFoundation);
-    	state.put("tableau", mTableau);
-
-    	saveStateToDisk(state);
+//    	HashMap<String, Object> state = new HashMap<String, Object>();
+//    	state.put("deck", mDeck);
+//    	state.put("deck", mDeck);
+//    	state.put("dealt", mDealt);
+//    	state.put("foundation", mFoundation);
+//    	state.put("tableau", mTableau);
+//
+//    	saveStateToDisk(state);
+		
+		return false;
     }
 
-    private void saveStateToDisk(HashMap<String, Object> state)
-    {
-    	FileOutputStream out = null;
-    	ObjectOutputStream oos = null;
+//    private void saveStateToDisk(HashMap<String, Object> state)
+//    {
+//    	FileOutputStream out = null;
+//    	ObjectOutputStream oos = null;
+//
+//    	try {
+//    		out = openFileOutput(TMP_STATE_FILE, MODE_PRIVATE);
+//    		oos = new ObjectOutputStream(out);
+//    		oos.writeObject(state);
+//    	} catch (IOException e) {
+//    		Log.d(TAG, "Unable to save state!", e);
+//    	} finally {
+//    		if (oos != null)
+//    			try { oos.close(); } catch (IOException e) {}
+//    		else if (out != null)
+//    			try { out.close(); } catch (IOException e) {}
+//    	}
+//    }
+//
+//    private HashMap<String, Object> loadStateFromDisk()
+//    {
+//    	HashMap<String, Object> result = null;
+//    	FileInputStream in = null;
+//    	ObjectInputStream ois = null;
+//
+//    	try {
+//    		in = openFileInput(TMP_STATE_FILE);
+//    		ois = new ObjectInputStream(in);
+//    		result = (HashMap<String, Object>)ois.readObject();
+//    	} catch (Exception e) {
+//    		Log.d(TAG, "Unable to load state!", e);
+//		} finally {
+//			if (ois != null)
+//				try { ois.close(); } catch (IOException e) {}
+//			else if (in != null)
+//				try { in.close(); } catch (IOException e) {}
+//    	}
+//
+//    	return result;
+//    }
 
-    	try {
-    		out = openFileOutput(TMP_STATE_FILE, MODE_PRIVATE);
-    		oos = new ObjectOutputStream(out);
-    		oos.writeObject(state);
-    	} catch (IOException e) {
-    		Log.d(TAG, "Unable to save state!", e);
-    	} finally {
-    		if (oos != null)
-    			try { oos.close(); } catch (IOException e) {}
-    		else if (out != null)
-    			try { out.close(); } catch (IOException e) {}
-    	}
-    }
-
-    private HashMap<String, Object> loadStateFromDisk()
-    {
-    	HashMap<String, Object> result = null;
-    	FileInputStream in = null;
-    	ObjectInputStream ois = null;
-
-    	try {
-    		in = openFileInput(TMP_STATE_FILE);
-    		ois = new ObjectInputStream(in);
-    		result = (HashMap<String, Object>)ois.readObject();
-    	} catch (Exception e) {
-    		Log.d(TAG, "Unable to load state!", e);
-		} finally {
-			if (ois != null)
-				try { ois.close(); } catch (IOException e) {}
-			else if (in != null)
-				try { in.close(); } catch (IOException e) {}
-    	}
-
-    	return result;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-    	super.onCreateOptionsMenu(menu);
-    	
-    	menu.add(0, MENU_NEW_GAME, "New Game");
-    	
-    	return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(Menu.Item item)
-    {
-    	switch (item.getId())
-    	{
-    	case MENU_NEW_GAME:
-    		deleteFile(TMP_STATE_FILE);
-    		newGame();
-    		return true;
-    	}
-    	
-    	return super.onOptionsItemSelected(item);
-    }
-    
     private final OnClickListener mDeckClick = new OnClickListener()
     {
     	public void onClick(View v)
@@ -325,10 +306,7 @@ public class Klondike extends Activity
 				acestack.add(card);
 
 				if (checkWin(acestack) == true)
-				{
-					Toast.makeText(Klondike.this, "You WIN!", Toast.LENGTH_LONG).show();
-					newGame();
-				}
+					won();
 			}
 		}
     };
@@ -485,7 +463,7 @@ public class Klondike extends Activity
 		@Override
 		protected void onAdd(CardStack stack, Card card)
 		{
-			CardView view = new CardView(Klondike.this);
+			CardView view = new CardView(mManager);
 			view.setCard(card);
 			mView.addCard(view);
 			mView.invalidate();
