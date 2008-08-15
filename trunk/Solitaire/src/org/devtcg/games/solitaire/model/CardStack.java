@@ -122,14 +122,16 @@ public class CardStack extends ArrayList<Card>
 		return ret;
 	}
 	
-	public void flipTopCard(boolean faceUp)
+	public Card flipTopCard(boolean faceUp)
 	{
 		Card top = peekTop();
 		
 		if (top == null)
-			return;
+			return null;
 
 		top.setFaceUp(faceUp);
+
+		return top;
 	}
 	
 	@Override
