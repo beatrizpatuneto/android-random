@@ -18,7 +18,7 @@ public class CardStack extends ArrayList<Card>
 
 	public CardStack(int initialCapacity)
 	{
-		super();
+		super(initialCapacity);
 		init();
 	}
 
