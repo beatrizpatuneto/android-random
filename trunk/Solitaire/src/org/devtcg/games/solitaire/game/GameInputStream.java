@@ -47,7 +47,7 @@ public class GameInputStream extends DataInputStream
 	  throws IOException
 	{
 		int n = readInt();
-		
+
 		if (n < 0)
 			return null;
 		
