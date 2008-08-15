@@ -1,12 +1,5 @@
 package org.devtcg.games.solitaire.game;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Random;
 
 import org.devtcg.games.solitaire.R;
@@ -17,14 +10,9 @@ import org.devtcg.games.solitaire.model.Deck;
 import org.devtcg.games.solitaire.view.CardStackView;
 import org.devtcg.games.solitaire.view.CardView;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewInflate;
 import android.view.View.OnClickListener;
-import android.widget.Toast;
 
 public class Klondike extends Game
 {
