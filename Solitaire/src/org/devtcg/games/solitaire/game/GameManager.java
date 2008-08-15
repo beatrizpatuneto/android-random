@@ -4,18 +4,28 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.devtcg.games.solitaire.R;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.Window;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 
 public class GameManager extends Activity
 {
@@ -45,7 +55,6 @@ public class GameManager extends Activity
 		mRoot = (FrameLayout)findViewById(R.id.root);
 		
 		registerGame(Klondike.class.getName(), Klondike.class);
-//		registerGame(Freecell.ruleId, Freecell.class);
 
 		Game game;
 
@@ -60,11 +69,7 @@ public class GameManager extends Activity
 			}
 		}
 
-		mCurrent = game;
-
-		View root = mCurrent.getGameView();
-		mRoot.addView(root, new LayoutParams(LayoutParams.FILL_PARENT,
-		  LayoutParams.FILL_PARENT));
+		switchCurrentGame(game);
 	}
 
 	protected void registerGame(String name, Class game)
@@ -144,6 +149,17 @@ public class GameManager extends Activity
 		}
 	}
 
+	private void switchCurrentGame(Game game)
+	{
+		mRoot.removeAllViews();
+
+		mCurrent = game;
+
+		View root = mCurrent.getGameView();
+		mRoot.addView(root, new LayoutParams(LayoutParams.FILL_PARENT,
+		  LayoutParams.FILL_PARENT));
+	}
+
 	@Override
 	protected void onPause()
 	{
@@ -196,18 +212,113 @@ public class GameManager extends Activity
     		mCurrent.newGame(mCurrent.getSeed());
     		return true;
     	case MENU_CHANGE_RULES:
-    		/* TODO... */
+    		ChangeRulesDialog.show(this, "Choose game rules", mGames, mChangeRules);
     		return true;
     	}
 
     	return super.onOptionsItemSelected(item);
     }
+    
+    private final ChangeRulesDialog.OnChangeListener mChangeRules = new ChangeRulesDialog.OnChangeListener() {
+    	public void onChange(DialogInterface dialog, String ruleName)
+    	{
+    		dialog.dismiss();
+    		deleteFile(STATE_FILE);
+
+    		Class ruleClass = lookupGame(ruleName);
+    		Game rules;
+
+			try {
+				rules = (Game)ruleClass.newInstance();
+	    		rules.init(GameManager.this);
+	    		rules.newGame();
+
+	    		switchCurrentGame(rules);
+			} catch (Exception e) {
+				Log.d(TAG, "Unable to load game '" + ruleName + "'", e);
+			}    		
+    	}
+    };
 
     public void onWin(Game game)
     {
     	assert mCurrent == game;
-    	
+
 		Toast.makeText(this, "You WIN!", Toast.LENGTH_LONG).show();
 		game.newGame();
+    }
+
+    private static class ChangeRulesDialog extends Dialog
+    {
+    	private String[] mChoices;  
+    	private String mTitle;
+    	private OnChangeListener mChangeListener;
+
+    	public ChangeRulesDialog(Context ctx)
+    	{
+    		super(ctx);
+    	}
+
+    	public void setChoices(HashMap<String, Class> games)
+    	{
+    		Set<String> names = games.keySet();
+    		mChoices = new String[names.size()];
+    		names.toArray(mChoices);
+    	}
+
+    	public void setTitle(String title)
+    	{
+    		super.setTitle(title);
+    		mTitle = title;
+    	}
+
+    	public void setOnChangeListener(OnChangeListener listener)
+    	{
+    		mChangeListener = listener;
+    	}
+
+    	public static ChangeRulesDialog show(Context ctx, String title,
+    	  HashMap<String, Class> games, OnChangeListener listener)
+    	{
+    		ChangeRulesDialog dialog = new ChangeRulesDialog(ctx);
+
+    		dialog.setTitle(title);
+    		dialog.setChoices(games);
+    		dialog.setOnChangeListener(listener);
+    		dialog.setCancelable(true);
+    		dialog.show();
+
+    		return dialog;
+    	}
+
+    	public void onStart()
+    	{
+    		if (TextUtils.isEmpty(mTitle) == true)
+    			requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+    		setContentView(R.layout.change_rules_dialog);
+
+    		ListView list = (ListView)findViewById(R.id.rules);
+    		list.setAdapter(new ArrayAdapter<String>(getContext(),
+    		  android.R.layout.simple_list_item_1, mChoices));
+    		list.setOnItemClickListener(mItemClicked);
+    	}
+    	
+    	private final OnItemClickListener mItemClicked = new OnItemClickListener()
+    	{
+			public void onItemClick(AdapterView adapter, View v, int pos, long id)
+			{
+				if (mChangeListener != null)
+				{
+					mChangeListener.onChange(GameManager.ChangeRulesDialog.this,
+					  mChoices[pos]);
+				}
+			}
+    	};
+
+    	public static interface OnChangeListener
+    	{
+    		void onChange(DialogInterface dialog, String ruleName);
+    	}
     }
 }
