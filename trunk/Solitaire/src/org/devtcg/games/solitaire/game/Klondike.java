@@ -42,6 +42,12 @@ public class Klondike extends Game
 
 	/** The stack that we are currently holding. */
 	protected CardStackView mHolding;
+	
+	@Override
+	public String getName()
+	{
+		return TAG;
+	}
 
     @Override
     public void init(GameManager mgr)
