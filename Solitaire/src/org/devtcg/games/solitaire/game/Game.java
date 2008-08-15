@@ -1,5 +1,7 @@
 package org.devtcg.games.solitaire.game;
 
+import java.io.IOException;
+
 import android.content.Context;
 import android.view.View;
 
@@ -8,9 +10,6 @@ import android.view.View;
  */
 public abstract class Game
 {
-	/** Unique id for this games rules. */
-	public static int ruleId;
-	
 	/** Current game's randomization seed.  Used to support {@link restartGame}. */
 	protected long mSeed = -1;
 
@@ -67,8 +66,6 @@ public abstract class Game
 
 	/** @deprecated Going away soon when we switch to Activity abstraction. */
 	public abstract View getGameView();
-	
-	public abstract String getName();
 
 	/**
 	 * Deal a new game with the specified seed.  Used to restart a game with
@@ -101,7 +98,8 @@ public abstract class Game
 	 * @return
 	 *   True if the game state was written; false if the game doesn't support saves. 
 	 */
-	public abstract boolean saveGame(GameOutputStream out);
+	public abstract boolean saveGame(GameOutputStream out)
+	  throws IOException;
 
 	/**
 	 * Load game state.  Apply the reverse of {@link saveGame} here.
@@ -110,5 +108,6 @@ public abstract class Game
 	 *   True if the game state was loaded; false otherwise.  If false, expect
 	 *   a call to {@link newGame} to follow.
 	 */
-	public abstract boolean loadGame(GameInputStream in);
+	public abstract boolean loadGame(GameInputStream in)
+	  throws IOException;
 }

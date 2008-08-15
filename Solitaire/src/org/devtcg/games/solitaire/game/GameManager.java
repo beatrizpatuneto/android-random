@@ -25,11 +25,13 @@ public class GameManager extends Activity
 	
 	protected static final String STATE_FILE = "gamestate";
 	
+	private static final String DEFAULT_GAME = Klondike.class.getName();
+	
 	protected static final int MENU_NEW_GAME = Menu.FIRST;
 	protected static final int MENU_RESTART_GAME = Menu.FIRST + 1;
 	protected static final int MENU_CHANGE_RULES = Menu.FIRST + 2;
 
-	protected static HashMap<Integer, Class> mGames = new HashMap<Integer, Class>();
+	protected static HashMap<String, Class> mGames = new HashMap<String, Class>();
 	protected Game mCurrent;
 
 	private FrameLayout mRoot;
@@ -41,8 +43,8 @@ public class GameManager extends Activity
 		setContentView(R.layout.main);
 
 		mRoot = (FrameLayout)findViewById(R.id.root);
-
-		registerGame(Klondike.ruleId, Klondike.class);
+		
+		registerGame(Klondike.class.getName(), Klondike.class);
 //		registerGame(Freecell.ruleId, Freecell.class);
 
 		Game game;
@@ -65,14 +67,14 @@ public class GameManager extends Activity
 		  LayoutParams.FILL_PARENT));
 	}
 
-	protected void registerGame(int ruleId, Class game)
+	protected void registerGame(String name, Class game)
 	{
-		mGames.put(ruleId, game);
+		mGames.put(name, game);
 	}
 
-	protected Class lookupGame(int ruleId)
+	protected Class lookupGame(String name)
 	{
-		return mGames.get(ruleId);
+		return mGames.get(name);
 	}
 
 	public Game tryLoadGame()
@@ -85,15 +87,15 @@ public class GameManager extends Activity
 		try {
 			inf = openFileInput(STATE_FILE);
 			in = new GameInputStream(inf);
-
-			ruleId = in.readInt();
+			
+			String ruleName = in.readUTF();
 			long seed = in.readLong();
 
 			Class gameClass;
 
-			if ((gameClass = lookupGame(ruleId)) == null)
+			if ((gameClass = lookupGame(ruleName)) == null)
 			{
-				Log.d(TAG, "Game " + ruleId + " not found, weird.");
+				Log.d(TAG, "Game '" + ruleName + "' not found, weird.");
 				return null;
 			}
 
@@ -119,15 +121,15 @@ public class GameManager extends Activity
 	public Game tryNewGame()
 	{
 		SharedPreferences prefs = getSharedPreferences(TAG, MODE_PRIVATE);
-		int ruleId = prefs.getInt(PREFS_LAST_GAME, Klondike.ruleId);
+		String ruleName = prefs.getString(PREFS_LAST_GAME, DEFAULT_GAME);
 
 		Class gameClass;
 
-		if ((gameClass = lookupGame(ruleId)) == null)
+		if ((gameClass = lookupGame(ruleName)) == null)
 		{
-			Log.d(TAG, "Game " + ruleId + " not found, weird.");
+			Log.d(TAG, "Game '" + ruleName + "' not found, weird.");
 			
-			if ((gameClass = lookupGame(Klondike.ruleId)) == null)
+			if ((gameClass = lookupGame(DEFAULT_GAME)) == null)
 				return null;
 		}
 
@@ -137,7 +139,7 @@ public class GameManager extends Activity
 			game.newGame();
 			return game;
 		} catch (Exception e) {
-			Log.d(TAG, "Unable to instantiate game with rule " + ruleId, e);
+			Log.d(TAG, "Unable to instantiate game '" + ruleName + "'", e);
 			return null;
 		}
 	}
@@ -152,7 +154,7 @@ public class GameManager extends Activity
 			outf = openFileOutput(STATE_FILE, MODE_PRIVATE);
 			out = new GameOutputStream(outf);
 
-			out.writeInt(mCurrent.ruleId);
+			out.writeUTF(mCurrent.getClass().getName());
 			out.writeLong(mCurrent.getSeed());
 			mCurrent.saveGame(out);
 			out.close();
@@ -197,7 +199,7 @@ public class GameManager extends Activity
     		/* TODO... */
     		return true;
     	}
-    	
+
     	return super.onOptionsItemSelected(item);
     }
     
