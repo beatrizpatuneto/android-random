@@ -1,5 +1,6 @@
 package org.devtcg.games.solitaire.game;
 
+import java.io.IOException;
 import java.util.Random;
 
 import org.devtcg.games.solitaire.R;
@@ -20,15 +21,17 @@ public class Klondike extends Game
 	
 	public static final String TMP_STATE_FILE = "gamestate";
 	
+	public static final int ruleId = 1;
+	
 	protected View mRoot;
 
 	protected Deck mDeck;
-	protected CardStack mDealt;
+	protected CardStack mWaste;
 	protected CardStack[] mTableau = new CardStack[7];
 	protected CardStack[] mFoundation = new CardStack[4];
 
 	protected CardStackView mDeckView;
-	protected CardStackView mDealtView; 
+	protected CardStackView mWasteView; 
 	protected CardStackView[] mTableauView = new CardStackView[7];
 	protected CardStackView[] mFoundationView = new CardStackView[4];
 
@@ -41,12 +44,6 @@ public class Klondike extends Game
 
 	/** The stack that we are currently holding. */
 	protected CardStackView mHolding;
-	
-	@Override
-	public String getName()
-	{
-		return "Klondike";
-	}
 
     @Override
     public void init(GameManager mgr)
@@ -57,7 +54,7 @@ public class Klondike extends Game
         View v = inflate.inflate(R.layout.klondike, null, null);
 
 		initViews(v);
-		
+
 		mRoot = v;
     }
 
@@ -67,9 +64,9 @@ public class Klondike extends Game
     	mDeckView.setCardOrientation(CardStackView.Orientation.SINGLE);
     	mDeckView.setOnClickListener(mDeckClick);
 
-    	mDealtView = (CardStackView)v.findViewById(R.id.dealt);
-    	mDealtView.setCardOrientation(CardStackView.Orientation.SINGLE);
-    	mDealtView.setOnClickListener(mDealtClick);
+    	mWasteView = (CardStackView)v.findViewById(R.id.dealt);
+    	mWasteView.setCardOrientation(CardStackView.Orientation.SINGLE);
+    	mWasteView.setOnClickListener(mDealtClick);
 
         mTableauView[0] = (CardStackView)v.findViewById(R.id.stack1);
         mTableauView[1] = (CardStackView)v.findViewById(R.id.stack2);
@@ -112,8 +109,8 @@ public class Klondike extends Game
         mDeck.shuffle(new Random(seed));
         mDeckView.connectToCardStack(mDeck, new KlondikeObserver(mDeckView));
 
-        mDealt = new CardStack();
-        mDealtView.connectToCardStack(mDealt, new KlondikeObserver(mDealtView));
+        mWaste = new CardStack();
+        mWasteView.connectToCardStack(mWaste, new KlondikeObserver(mWasteView));
         
         for (int i = 0; i < mTableau.length; i++)
         {
@@ -134,88 +131,43 @@ public class Klondike extends Game
 
 	@Override
     public boolean loadGame(GameInputStream in)
+	  throws IOException
     {
-//    	mDeck = Deck.valueOf((ArrayList)state.get("deck"));
-//        mDeckView.connectToCardStack(mDeck, new KlondikeObserver(mDeckView));
-//    	mDealt = CardStack.valueOf((ArrayList)state.get("dealt"));
-//        mDealtView.connectToCardStack(mDealt, new KlondikeObserver(mDealtView));
-//
-//    	Object[] f = (Object[])state.get("foundation");
-//
-//    	for (int i = 0; i < mFoundation.length; i++)
-//    	{
-//    		mFoundation[i] = CardStack.valueOf((ArrayList)f[i]);
-//        	mFoundationView[i].connectToCardStack(mFoundation[i],
-//              new KlondikeObserver(mFoundationView[i]));
-//    	}
-//
-//    	Object[] t = (Object[])state.get("tableau");
-//
-//        for (int i = 0; i < mTableau.length; i++)
-//        {
-//        	mTableau[i] = CardStack.valueOf((ArrayList)t[i]);
-//        	mTableauView[i].connectToCardStack(mTableau[i],
-//              new KlondikeObserver(mTableauView[i]));
-//        }
+		mDeck = Deck.valueOf(in.readCardStack());
+        mDeckView.connectToCardStack(mDeck, new KlondikeObserver(mDeckView));
+        mWaste = in.readCardStack();
+        mWasteView.connectToCardStack(mWaste, new KlondikeObserver(mWasteView));
 
-		return false;
+        mFoundation = in.readCardStacks();
+
+    	for (int i = 0; i < mFoundation.length; i++)
+    	{
+        	mFoundationView[i].connectToCardStack(mFoundation[i],
+              new KlondikeObserver(mFoundationView[i]));
+    	}
+
+    	mTableau = in.readCardStacks();
+
+        for (int i = 0; i < mTableau.length; i++)
+        {
+        	mTableauView[i].connectToCardStack(mTableau[i],
+              new KlondikeObserver(mTableauView[i]));
+        }
+
+		return true;
     }
 
 	@Override
     public boolean saveGame(GameOutputStream out)
+	  throws IOException
     {
-//    	HashMap<String, Object> state = new HashMap<String, Object>();
-//    	state.put("deck", mDeck);
-//    	state.put("deck", mDeck);
-//    	state.put("dealt", mDealt);
-//    	state.put("foundation", mFoundation);
-//    	state.put("tableau", mTableau);
-//
-//    	saveStateToDisk(state);
+		out.writeCardStack(mDeck);
+		out.writeCardStack(mWaste);
+		out.writeCardStacks(mFoundation);
+		out.writeCardStacks(mTableau);
 		
-		return false;
+		return true;
     }
-
-//    private void saveStateToDisk(HashMap<String, Object> state)
-//    {
-//    	FileOutputStream out = null;
-//    	ObjectOutputStream oos = null;
-//
-//    	try {
-//    		out = openFileOutput(TMP_STATE_FILE, MODE_PRIVATE);
-//    		oos = new ObjectOutputStream(out);
-//    		oos.writeObject(state);
-//    	} catch (IOException e) {
-//    		Log.d(TAG, "Unable to save state!", e);
-//    	} finally {
-//    		if (oos != null)
-//    			try { oos.close(); } catch (IOException e) {}
-//    		else if (out != null)
-//    			try { out.close(); } catch (IOException e) {}
-//    	}
-//    }
-//
-//    private HashMap<String, Object> loadStateFromDisk()
-//    {
-//    	HashMap<String, Object> result = null;
-//    	FileInputStream in = null;
-//    	ObjectInputStream ois = null;
-//
-//    	try {
-//    		in = openFileInput(TMP_STATE_FILE);
-//    		ois = new ObjectInputStream(in);
-//    		result = (HashMap<String, Object>)ois.readObject();
-//    	} catch (Exception e) {
-//    		Log.d(TAG, "Unable to load state!", e);
-//		} finally {
-//			if (ois != null)
-//				try { ois.close(); } catch (IOException e) {}
-//			else if (in != null)
-//				try { in.close(); } catch (IOException e) {}
-//    	}
-//
-//    	return result;
-//    }
 
     private final OnClickListener mDeckClick = new OnClickListener()
     {
@@ -223,29 +175,29 @@ public class Klondike extends Game
     	{
     		if (mDeck.size() == 0)
     		{
-    			int n = mDealt.size();
+    			int n = mWaste.size();
     			
     			/* Nothing to do, back out. */
     			if (n == 0)
     				return;
 
     			/* Make sure all cards are flipped down. */
-    			mDealt.flipTopCard(false);
+    			mWaste.flipTopCard(false);
 
     			while (n-- > 0)
     			{
-    				Card card = mDealt.remove(n);
+    				Card card = mWaste.remove(n);
     				mDeck.add(card);
     			}
     		}
 
-			mDealt.flipTopCard(false);
+			mWaste.flipTopCard(false);
 			
 			//int deal = Math.min(3, mDeck.size());
 			int deal = 1;
 			
-			mDealt.addAll(mDeck.deal(deal, false));
-			mDealt.flipTopCard(true);
+			mWaste.addAll(mDeck.deal(deal, false));
+			mWaste.flipTopCard(true);
 			
 			releaseHolding();
     	}
@@ -255,8 +207,8 @@ public class Klondike extends Game
     {
     	public void onClick(View v)
     	{
-			if (mDealt.size() >= 0)
-				setHolding(mDealtView);
+			if (mWaste.size() >= 0)
+				setHolding(mWasteView);
     	}
     };
     
