@@ -57,10 +57,10 @@ public class Card implements Serializable
 
         switch (suit)
         {
-        	case 0: mSuit = Suit.DIAMONDS; break;
-        	case 1: mSuit = Suit.CLUBS; break;
+        	case 0: mSuit = Suit.CLUBS; break;
+        	case 1: mSuit = Suit.SPADES; break;
         	case 2: mSuit = Suit.HEARTS; break;
-        	case 3: mSuit = Suit.SPADES; break;
+        	case 3: mSuit = Suit.DIAMONDS; break;
         	default: throw new IllegalArgumentException("suit must be between 0 and 3");
         }
         
