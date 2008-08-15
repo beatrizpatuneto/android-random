@@ -27,6 +27,13 @@ public class Klondike extends Game
 	protected CardStack mWaste;
 	protected CardStack[] mTableau = new CardStack[7];
 	protected CardStack[] mFoundation = new CardStack[4];
+	
+	/**
+	 * Foundation reference, indexed by suit ordinal for fast searching.  The
+	 * main foundation model is ordered to reflect how the user has position
+	 * the cards.
+	 */
+	protected CardStack[] mFoundationIndex = new CardStack[4];
 
 	protected CardStackView mDeckView;
 	protected CardStackView mWasteView; 
@@ -196,16 +203,145 @@ public class Klondike extends Game
     		}
 
 			mWaste.flipTopCard(false);
-			
-			//int deal = Math.min(3, mDeck.size());
-			int deal = 1;
-			
+
+			int deal = Math.min(3, mDeck.size());
+
 			mWaste.addAll(mDeck.deal(deal, false));
-			mWaste.flipTopCard(true);
-			
+			flipTopCardUpThenAutoplay(mWaste);
+
 			releaseHolding();
     	}
     };
+    
+    private CardStack findEmptyFoundation()
+    {
+    	for (int i = 0; i < mFoundation.length; i++)
+    	{
+    		if (mFoundation[i].size() == 0)
+    			return mFoundation[i];
+    	}
+    	
+    	return null;
+    }
+    
+    private boolean flipTopCardUpThenAutoplay(CardStack stack)
+    {
+    	Card play = stack.flipTopCard(true);
+
+    	if (play == null)
+    		return false;
+
+    	Card.Suit playSuit = play.getSuit();
+    	CardStack mine = mFoundationIndex[playSuit.ordinal()];
+
+    	/* Nothing here already, throw up the ace. */
+    	if (mine == null)
+    	{
+    		if (play.getRank() != Card.Rank.ACE)
+    			return false;
+    		
+    		mine = findEmptyFoundation();
+    		mFoundationIndex[playSuit.ordinal()] = mine;
+    		playFoundationAndCheckWin(mine, stack);
+    		return true;
+    	}
+    	/* Carefully check for a safe autoplay move. */
+    	else
+    	{
+    		Card f = mine.peekTop();
+
+    		int playRank = play.getRankOrdinal();
+
+    		/* First check that the move is legal. */
+    		if ((f.getRankOrdinal() + 1) != playRank)
+    			return false;
+    		
+    		/* Then make sure it is safe by checking the ranks of opposing
+    		 * suit colors. */
+    		CardStack[] opp = new CardStack[2];
+
+    		if (Card.isSuitRed(playSuit) == true)
+    		{
+    			opp[0] = mFoundationIndex[Card.Suit.SPADES.ordinal()];
+    			opp[1] = mFoundationIndex[Card.Suit.CLUBS.ordinal()];
+    		}
+    		else
+    		{
+    			opp[0] = mFoundationIndex[Card.Suit.HEARTS.ordinal()];
+    			opp[1] = mFoundationIndex[Card.Suit.DIAMONDS.ordinal()];
+    		}
+
+    		for (int i = 0; i < opp.length; i++)
+    		{
+    			int oppRank = (opp[i] != null) ?
+				  opp[i].peekTop().getRankOrdinal() : 0;
+
+				/* This would not be a safe move, abort. */
+				if (oppRank + 2 < playRank)
+					return false;
+    		}
+
+    		playFoundationAndCheckWin(mine, stack);
+    		return true;
+    	}
+    }
+    
+    /**
+     * Scan the play field (tableau only) for a playable card to the supplied
+     * foundation.  The waste is not scanned here as there are other conditions
+     * which will result in autoplay checking there.
+     * 
+     * @return
+     *   True if a card was autoplayed; false otherwise.
+     */
+    private boolean scanAutoplay(CardStack foundation)
+    {
+    	Card f = foundation.peekTop();
+
+    	/* Huh, why were we asked to autoplay an empty foundation? */
+    	if (f == null)
+    		return false;
+
+    	Card.Suit targetSuit = f.getSuit(); 
+    	int targetRank = f.getRankOrdinal() + 1;
+
+    	for (int i = 0; i < mTableau.length; i++)
+    	{
+    		Card check = mTableau[i].peekTop();
+    		
+    		if (check != null &&
+    		    check.getSuit() == targetSuit &&
+    		    check.getRankOrdinal() == targetRank)
+    		{
+    			playFoundationAndCheckWin(foundation, mTableau[i]);
+    			return true;
+    		}
+    	}
+
+    	return false;
+    }
+
+    private boolean playFoundationAndCheckWin(CardStack foundation, CardStack playTop)
+    {
+		Card play = playTop.removeTop();
+		foundation.add(play);
+
+		if (checkWin(foundation) == true)
+		{
+			won();
+			return true;
+		}
+
+		/* XXX: There is a bug here wherein if we win during autoplay (which
+		 * is likely!) we won't return the correct result from the initial
+		 * invocation of this function.  It isn't a problem in practice
+		 * because we don't check the return value, but just something to
+		 * consider. */
+		flipTopCardUpThenAutoplay(playTop);
+		scanAutoplay(foundation);
+
+		return false;
+    }
     
     private final OnClickListener mDealtClick = new OnClickListener()
     {
@@ -235,22 +371,19 @@ public class Klondike extends Game
 				return;
 
 			Card acetop = acestack.peekTop();
-			int rank;
 
 			if (acetop == null)
-				rank = Card.Rank.ACE.rankOrdinal();
-			else
-				rank = acetop.getRankOrdinal() + 1;
-
-			if (card.getRankOrdinal() == rank &&
-			    (acetop == null || acetop.getSuit() == card.getSuit()))
 			{
-				stack.removeTop();
-				stack.flipTopCard(true);
-				acestack.add(card);
-
-				if (checkWin(acestack) == true)
-					won();
+				if (card.getRank() == Card.Rank.ACE)
+				{
+					mFoundationIndex[card.getSuit().ordinal()] = acestack;
+					playFoundationAndCheckWin(acestack, stack);
+				}
+			}
+			else
+			{
+				if (card.getRankOrdinal() == acetop.getRankOrdinal() + 1)
+					playFoundationAndCheckWin(acestack, stack);
 			}
 		}
     };
@@ -282,7 +415,7 @@ public class Klondike extends Game
 
 					/* Check that we haven't now removed the top card from this
 					 * stack, leaving an unflipped new top. */
-					src.flipTopCard(true);
+					flipTopCardUpThenAutoplay(src);
 				}
 				else
 				{
