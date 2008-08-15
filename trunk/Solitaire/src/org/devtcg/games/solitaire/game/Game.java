@@ -80,7 +80,7 @@ public abstract class Game
 	{
 		newGame(setDefaultSeed());
 	}
-	
+
 	/**
 	 * Convenience called when the game has been won.
 	 */
@@ -88,7 +88,7 @@ public abstract class Game
 	{
 		mManager.onWin(this);
 	}
-	
+
 	/**
 	 * Serialize the game state for persistent storage.
 	 * 
