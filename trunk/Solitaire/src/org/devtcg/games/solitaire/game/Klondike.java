@@ -21,8 +21,6 @@ public class Klondike extends Game
 	
 	public static final String TMP_STATE_FILE = "gamestate";
 	
-	public static final int ruleId = 1;
-
 	protected View mRoot;
 
 	protected Deck mDeck;
