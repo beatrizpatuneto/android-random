@@ -117,10 +117,12 @@ public class Klondike extends Game
     	/* Initialize models. */
         mDeck = new Deck();
         mDeck.shuffle(new Random(seed));
-        mDeckView.connectToCardStack(mDeck, new KlondikeObserver(mDeckView));
+        mDeckView.connectToCardStack(mDeck,
+          new DefaultCardStackObserver(mManager, mDeckView));
 
         mWaste = new CardStack();
-        mWasteView.connectToCardStack(mWaste, new KlondikeObserver(mWasteView));
+        mWasteView.connectToCardStack(mWaste,
+          new DefaultCardStackObserver(mManager, mWasteView));
         
         for (int i = 0; i < mTableau.length; i++)
         {
@@ -128,14 +130,14 @@ public class Klondike extends Game
         	mTableau[i].addAll(mDeck.deal(i + 1, false));
         	mTableau[i].flipTopCard(true);
         	mTableauView[i].connectToCardStack(mTableau[i],
-        	  new KlondikeObserver(mTableauView[i]));
+        	  new DefaultCardStackObserver(mManager, mTableauView[i]));
         }
 
         for (int i = 0; i < mFoundation.length; i++)
         {
         	mFoundation[i] = new CardStack(13);
     		mFoundationView[i].connectToCardStack(mFoundation[i],
-    		  new KlondikeObserver(mFoundationView[i]));
+    		  new DefaultCardStackObserver(mManager, mFoundationView[i]));
         }
     }
 
@@ -144,16 +146,18 @@ public class Klondike extends Game
 	  throws IOException
     {
 		mDeck = Deck.valueOf(in.readCardStack());
-        mDeckView.connectToCardStack(mDeck, new KlondikeObserver(mDeckView));
+        mDeckView.connectToCardStack(mDeck,
+          new DefaultCardStackObserver(mManager, mDeckView));
         mWaste = in.readCardStack();
-        mWasteView.connectToCardStack(mWaste, new KlondikeObserver(mWasteView));
+        mWasteView.connectToCardStack(mWaste,
+          new DefaultCardStackObserver(mManager, mWasteView));
 
         mFoundation = in.readCardStacks();
 
     	for (int i = 0; i < mFoundation.length; i++)
     	{
         	mFoundationView[i].connectToCardStack(mFoundation[i],
-              new KlondikeObserver(mFoundationView[i]));
+              new DefaultCardStackObserver(mManager, mFoundationView[i]));
     	}
 
     	mTableau = in.readCardStacks();
@@ -161,7 +165,7 @@ public class Klondike extends Game
         for (int i = 0; i < mTableau.length; i++)
         {
         	mTableauView[i].connectToCardStack(mTableau[i],
-              new KlondikeObserver(mTableauView[i]));
+              new DefaultCardStackObserver(mManager, mTableauView[i]));
         }
 
 		return true;
@@ -526,32 +530,4 @@ public class Klondike extends Game
 		/* Returns true if the game is won; false otherwise. */
 		return (mWinFlag == 0xf);
 	}
-	
-    public class KlondikeObserver extends CardStackObserver
-    {
-    	protected CardStackView mView;
-
-    	public KlondikeObserver(CardStackView view)
-    	{
-    		super();
-    		mView = view;
-    	}
-
-		@Override
-		protected void onAdd(CardStack stack, Card card)
-		{
-			CardView view = new CardView(mManager);
-			view.setCard(card);
-			mView.addCard(view);
-			mView.invalidate();
-		}
-
-		@Override
-		protected void onRemove(CardStack stack, int pos)
-		{
-			CardView view = (CardView)mView.getChildAt(pos);
-			mView.removeCard(pos);
-			mView.invalidate();
-		}
-    }
 }
