@@ -22,7 +22,7 @@ import android.view.ViewGroup;
 public class CardStackView extends ViewGroup
 {
 	public static final String TAG = "CardStackView";
-	
+
 	private Rect mRect;
 	private Paint mBorder;
 	private Paint mBack;
@@ -38,9 +38,9 @@ public class CardStackView extends ViewGroup
 	}
 
 	protected Orientation mOrientation;
-	
-	private static final int STACK_OFFSET = 14;
-	
+
+	private static final int STACK_OFFSET = 16;
+
 	public CardStackView(Context context)
 	{
 		super(context);
@@ -232,7 +232,7 @@ public class CardStackView extends ViewGroup
 			int pt = mPaddingTop;
 			int pr = mPaddingRight;
 			int pb = mPaddingBottom;
-			
+
 			canvas.drawLine(r.left + pl + 1, r.top + pt, r.right - 1 - pr, r.top + pt, mBorder);
 			canvas.drawLine(r.left + pl + 1, r.bottom - 1 - pb, r.right - 1 - pr, r.bottom - 1 - pb, mBorder);
 			canvas.drawLine(r.left + pl, r.top + 1 + pt, r.left + pl, r.bottom - 1 - pb, mBorder);
