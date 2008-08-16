@@ -203,7 +203,8 @@ public class Klondike extends Game
 
 			mWaste.flipTopCard(false);
 
-			int deal = Math.min(3, mDeck.size());
+			//int deal = Math.min(3, mDeck.size());
+			int deal = 1;
 
 			mWaste.addAll(mDeck.deal(deal, false));
 			flipTopCardUpThenAutoplay(mWaste);
