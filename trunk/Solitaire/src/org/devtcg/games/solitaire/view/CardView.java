@@ -28,6 +28,7 @@ public class CardView extends View
 	private Rect mRect;
 	private Paint mBorder;
 	private Paint mBack;
+	private Paint mEmpty;
 	private Paint mSuitPaint;
 
 	protected Card mCard;
@@ -59,6 +60,10 @@ public class CardView extends View
 		mBack = new Paint();
 		mBack.setStyle(Paint.Style.FILL);
 		mBack.setColor(0xff557fa4);
+		
+		mEmpty = new Paint();
+		mEmpty.setStyle(Paint.Style.FILL);
+		mEmpty.setColor(0xff578132);
 
 		mSuitPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mSuitPaint.setTypeface(Typeface.DEFAULT_BOLD);
@@ -74,6 +79,10 @@ public class CardView extends View
 	public void setCard(Card card)
 	{
 		mCard = card;
+		invalidate();
+		
+		if (card == null)
+			return;
 		
 		switch (mCard.getSuit())
 		{
@@ -104,8 +113,6 @@ public class CardView extends View
 			mSuitDrawable = getResources().getDrawable(R.drawable.suit_diamonds);
 			break;
 		}
-		
-		invalidate();
 	}
 
 	public Card getCard()
@@ -137,8 +144,18 @@ public class CardView extends View
 
 		Rect r = mRect;
 		getDrawingRect(r);
+		
+		if (mCard == null)
+		{
+			canvas.drawLine(r.left + 1, r.top, r.right - 1, r.top, mBorder);
+			canvas.drawLine(r.left + 1, r.bottom - 1, r.right - 1, r.bottom - 1, mBorder);
+			canvas.drawLine(r.left, r.top + 1, r.left, r.bottom - 1, mBorder);
+			canvas.drawLine(r.right - 1, r.top + 1, r.right - 1, r.bottom - 1, mBorder);
 
-		if (mCard != null && mCard.isFaceUp() == true)
+			r.left++; r.top++; r.right--; r.bottom--;
+			canvas.drawRect(r, mEmpty);			
+		}
+		else if (mCard.isFaceUp() == true)
 		{
 			mCardDrawable.setBounds(r);
 			mCardDrawable.draw(canvas);
@@ -159,7 +176,7 @@ public class CardView extends View
 
 				mSuitDrawable.setBounds(3, r.bottom - r.top - h - 3, 3 + w, r.bottom - r.top - 3);
 				mSuitDrawable.draw(canvas);
-			}
+			}			
 		}
 		else
 		{
@@ -169,7 +186,7 @@ public class CardView extends View
 			canvas.drawLine(r.right - 1, r.top + 1, r.right - 1, r.bottom - 1, mBorder);
 
 			r.left++; r.top++; r.right--; r.bottom--;
-			canvas.drawRect(r, mBack);
+			canvas.drawRect(r, mBack);			
 		}
 	}
 }
