@@ -267,8 +267,8 @@ public class GameManager extends Activity
     	{
     		Set<String> names = games.keySet();
     		mChoices = new String[names.size()];
-    		Arrays.sort(mChoices);
     		names.toArray(mChoices);
+    		Arrays.sort(mChoices);
     	}
 
     	public void setTitle(String title)
