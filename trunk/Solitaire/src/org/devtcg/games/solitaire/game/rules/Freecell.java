@@ -1,9 +1,14 @@
-package org.devtcg.games.solitaire.game;
+package org.devtcg.games.solitaire.game.rules;
 
 import java.io.IOException;
 import java.util.Random;
 
 import org.devtcg.games.solitaire.R;
+import org.devtcg.games.solitaire.game.DefaultCardStackObserver;
+import org.devtcg.games.solitaire.game.Game;
+import org.devtcg.games.solitaire.game.GameInputStream;
+import org.devtcg.games.solitaire.game.GameManager;
+import org.devtcg.games.solitaire.game.GameOutputStream;
 import org.devtcg.games.solitaire.model.Card;
 import org.devtcg.games.solitaire.model.CardStack;
 import org.devtcg.games.solitaire.model.Deck;

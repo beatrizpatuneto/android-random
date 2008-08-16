@@ -3,10 +3,13 @@ package org.devtcg.games.solitaire.game;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
 
 import org.devtcg.games.solitaire.R;
+import org.devtcg.games.solitaire.game.rules.Freecell;
+import org.devtcg.games.solitaire.game.rules.Klondike;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -264,6 +267,7 @@ public class GameManager extends Activity
     	{
     		Set<String> names = games.keySet();
     		mChoices = new String[names.size()];
+    		Arrays.sort(mChoices);
     		names.toArray(mChoices);
     	}
 
