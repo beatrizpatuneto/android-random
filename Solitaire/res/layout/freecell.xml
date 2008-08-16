@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<org.devtcg.games.solitaire.view.CardTableView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:solitaire="http://schemas.devtcg.org/apk/res/org.devtcg.games.solitaire"
+    android:padding="5dip"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:shrinkColumns="*"
+        android:stretchColumns="*">
+
+        <TableRow
+            android:layout_marginBottom="10dip">
+
+            <org.devtcg.games.solitaire.view.CardView
+                android:id="@+id/freecell1"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                />
+            <org.devtcg.games.solitaire.view.CardView
+                android:id="@+id/freecell2"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                />
+            <org.devtcg.games.solitaire.view.CardView
+                android:id="@+id/freecell3"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                />
+            <org.devtcg.games.solitaire.view.CardView
+                android:id="@+id/freecell4"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                />
+
+            <org.devtcg.games.solitaire.view.CardStackView 
+                android:id="@+id/ace1"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                solitaire:card_orientation="single"
+                />
+            <org.devtcg.games.solitaire.view.CardStackView 
+                android:id="@+id/ace2"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                solitaire:card_orientation="single"
+                />
+            <org.devtcg.games.solitaire.view.CardStackView 
+                android:id="@+id/ace3"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                solitaire:card_orientation="single"
+                />
+            <org.devtcg.games.solitaire.view.CardStackView 
+                android:id="@+id/ace4"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                solitaire:card_orientation="single"
+                />
+
+        </TableRow>
+
+        <TableRow>
+
+            <org.devtcg.games.solitaire.view.CardStackView
+                android:id="@+id/stack1"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                solitaire:card_orientation="vertical"
+                />
+            <org.devtcg.games.solitaire.view.CardStackView
+                android:id="@+id/stack2"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                solitaire:card_orientation="vertical"
+                />
+            <org.devtcg.games.solitaire.view.CardStackView
+                android:id="@+id/stack3"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                solitaire:card_orientation="vertical"
+                />
+            <org.devtcg.games.solitaire.view.CardStackView
+                android:id="@+id/stack4"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                solitaire:card_orientation="vertical"
+                />
+            <org.devtcg.games.solitaire.view.CardStackView
+                android:id="@+id/stack5"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                solitaire:card_orientation="vertical"
+                />
+            <org.devtcg.games.solitaire.view.CardStackView
+                android:id="@+id/stack6"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                solitaire:card_orientation="vertical"
+                />
+            <org.devtcg.games.solitaire.view.CardStackView
+                android:id="@+id/stack7"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                solitaire:card_orientation="vertical"
+                />
+            <org.devtcg.games.solitaire.view.CardStackView
+                android:id="@+id/stack8"
+                android:layout_gravity="center_horizontal"
+                android:padding="1px"
+                solitaire:card_orientation="vertical"
+                />
+
+        </TableRow>
+
+    </TableLayout>
+
+</org.devtcg.games.solitaire.view.CardTableView>
+

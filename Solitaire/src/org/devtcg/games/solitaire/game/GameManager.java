@@ -55,6 +55,7 @@ public class GameManager extends Activity
 		mRoot = (FrameLayout)findViewById(R.id.root);
 		
 		registerGame(Klondike.TAG, Klondike.class);
+		registerGame(Freecell.TAG, Freecell.class);
 
 		Game game;
 
