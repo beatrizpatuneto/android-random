@@ -25,9 +25,11 @@ public class Freecell extends Game
 	
 	protected View mRoot;
 
+	/* TODO: Make a CardSlot class, which can be observed. */
 	protected CardStack mFoundation[] = new CardStack[4];
 	protected CardStack mTableau[] = new CardStack[8];
 
+	/* TODO: Make and use a CardSlotView. */
 	protected CardView mFreecellView[] = new CardView[4];
 	protected CardStackView mFoundationView[] = new CardStackView[mFoundation.length];
 	protected CardStackView mTableauView[] = new CardStackView[mTableau.length];
@@ -121,14 +123,39 @@ public class Freecell extends Game
 	public boolean saveGame(GameOutputStream out)
 	  throws IOException
 	{
-		return false;
+		for (int i = 0; i < mFreecellView.length; i++)
+			out.writeCard(mFreecellView[i].getCard());
+			
+		out.writeCardStacks(mTableau);
+		out.writeCardStacks(mFoundation);
+		
+		return true;
 	}
 
 	@Override
 	public boolean loadGame(GameInputStream in)
 	  throws IOException
 	{
-		return false;
+		for (int i = 0; i < mFreecellView.length; i++)
+			mFreecellView[i].setCard(in.readCard());
+		
+		mTableau = in.readCardStacks();
+		
+		for (int i = 0; i < mTableau.length; i++)
+		{
+			mTableauView[i].connectToCardStack(mTableau[i],
+			  new DefaultCardStackObserver(mManager, mTableauView[i]));
+		}
+		
+		mFoundation = in.readCardStacks();
+		
+		for (int i = 0; i < mFoundation.length; i++)
+		{
+			mFoundationView[i].connectToCardStack(mFoundation[i],
+			  new DefaultCardStackObserver(mManager, mFoundationView[i]));
+		}
+		
+		return true;
 	}
 
 	private final OnClickListener mTableauClick = new OnClickListener()
