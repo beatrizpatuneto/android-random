@@ -149,6 +149,8 @@ public class GameManager extends Activity
 
 	private void switchCurrentGame(Game game)
 	{
+		setTitle(game.getName()); 
+
 		mRoot.removeAllViews();
 
 		mCurrent = game;
