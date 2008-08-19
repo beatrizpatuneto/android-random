@@ -1,21 +1,15 @@
 package org.devtcg.games.solitaire.view;
 
-import java.util.Map;
-
 import org.devtcg.games.solitaire.R;
 import org.devtcg.games.solitaire.model.Card;
-import org.devtcg.games.solitaire.model.Card.Rank;
-import org.devtcg.games.solitaire.model.Card.Suit;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.Paint.FontMetricsInt;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 /**
@@ -45,9 +39,9 @@ public class CardView extends View
 		init();
 	}
 
-	public CardView(Context context, AttributeSet attrs, Map inflateParams)
+	public CardView(Context context, AttributeSet attrs)
 	{
-		super(context, attrs, inflateParams);
+		super(context, attrs);
 		init();
 	}
 

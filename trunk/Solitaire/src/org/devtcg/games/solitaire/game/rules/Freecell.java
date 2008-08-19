@@ -15,8 +15,9 @@ import org.devtcg.games.solitaire.model.Deck;
 import org.devtcg.games.solitaire.view.CardStackView;
 import org.devtcg.games.solitaire.view.CardView;
 
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewInflate;
 import android.view.View.OnClickListener;
 
 public class Freecell extends Game
@@ -33,6 +34,8 @@ public class Freecell extends Game
 	protected CardView mFreecellView[] = new CardView[4];
 	protected CardStackView mFoundationView[] = new CardStackView[mFoundation.length];
 	protected CardStackView mTableauView[] = new CardStackView[mTableau.length];
+	
+	protected CardStackView mHolding = null;
 
 	@Override
 	public String getName()
@@ -44,8 +47,8 @@ public class Freecell extends Game
 	public void init(GameManager mgr)
 	{
 		super.init(mgr);
-
-		View v = ViewInflate.from(mgr).inflate(R.layout.freecell, null, null);
+		
+		View v = LayoutInflater.from(mgr).inflate(R.layout.freecell, null);
 
         mFreecellView[0] = (CardView)v.findViewById(R.id.freecell1);
         mFreecellView[1] = (CardView)v.findViewById(R.id.freecell2);
@@ -87,7 +90,7 @@ public class Freecell extends Game
 
 		mRoot = v;
 	}
-	
+
 	@Override
 	public View getGameView()
 	{
@@ -148,23 +151,90 @@ public class Freecell extends Game
 		}
 		
 		mFoundation = in.readCardStacks();
-		
+
 		for (int i = 0; i < mFoundation.length; i++)
 		{
 			mFoundationView[i].connectToCardStack(mFoundation[i],
 			  new DefaultCardStackObserver(mManager, mFoundationView[i]));
 		}
-		
+
 		return true;
+	}
+	
+	private void setHolding(CardStackView stack)
+	{
+		if (mHolding == stack)
+			return;
+		
+		releaseHolding();
+		stack.setSelected(true);
+		mHolding = stack;
+	}
+	
+	private void releaseHolding()
+	{
+		if (mHolding != null)
+		{
+			mHolding.setSelected(false);
+			mHolding = null;
+		}
 	}
 
 	private final OnClickListener mTableauClick = new OnClickListener()
 	{
 		public void onClick(View v)
 		{
-			
+//			CardStackView vv = (CardStackView)v;
+//
+//			if (mHolding != null)
+//			{
+//				CardStack src = mHolding.getCardStack();
+//				CardStack dst = vv.getCardStack();
+//
+//				int pos = findLegalTableauMove(src, dst, mHolding.getHoldingCount());
+//
+//				releaseHolding();
+//
+//				if (pos >= 0)
+//				{
+//					int n = src.size();
+//
+//					for (int i = pos; i < n; i++)
+//						dst.add(src.remove(pos));
+//
+//					src.flipTopCard(true);
+//					return;
+//				}
+//			}
+//			
+//			if (vv.getCardStack().size() > 0)
+//				setHolding(vv);
 		}
 	};
+
+//	private int findLegalTableauMove(CardStack src, CardStack dst, int srcmax)
+//	{
+//		int srcn = src.size();
+//
+//		if (srcn == 0)
+//			return -1;
+//
+//		Card dsttop = dst.peekTop();
+//
+//		if (dsttop != null)
+//		{
+//			int targetOrd = dsttop.getRankOrdinal() - 1;
+//			boolean targetIsRed = Card.isSuitBlack(dsttop.getSuit());
+//			
+//			if (targetOrd < 2)
+//				return -1;
+//
+//		}
+//		else
+//		{
+//			Log.d(TAG, "TODO...");
+//		}
+//	}
 	
 	private final OnClickListener mFreecellClick = new OnClickListener()
 	{

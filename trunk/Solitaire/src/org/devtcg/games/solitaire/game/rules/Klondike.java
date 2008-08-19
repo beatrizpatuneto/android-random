@@ -16,8 +16,8 @@ import org.devtcg.games.solitaire.model.Deck;
 import org.devtcg.games.solitaire.view.CardStackView;
 import org.devtcg.games.solitaire.view.CardView;
 
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewInflate;
 import android.view.View.OnClickListener;
 
 public class Klondike extends Game
@@ -66,10 +66,8 @@ public class Klondike extends Game
     {
         super.init(mgr);
 
-        View v = ViewInflate.from(mgr).inflate(R.layout.klondike, null, null);
-
+        View v = LayoutInflater.from(mgr).inflate(R.layout.klondike, null);
 		initViews(v);
-
 		mRoot = v;
     }
 
