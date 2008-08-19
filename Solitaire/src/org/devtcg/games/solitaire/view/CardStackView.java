@@ -1,21 +1,18 @@
 package org.devtcg.games.solitaire.view;
 
-import java.util.Map;
-
 import org.devtcg.games.solitaire.R;
 import org.devtcg.games.solitaire.model.Card;
 import org.devtcg.games.solitaire.model.CardStack;
 import org.devtcg.games.solitaire.model.CardStackObserver;
 
 import android.content.Context;
-import android.content.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -49,13 +46,13 @@ public class CardStackView extends ViewGroup
 		setCardOrientation(Orientation.VERTICAL);
 	}
 
-	public CardStackView(Context context, AttributeSet attrs, Map inflateParams)
+	public CardStackView(Context context, AttributeSet attrs)
 	{
-		super(context, attrs, inflateParams);
+		super(context, attrs);
 		init();
 
 		/* XXX: This doesn't work but I don't understand why. */
-		Resources.StyledAttributes a = context.obtainStyledAttributes(attrs,
+		TypedArray a = context.obtainStyledAttributes(attrs,
 		  R.styleable.CardStackView);
 
 		int orientation = a.getInt(R.styleable.CardStackView_card_orientation,
@@ -243,7 +240,7 @@ public class CardStackView extends ViewGroup
 
 		/* TODO: In a stack, we shouldn't need to draw each card in full.  In
 		 * every case, we can save drawing area, but we don't have an elegant
-		 * way to propogate the clipping yet. */
+		 * way to propagate the clipping yet. */
 		super.dispatchDraw(canvas);
 
 		if (isSelected() == true)

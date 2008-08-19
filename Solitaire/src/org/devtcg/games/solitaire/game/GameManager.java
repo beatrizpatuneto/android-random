@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.ViewGroup.LayoutParams;
@@ -44,7 +45,8 @@ public class GameManager extends Activity
 	protected static final int MENU_RESTART_GAME = Menu.FIRST + 1;
 	protected static final int MENU_CHANGE_RULES = Menu.FIRST + 2;
 
-	protected static HashMap<String, Class> mGames = new HashMap<String, Class>();
+	private static HashMap<String, Class> mGames = null;
+
 	protected Game mCurrent;
 
 	private FrameLayout mRoot;
@@ -57,8 +59,7 @@ public class GameManager extends Activity
 
 		mRoot = (FrameLayout)findViewById(R.id.root);
 		
-		registerGame(Klondike.TAG, Klondike.class);
-		registerGame(Freecell.TAG, Freecell.class);
+		registerGames();
 
 		Game game;
 
@@ -74,6 +75,16 @@ public class GameManager extends Activity
 		}
 
 		switchCurrentGame(game);
+	}
+	
+	private void registerGames()
+	{
+		if (mGames != null)
+			return;
+
+		mGames = new HashMap<String, Class>(2);
+		registerGame(Klondike.TAG, Klondike.class);
+		registerGame(Freecell.TAG, Freecell.class);
 	}
 
 	protected void registerGame(String name, Class game)
@@ -194,18 +205,18 @@ public class GameManager extends Activity
     public boolean onCreateOptionsMenu(Menu menu)
     {
     	super.onCreateOptionsMenu(menu);
-    	
-    	menu.add(0, MENU_NEW_GAME, "New Game");
-    	menu.add(0, MENU_RESTART_GAME, "Restart Game");
-    	menu.add(0, MENU_CHANGE_RULES, "Choose Game");
+
+    	menu.add(0, MENU_NEW_GAME, Menu.NONE, "New Game");
+    	menu.add(0, MENU_RESTART_GAME, Menu.NONE, "Restart Game");
+    	menu.add(0, MENU_CHANGE_RULES, Menu.NONE, "Choose Game");
     	
     	return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(Menu.Item item)
+    public boolean onOptionsItemSelected(MenuItem item)
     {
-    	switch (item.getId())
+    	switch (item.getItemId())
     	{
     	case MENU_NEW_GAME:
     		deleteFile(STATE_FILE);
@@ -229,11 +240,11 @@ public class GameManager extends Activity
     		dialog.dismiss();
     		deleteFile(STATE_FILE);
 
-    		Class ruleClass = lookupGame(ruleName);
+    		Class<Game> ruleClass = lookupGame(ruleName);
     		Game rules;
 
 			try {
-				rules = (Game)ruleClass.newInstance();
+				rules = ruleClass.newInstance();
 	    		rules.init(GameManager.this);
 	    		rules.newGame();
 
