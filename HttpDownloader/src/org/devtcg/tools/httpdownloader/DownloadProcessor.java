@@ -133,7 +133,10 @@ public class DownloadProcessor extends Thread
 			 * exception that occurs during cancellation is ignored regardless
 			 * as there would be no need to handle it. */
 			if (mStopped == false)
+			{
 				mHandler.sendError(e.toString());
+				Log.e(TAG, "Unexpected error", e);
+			}
 		} finally {
 			if (in != null)
 				try { in.close(); } catch (IOException e) {}
