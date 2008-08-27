@@ -15,9 +15,9 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.params.ClientPNames;
-import org.apache.http.conn.PlainSocketFactory;
-import org.apache.http.conn.Scheme;
-import org.apache.http.conn.SchemeRegistry;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.params.BasicHttpParams;
@@ -53,7 +53,6 @@ public class DownloadProcessor extends Thread
 	{
 		/* Set the connection timeout to 10s for our test. */
 		HttpParams params = new BasicHttpParams();
-		params.setParameter(ClientPNames.CONNECTION_MANAGER_TIMEOUT, 10000L);
 
 		/* Avoid registering the https scheme, and thus initializing
 		 * SSLSocketFactory on Android.  Seems to be very heavy for some
@@ -75,13 +74,8 @@ public class DownloadProcessor extends Thread
 		HttpClient cli = getClient();
 		HttpGet method;
 		
-		try {
-			method = new HttpGet(mDownload.url.toString());
-		} catch (URISyntaxException e) {
-			mHandler.sendError(e.toString());
-			return;
-		}
-
+		method = new HttpGet(mDownload.url.toString());
+		
 		/* It's important that we pause here to check if we've been stopped
 		 * already.  Otherwise, we would happily progress, seemingly ignoring
 		 * the stop request. */
