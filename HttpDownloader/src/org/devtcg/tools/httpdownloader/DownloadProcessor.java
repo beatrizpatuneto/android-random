@@ -89,7 +89,7 @@ public class DownloadProcessor extends Thread
 		HttpEntity ent = null;
 		InputStream in = null;
 		OutputStream out = null;
-		
+
 		try {
 			HttpResponse resp = cli.execute(mMethod);
 
@@ -125,6 +125,9 @@ public class DownloadProcessor extends Thread
 					out.write(b, 0, n);
 				}
 			}
+
+			if (mStopped == false)
+				mHandler.sendFinished();
 		} catch (Exception e) {
 			/* We expect a SocketException on cancellation.  Any other type of
 			 * exception that occurs during cancellation is ignored regardless
@@ -154,9 +157,6 @@ public class DownloadProcessor extends Thread
 						mDownload.abortCleanup();
 				}
 			}
-
-			if (mStopped == false)
-				mHandler.sendFinished();
 		}
 	}
 
