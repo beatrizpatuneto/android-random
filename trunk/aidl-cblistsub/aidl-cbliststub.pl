@@ -5,7 +5,10 @@
 ##
 ## Copyright (C) 2006 Josh Guilfoyle <jasta@devtcg.org>
 ##
-## Total hackjob.
+## Total hackjob to generate specialized RemoteCallbackList classes from a
+## custom AIDL.  Example usage:
+##
+## $ ./aidl-cblistsub.pl < IFooListener.aidl > IFooListenerCallbackList.java
 ##
 ###############################################################################
 
