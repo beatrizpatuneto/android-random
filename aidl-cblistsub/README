@@ -1,0 +1,3 @@
+Simple utility to generate extended RemoteCallbackList classes.  This
+essentially generates a stubbed interface for broadcasting events to
+asynchronous listeners.
