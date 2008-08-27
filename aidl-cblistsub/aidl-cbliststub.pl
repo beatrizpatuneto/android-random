@@ -39,7 +39,7 @@ foreach (@parts)
 {
 	s/^\s+//;
 	s/\s+$//;
-	next unless length($_);
+	next unless length;
 
 	my $m = {};
 
