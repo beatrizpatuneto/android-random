@@ -54,6 +54,9 @@ foreach (@parts)
 	die unless $m->{ret};
 	die unless $m->{name};
 
+	$m->{nameUp} = $m->{name};
+	$m->{nameUp} =~ s/^(\w)/uc($1)/e;
+
 	$m->{argnames} = join(', ',
 	  map { [sepTypeAndToken($_)]->[1] }
 	    (split /\s*,\s*/, $m->{arglist}));
@@ -80,7 +83,7 @@ public class $name extends
 foreach my $m (@methods)
 {
 	print qq#
-	public $m->{ret} broadcast$m->{name}($m->{arglist})
+	public $m->{ret} broadcast$m->{nameUp}($m->{arglist})
 	{
 		int N = beginBroadcast();
 
