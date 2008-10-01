@@ -48,7 +48,7 @@ foreach (@parts)
 	($typeAndToken, $m->{arglist}) =
 	  $_ =~ m/^([a-z0-9_\s]+)\s*\((.*?)\)$/msi;
 	die unless $typeAndToken;
-	die unless $m->{arglist};
+	die unless defined $m->{arglist};
 
 	@$m{qw/ret name/} = sepTypeAndToken($typeAndToken);
 	die unless $m->{ret};
