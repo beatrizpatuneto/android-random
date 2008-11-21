@@ -145,6 +145,9 @@ public class Provider extends ContentProvider
 	@Override
 	public Uri insert(Uri uri, ContentValues values)
 	{
+		/* Normally you would discriminate by creating a custom URI, but since
+		 * our provider is mostly empty we can just abuse the general insert
+		 * method. */
 		if (values.containsKey(EXTERNAL_DATABASE_PATH) == false)
 			throw new IllegalArgumentException();
 
@@ -482,9 +485,6 @@ public class Provider extends ContentProvider
 					mBusyLatch = null;
 				}
 			}
-
-//			getContext().getContentResolver()
-//			  .notifyChange(Schema.Foo.CONTENT_URI, null);
 		}
 	}
 }
