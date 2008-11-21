@@ -45,17 +45,15 @@ public class SqliteInjection extends Activity
 	private Cursor getCursor()
 	{
 		Log.i(TAG, "Handing out a new cursor...");
-		
+
         Cursor c = getContentResolver().query(Schema.Foo.CONTENT_URI,
           QUERY_FIELDS, null, null, null);
-        
+
         c.registerContentObserver(new ContentObserver(new Handler()) {
         	public void onChange(boolean selfChange) {
         		Log.d(TAG, "onChange: selfChange=" + selfChange);
         	}
         });
-        
-        startManagingCursor(c);
         
         return c;
 	}
@@ -81,13 +79,12 @@ public class SqliteInjection extends Activity
             Schema.Foo.BAZ },
           new int[] { R.id.foo_name, R.id.foo_foo, R.id.foo_bar,
             R.id.foo_baz });
-        
+
         mAdapter.registerDataSetObserver(new DataSetObserver() {
         	public void onChanged() {
         		Log.e(TAG, "onChanged");
-//     			mAdapter.changeCursor(getCursor(SqliteInjection.this));
         	}
-        	
+
         	public void onInvalidated() {
         		Log.e(TAG, "onInvalidated");
         	}
@@ -96,18 +93,6 @@ public class SqliteInjection extends Activity
         mList.setAdapter(mAdapter);
     }
     
-    @Override
-    protected void onResume()
-    {
-    	super.onResume();
-    	
-    	Cursor c = mAdapter.getCursor();
-    	Log.d(TAG, "c=" + c);
-    	
-    	if (c != null)
-    		Log.d(TAG, "c.closed=" + c.isClosed());
-    }
-
     @Override
     protected void onDestroy()
     {
@@ -122,13 +107,10 @@ public class SqliteInjection extends Activity
     		switch (v.getId())
     		{
     		case R.id.getDatabase:
-    			mProgress = ProgressDialog.show(SqliteInjection.this,
-    			  "Downloading",
-    			  "Please wait while the database is downloaded...");
     			(new ReplaceDbThread()).start();
     			break;
     		case R.id.queryDatabase:
-    			mAdapter.changeCursor(getCursor());
+    			mAdapter.getCursor().requery();
     			break;
     		}
     	}
@@ -144,18 +126,18 @@ public class SqliteInjection extends Activity
     		OutputStream out = null;
 
     		try {
-   				url = new URL("http://apollo/android/foo.db");
-   				
-   				File dbPath = getDatabasePath("foo-remote.db");
-   				
-   				in = url.openStream();
-   				out = new FileOutputStream(dbPath);
-   				
-   				byte[] b = new byte[2048];
-   				int n;
-   				
-   				while ((n = in.read(b)) >= 0)
-   					out.write(b, 0, n);
+//				url = new URL("http://jasta.dyndns.org/android/foo.db");
+//   				
+				File dbPath = getDatabasePath("foo-remote.db");
+//   				
+//				in = url.openStream();
+//				out = new FileOutputStream(dbPath);
+//   				
+//				byte[] b = new byte[2048];
+//				int n;
+//   				
+//				while ((n = in.read(b)) >= 0)
+//					out.write(b, 0, n);
 
    				Log.i(TAG, "Installing database...");
    				ContentValues cv = new ContentValues();
@@ -176,12 +158,6 @@ public class SqliteInjection extends Activity
     			
     			if (out != null)
     				try { out.close(); } catch (IOException e) {}
-
-        		mHandler.post(new Runnable() {
-        			public void run() {
-        				mProgress.dismiss();
-        			}
-        		});    
     		}
     	}
     }
