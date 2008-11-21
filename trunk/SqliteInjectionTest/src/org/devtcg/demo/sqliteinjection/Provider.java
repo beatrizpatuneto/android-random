@@ -128,7 +128,7 @@ public class Provider extends ContentProvider
 
 		SQLiteDatabase db = mHelper.getReadableDatabase();
 		String sql = qb.buildQuery(projection, selection, selectionArgs,
-		  groupBy, null, sortOrder, null);
+		  groupBy, null, sortOrder, "1000");
 		Cursor c = db.rawQuery(sql, selectionArgs);
 		c.setNotificationUri(getContext().getContentResolver(), uri);
 
