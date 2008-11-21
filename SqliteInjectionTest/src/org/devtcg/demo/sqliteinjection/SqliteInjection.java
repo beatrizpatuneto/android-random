@@ -107,6 +107,8 @@ public class SqliteInjection extends Activity
     		switch (v.getId())
     		{
     		case R.id.getDatabase:
+    			mProgress = ProgressDialog.show(SqliteInjection.this,
+    			  "Downloading", "Downloading database...");
     			(new ReplaceDbThread()).start();
     			break;
     		case R.id.queryDatabase:
@@ -126,24 +128,26 @@ public class SqliteInjection extends Activity
     		OutputStream out = null;
 
     		try {
-//				url = new URL("http://jasta.dyndns.org/android/foo.db");
-//   				
+				url = new URL("http://jasta.dyndns.org/android/foo.db");
+   				
 				File dbPath = getDatabasePath("foo-remote.db");
-//   				
-//				in = url.openStream();
-//				out = new FileOutputStream(dbPath);
-//   				
-//				byte[] b = new byte[2048];
-//				int n;
-//   				
-//				while ((n = in.read(b)) >= 0)
-//					out.write(b, 0, n);
+   				
+				in = url.openStream();
+				out = new FileOutputStream(dbPath);
+   				
+				byte[] b = new byte[2048];
+				int n;
+   				
+				while ((n = in.read(b)) >= 0)
+					out.write(b, 0, n);
 
    				Log.i(TAG, "Installing database...");
    				ContentValues cv = new ContentValues();
    				cv.put(Provider.EXTERNAL_DATABASE_PATH,
    				  dbPath.getAbsolutePath());
    				getContentResolver().insert(Schema.Foo.CONTENT_URI, cv);
+   				
+   				mProgress.dismiss();
     		} catch (Exception e) {
     			final String msg = e.toString();
     			mHandler.post(new Runnable() {
