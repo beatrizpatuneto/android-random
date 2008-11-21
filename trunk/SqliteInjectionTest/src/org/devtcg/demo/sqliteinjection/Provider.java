@@ -1,20 +1,33 @@
 package org.devtcg.demo.sqliteinjection;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
+import android.database.ContentObservable;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.database.DataSetObservable;
+import android.database.DataSetObserver;
+import android.database.sqlite.SQLiteCursor;
+import android.database.sqlite.SQLiteCursorDriver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQuery;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
+import android.os.Handler;
 import android.util.Log;
 
 public class Provider extends ContentProvider
@@ -25,16 +38,21 @@ public class Provider extends ContentProvider
 	private SQLiteOpenHelper mHelper;
 
 	private int mOperations = 0;
-	private CountDownLatch mBusyLatch;	
+	private CountDownLatch mBusyLatch;
+
+	/* Tracks cursors so that if we swap out the underlying database we
+	 * can properly support requery. */
+	private final Set<MyCursorWrapper> mCursors =
+	  Collections.synchronizedSet(new HashSet<MyCursorWrapper>());
 
 	private static final UriMatcher URI_MATCHER;
-	
+
 	private static final int FOO = 0;
 	private static final int FOOS = 1;
-	
+
 	public static final String EXTERNAL_DATABASE_PATH = "externalPath";
 
-	private static class DatabaseHelper extends SQLiteOpenHelper
+	private class DatabaseHelper extends SQLiteOpenHelper
 	{
 		public DatabaseHelper(Context context)
 		{
@@ -59,7 +77,7 @@ public class Provider extends ContentProvider
 			onCreate(db);
 		}
 	}
-	
+
 	@Override
 	public boolean onCreate()
 	{
@@ -109,8 +127,9 @@ public class Provider extends ContentProvider
 		}
 
 		SQLiteDatabase db = mHelper.getReadableDatabase();
-		Cursor c = qb.query(db, projection, selection, selectionArgs,
-		  groupBy, null, sortOrder);
+		String sql = qb.buildQuery(projection, selection, selectionArgs,
+		  groupBy, null, sortOrder, null);
+		Cursor c = db.rawQuery(sql, selectionArgs);
 		c.setNotificationUri(getContext().getContentResolver(), uri);
 
 		synchronized(this) {
@@ -119,8 +138,8 @@ public class Provider extends ContentProvider
 
 			mOperations--;
 		}
-
-		return c;
+		
+		return new MyCursorWrapper(c, sql, selectionArgs);
 	}
 
 	@Override
@@ -160,6 +179,130 @@ public class Provider extends ContentProvider
 		URI_MATCHER.addURI(Schema.AUTHORITY, "foo", FOOS);
 		URI_MATCHER.addURI(Schema.AUTHORITY, "foo/#", FOO);
 	}
+	
+	private class MyCursorWrapper extends CursorWrapper
+	{
+		private final String mSql;
+		private final String[] mSelArgs;
+		
+		/* Necessary because CursorAdapter expects observer notifications to
+		 * fire in the thread that created the cursor. */
+		private Handler mTarget;
+
+		private MyDataSetObservable mDataSetObservable =
+		  new MyDataSetObservable();
+
+		private MyContentObservable mContentObservable =
+		  new MyContentObservable();
+
+		public MyCursorWrapper(Cursor cursor, String sql, String[] selArgs)
+        {
+	        super(cursor);
+
+			Log.i(SqliteInjection.TAG, "SQL=" + sql);
+
+	        mSql = sql;
+	        mSelArgs = selArgs;
+
+	        mTarget = new Handler();
+
+	        mCursors.add(this);
+        }
+
+		public void close()
+		{
+			Log.i(SqliteInjection.TAG, "close");
+
+			mContentObservable.unregisterAll();
+			super.close();
+
+			mCursors.remove(this);
+		}
+
+		/* The database was closed, we must close the underlying cursor. */ 
+		public void notifyDatabaseInvalidated()
+		{
+			Log.i(SqliteInjection.TAG, "notifyDatabaseInvalidated");
+			
+			mTarget.post(new Runnable() {
+				public void run() {
+					mCursor.close();					
+				}
+			});
+		}
+
+		public void notifyDatabaseChanged(SQLiteDatabase db)
+		{
+			Log.i(SqliteInjection.TAG, "notifyDatabaseChanged");
+
+			/* Unregister all observers from the old cursor. */
+			for (DataSetObserver o: mDataSetObservable.getObservers())
+				mCursor.unregisterDataSetObserver(o);
+
+			for (ContentObserver o: mContentObservable.getObservers())
+				mCursor.unregisterContentObserver(o);
+
+			mCursor = db.rawQuery(mSql, mSelArgs);
+
+			/* ...and register them to the new one. */
+			for (DataSetObserver o: mDataSetObservable.getObservers())
+				mCursor.registerDataSetObserver(o);
+
+			for (ContentObserver o: mContentObservable.getObservers())
+				mCursor.registerContentObserver(o);
+
+			/* Simulate requery(). */
+			mTarget.post(new Runnable() {
+				public void run() {
+					mDataSetObservable.notifyChanged();					
+				}
+			});
+		}
+
+		@Override
+        public void registerContentObserver(ContentObserver observer)
+        {
+	        mContentObservable.registerObserver(observer);
+	        super.registerContentObserver(observer);
+        }
+
+		@Override
+        public void unregisterContentObserver(ContentObserver observer)
+        {
+	        mContentObservable.unregisterObserver(observer);
+	        super.unregisterContentObserver(observer);
+        }
+
+		@Override
+        public void registerDataSetObserver(DataSetObserver observer)
+        {
+			mDataSetObservable.registerObserver(observer);
+	        super.registerDataSetObserver(observer);
+        }
+		
+		@Override
+        public void unregisterDataSetObserver(DataSetObserver observer)
+        {
+			mDataSetObservable.unregisterObserver(observer);
+	        super.unregisterDataSetObserver(observer);
+        }
+
+		private class MyDataSetObservable extends DataSetObservable
+		{
+			public ArrayList<DataSetObserver> getObservers()
+			{
+				return mObservers;
+			}
+		}
+		
+		private class MyContentObservable extends ContentObservable
+		{
+			public ArrayList<ContentObserver> getObservers()
+			{
+				return mObservers;
+			}
+		}
+	}
 
 	private class ReplaceDbThread extends Thread
 	{
@@ -170,29 +313,13 @@ public class Provider extends ContentProvider
 			mSource = path;
 		}
 
-		private void copyTable(SQLiteDatabase src, SQLiteDatabase dst,
+		private void copyData(SQLiteDatabase dst, SQLiteDatabase src,
 		  String tableName)
 		{
-			dst.execSQL("DROP TABLE IF EXISTS " + tableName);
-
-			Cursor masterCursor =
-			  src.rawQuery("SELECT sql FROM sqlite_master WHERE type = 'table' and name = ?",
-			    new String[] { tableName });
-
-			try {
-				if (masterCursor.moveToFirst() == false)
-					return;
-
-				String createSql = masterCursor.getString(0);
-				dst.execSQL(createSql);
-			} finally {
-				masterCursor.close();
-			}
-
 			SQLiteStatement stmt = null;
 
 			Cursor rows = src.rawQuery("SELECT * FROM " + tableName, null);
-
+			
 			try {
 				dst.beginTransaction();
 
@@ -242,86 +369,118 @@ public class Provider extends ContentProvider
 
 				dst.endTransaction();
 				rows.close();
+			}			
+		}
+
+		private void copyTable(SQLiteDatabase dst, SQLiteDatabase src,
+		  String tableName)
+		{
+			dst.execSQL("DROP TABLE IF EXISTS " + tableName);
+
+			Cursor masterCursor =
+			  src.rawQuery("SELECT sql FROM sqlite_master WHERE type = 'table' and name = ?",
+			    new String[] { tableName });
+
+			try {
+				if (masterCursor.moveToFirst() == false)
+					return;
+
+				String createSql = masterCursor.getString(0);
+				dst.execSQL(createSql);
+			} finally {
+				masterCursor.close();
 			}
+
+			copyData(dst, src, tableName);
 		}
 
 		/* Transfers all tables (except excluded) from src to dst. */
-		private void transferDatabase(File src, File dst, String[] excluded)
+		private void transferDatabase(SQLiteDatabase dst, SQLiteDatabase src,
+		  String[] excluded)
 		{
-			SQLiteDatabase srcDb =
-			  SQLiteDatabase.openDatabase(src.getAbsolutePath(), null,
-			    SQLiteDatabase.OPEN_READONLY);
-
-			SQLiteDatabase dstDb =
-			  SQLiteDatabase.openDatabase(dst.getAbsolutePath(), null,
-			    SQLiteDatabase.OPEN_READWRITE);
-
 			HashSet<String> excludedSet =
 			  new HashSet<String>(Arrays.asList(excluded));
 
+			Cursor srcTables =
+			  src.rawQuery("SELECT name FROM sqlite_master WHERE type = 'table'", null);
+
+			dst.beginTransaction();
+
 			try {
-				Cursor srcTables =
-				  srcDb.rawQuery("SELECT name FROM sqlite_master WHERE type = 'table'", null);
+				while (srcTables.moveToNext() == true)
+				{
+					String tableName = srcTables.getString(0);
 
-				try {
-					while (srcTables.moveToNext() == true)
-					{
-						String tableName = srcTables.getString(0);
-						
-						if (tableName.startsWith("sqlite") == true)
-							continue;
+					if (tableName.startsWith("sqlite") == true)
+						continue;
 
-						if (excludedSet.contains(tableName) == true)
-							continue;
-						
-						copyTable(srcDb, dstDb, tableName);
-					}
-				} finally {
-					srcTables.close();
+					if (excludedSet.contains(tableName) == true)
+						continue;
+
+					copyTable(dst, src, tableName);
 				}
 
-				dstDb.setVersion(srcDb.getVersion());
+				dst.setTransactionSuccessful();
 			} finally {
-				srcDb.close();
-				dstDb.close();
+				dst.endTransaction();
+				srcTables.close();
 			}
 		}
 
 		public void run()
 		{
-			try {
-				Log.i(SqliteInjection.TAG, "Waiting for busy latch...");
-				mBusyLatch.await();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				return;
-			}
-
-			Log.i(SqliteInjection.TAG, "Moving database into place.");
+			SQLiteDatabase newDb = null;
 
 			try {
-				mHelper.close();
-				File old = getContext().getDatabasePath(DATABASE_NAME);
+				File oldPath;
+				
+				try {
+					Log.i(SqliteInjection.TAG, "Waiting for busy latch...");
+					mBusyLatch.await();
 
-				if (old.exists() == true)
-				{
-					transferDatabase(old, mSource,
+					Log.i(SqliteInjection.TAG, "Moving database into place.");
+
+					newDb = SQLiteDatabase.openDatabase(mSource.getAbsolutePath(), null,
+					  SQLiteDatabase.OPEN_READWRITE);
+
+					SQLiteDatabase oldDb = mHelper.getReadableDatabase();
+
+					/* Transfer any meta tables into the new database. */
+					transferDatabase(newDb, oldDb,
 					  new String[] { Schema.Foo.SQL.TABLE });
 
-					old.delete();
+					newDb.setVersion(oldDb.getVersion());
+
+					oldPath = new File(oldDb.getPath());
+				} catch (Exception e) {
+					mSource.delete();
+					throw e;
+				} finally {
+					newDb.close();
 				}
 
-				if (mSource.renameTo(old) == false)
-					throw new IllegalStateException("Failed to install new database.");
+				mHelper.close();
+				
+				for (MyCursorWrapper c: mCursors)
+					c.notifyDatabaseInvalidated();
 
-				/* Ensure that the new database opens. */
-				mHelper.getWritableDatabase();
+				/* Perform the swap. */
+				oldPath.delete();
+				mSource.renameTo(oldPath);
+
+				/* Confirm it all worked and reinitialize. */
+				SQLiteDatabase currentDb = mHelper.getWritableDatabase();
+
+				for (MyCursorWrapper c: mCursors)
+					c.notifyDatabaseChanged(currentDb);
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
+			} finally {
+				Log.i(SqliteInjection.TAG, "Yay!");
 
-			synchronized(this) {
-				mBusyLatch = null;
+				synchronized(this) {
+					mBusyLatch = null;
+				}
 			}
 
 //			getContext().getContentResolver()
