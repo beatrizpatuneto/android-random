@@ -199,18 +199,18 @@ public class Provider extends ContentProvider
 		  new MyContentObservable();
 
 		public MyCursorWrapper(Cursor cursor, String sql, String[] selArgs)
-        {
-	        super(cursor);
+		{
+			super(cursor);
 
 			Log.i(SqliteInjection.TAG, "SQL=" + sql);
 
-	        mSql = sql;
-	        mSelArgs = selArgs;
+			mSql = sql;
+			mSelArgs = selArgs;
 
-	        mTarget = new Handler();
+			mTarget = new Handler();
 
-	        mCursors.add(this);
-        }
+			mCursors.add(this);
+		}
 
 		public void close()
 		{
@@ -263,32 +263,32 @@ public class Provider extends ContentProvider
 		}
 
 		@Override
-        public void registerContentObserver(ContentObserver observer)
-        {
-	        mContentObservable.registerObserver(observer);
-	        super.registerContentObserver(observer);
-        }
+		public void registerContentObserver(ContentObserver observer)
+		{
+			mContentObservable.registerObserver(observer);
+			super.registerContentObserver(observer);
+		}
 
 		@Override
-        public void unregisterContentObserver(ContentObserver observer)
-        {
-	        mContentObservable.unregisterObserver(observer);
-	        super.unregisterContentObserver(observer);
-        }
+		public void unregisterContentObserver(ContentObserver observer)
+		{
+			mContentObservable.unregisterObserver(observer);
+			super.unregisterContentObserver(observer);
+		}
 
 		@Override
-        public void registerDataSetObserver(DataSetObserver observer)
-        {
+		public void registerDataSetObserver(DataSetObserver observer)
+		{
 			mDataSetObservable.registerObserver(observer);
-	        super.registerDataSetObserver(observer);
-        }
+			super.registerDataSetObserver(observer);
+		}
 		
 		@Override
-        public void unregisterDataSetObserver(DataSetObserver observer)
-        {
+		public void unregisterDataSetObserver(DataSetObserver observer)
+		{
 			mDataSetObservable.unregisterObserver(observer);
-	        super.unregisterDataSetObserver(observer);
-        }
+			super.unregisterDataSetObserver(observer);
+		}
 
 		private class MyDataSetObservable extends DataSetObservable
 		{

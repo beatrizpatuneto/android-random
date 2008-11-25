@@ -137,7 +137,7 @@ public class SqliteInjection extends Activity
    				
 				byte[] b = new byte[2048];
 				int n;
-   				
+
 				while ((n = in.read(b)) >= 0)
 					out.write(b, 0, n);
 
@@ -146,7 +146,7 @@ public class SqliteInjection extends Activity
    				cv.put(Provider.EXTERNAL_DATABASE_PATH,
    				  dbPath.getAbsolutePath());
    				getContentResolver().insert(Schema.Foo.CONTENT_URI, cv);
-   				
+
    				mProgress.dismiss();
     		} catch (Exception e) {
     			final String msg = e.toString();
