@@ -1,5 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.androidnerds.tools.RemoteLogger">
+    
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    
     <application>
         <activity android:name=".RemoteLogger" android:label="RemoteLogger">
             <intent-filter>
@@ -10,7 +14,6 @@
         </activity>
 	<service android:name=".LogProcessor" android:process=":remote">
 		<intent-filter>
-			<action android:name="com.androidnerds.tools.RemoteLogger.LogProcessorInterface" />
 			<action android:name="com.androidnerds.tools.RemoteLogger.LOG_PROCESSOR" />
 		</intent-filter>
 	</service>
