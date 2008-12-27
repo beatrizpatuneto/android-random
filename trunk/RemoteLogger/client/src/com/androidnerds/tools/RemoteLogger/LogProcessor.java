@@ -1,7 +1,7 @@
 /**
- * Written by Mike Novak - mike@novaklabs.com
+ * Written by Mike Novak - michael.novakjr@gmail.com
  *
- * Submit patches to remotelogger@novaklabs.com
+ * Submit issues to http://code.google.com/p/android-random
  */
 package com.androidnerds.tools.RemoteLogger;
 
@@ -9,10 +9,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Handler;
-import android.os.Bundle;
-import android.os.DeadObjectException;
-import android.util.Log;
+import android.os.Parcel;
 
 import java.io.*;
 import java.net.*;
@@ -22,51 +19,29 @@ public class LogProcessor extends Service
 	private String serverAddress = "";
 	private String serverPort = "";
 	private Process gLogProcess = null;
-
-	private Thread thr;
 	
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
+		
 	}
 
 	@Override
-	public void onStart( int startId, Bundle args )
-	{
-		super.onStart( startId, args );
+	public void onStart(Intent intent, int startId) {
+		super.onStart(intent, startId);
+		
+		if (intent.hasExtra("address")) serverAddress = intent.getExtras().getString("address");
+		if (intent.hasExtra("port")) serverPort = intent.getExtras().getString("port");
+		
+		new Thread(thrRunner).start();
 	}
-
+	
 	@Override
 	public void onDestroy()
 	{
 		super.onDestroy();
 	}
-
-	@Override
-	public IBinder onBind( Intent intent )
-	{
-		return gBinder;
-	}
-
-	private final LogProcessorInterface.Stub gBinder = new LogProcessorInterface.Stub()
-	{
-		public void startTheCat( String serverAddress, String serverPort ) throws DeadObjectException
-		{
-			LogProcessor.this.serverAddress = serverAddress;
-			LogProcessor.this.serverPort = serverPort;
-			thr = new Thread(null, thrRunner, "LogProcessor");
-			thr.start();
-			return;
-			//LogProcessor.this.connectAndStream( serverAddress, serverPort );
-		}
-
-		public void closeServer()
-		{
-			thr.stop();
-			LogProcessor.this.stopSelf();
-		}
-	};
 	
 	Runnable thrRunner = new Runnable() {
     		public void run() {
@@ -109,4 +84,21 @@ public class LogProcessor extends Service
 			//error.
 		}
 	}
+	
+	public IBinder onBind(Intent intent) {
+		return mBinder;
+
+	}
+	
+	private final IBinder mBinder = new Binder() {
+		@Override
+		protected boolean onTransact(int code, Parcel data, Parcel reply,
+				int flags) {
+			try {
+			return super.onTransact(code, data, reply, flags);
+			} catch (Exception e) {
+				return false;
+			}
+		}
+	};
 }
