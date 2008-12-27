@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 public abstract class LogcatProcessor extends Thread
 {
 	/* TODO: Support logcat filtering. */
-	public static final String[] LOGCAT_CMD = new String[] { "/system/bin/logcat" };
+	public static final String[] LOGCAT_CMD = new String[] { "logcat" };
 	private static final int BUFFER_SIZE = 1024;
 
 	private int mLines = 0;
@@ -41,6 +41,7 @@ public abstract class LogcatProcessor extends Thread
 				onNewline(line);
 				mLines++;
 			}
+			
 		}
 		catch (IOException e)
 		{
