@@ -19,7 +19,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Menu;
-import android.view.UIThreadUtilities;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.widget.LinearLayout;
@@ -115,7 +115,7 @@ public class LogcatActivity extends Activity
 	{
 		super.onCreateOptionsMenu(menu);
 
-		menu.add(0, MENU_SAVE_LOG, "Save Log");
+		menu.add(0, MENU_SAVE_LOG, 0, "Save Log").setIcon(android.R.drawable.ic_menu_save);
 
 		return true;
 	}
@@ -189,9 +189,9 @@ public class LogcatActivity extends Activity
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(Menu.Item item)
+	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		switch (item.getId())
+		switch (item.getItemId())
 		{
 		case MENU_SAVE_LOG:
 			menuSaveCurrentLog();
@@ -208,7 +208,7 @@ public class LogcatActivity extends Activity
 		{
 			public void onError(final String msg, Throwable e)
 			{
-				UIThreadUtilities.runOnUIThread(LogcatActivity.this, new Runnable() {
+				runOnUiThread(new Runnable() {
 					public void run()
 					{
 						Toast.makeText(LogcatActivity.this, msg,
